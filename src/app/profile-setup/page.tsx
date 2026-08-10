@@ -1,0 +1,190 @@
+"use client";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import AuthShell from "@/app/components/signet/auth-shell";
+import ProfileAvatar from "@/app/components/signet/profile-avatar";
+import { useAuth } from "@/context/auth-context";
+import { uploadProfileImage } from "@/lib/services/storage";
+import Wrapper from "@/layouts/wrapper";
+
+export default function ProfileSetupPage() {
+  const { user, profile, finishProfileSetup, loading } = useAuth();
+  const router = useRouter();
+  const isCompany = profile?.userType === "company";
+  const [fullName, setFullName] = useState(profile?.fullName || "");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [companyName, setCompanyName] = useState(profile?.companyName || "");
+  const [industry, setIndustry] = useState("");
+  const [website, setWebsite] = useState("");
+  const [photoUrl, setPhotoUrl] = useState(
+    profile?.profileImage || profile?.logoUrl || ""
+  );
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  if (!loading && !user) {
+    router.replace("/login");
+  }
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSaving(true);
+    try {
+      let imageUrl = photoUrl;
+      if (photoFile) {
+        setUploading(true);
+        imageUrl = await uploadProfileImage(user.uid, photoFile);
+        setPhotoUrl(imageUrl);
+        setUploading(false);
+      }
+
+      if (isCompany) {
+        await finishProfileSetup({
+          fullName: fullName || companyName,
+          companyName,
+          industry,
+          website,
+          phone,
+          address,
+          companyLocation: address,
+          logoUrl: imageUrl || "",
+          profileImage: imageUrl || "",
+        });
+        toast.success("Company profile ready!");
+        router.push("/company");
+      } else {
+        await finishProfileSetup({
+          fullName,
+          phone,
+          address,
+          occupation,
+          profileImage: imageUrl || "",
+        });
+        toast.success("Profile ready!");
+        router.push("/candidate");
+      }
+    } catch {
+      toast.error("Could not save profile.");
+    } finally {
+      setUploading(false);
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Wrapper>
+      <AuthShell
+        showTabs={false}
+        title="Make it yours"
+        subtitle={
+          isCompany
+            ? "A sharp logo helps candidates trust your roles instantly."
+            : "A clear photo makes your applications stand out."
+        }
+      >
+        <div className="d-flex justify-content-center mb-3">
+          <ProfileAvatar
+            src={photoUrl}
+            name={isCompany ? companyName : fullName}
+            size="xl"
+            rounded={isCompany ? "tile" : "circle"}
+            editable
+            uploading={uploading}
+            hint={isCompany ? "Upload company logo" : "Upload profile photo"}
+            onFileSelect={async (file) => {
+              setPhotoFile(file);
+              setPhotoUrl(URL.createObjectURL(file));
+            }}
+          />
+        </div>
+
+        <form onSubmit={onSubmit} className="signet-auth-form">
+          {isCompany ? (
+            <>
+              <div className="signet-field">
+                <label>Company name</label>
+                <input
+                  required
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+              </div>
+              <div className="signet-field">
+                <label>Contact name</label>
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+              <div className="signet-field">
+                <label>Industry</label>
+                <input
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  placeholder="Technology"
+                />
+              </div>
+              <div className="signet-field">
+                <label>Website</label>
+                <input
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="https://"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="signet-field">
+                <label>Full name</label>
+                <input
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+              <div className="signet-field">
+                <label>Occupation</label>
+                <input
+                  value={occupation}
+                  onChange={(e) => setOccupation(e.target.value)}
+                  placeholder="Designer"
+                />
+              </div>
+            </>
+          )}
+          <div className="signet-field">
+            <label>Phone</label>
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </div>
+          <div className="signet-field">
+            <label>Address / Location</label>
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+          <button
+            className="signet-btn w-100"
+            disabled={saving || uploading}
+            type="submit"
+          >
+            {saving || uploading ? (
+              <span className="d-inline-flex align-items-center gap-2">
+                <span className="signet-spinner sm" />
+                {uploading ? "Uploading…" : "Saving…"}
+              </span>
+            ) : (
+              "Continue"
+            )}
+          </button>
+        </form>
+      </AuthShell>
+    </Wrapper>
+  );
+}
