@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import Link from 'next/link';
 import Wrapper from '@/layouts/wrapper';
 import Header from '@/layouts/headers/header';
 import FooterOne from '@/layouts/footers/footer-one';
@@ -15,33 +16,35 @@ export const metadata: Metadata = {
 };
 
 const JobDetailsV1Page = () => {
-  const job = job_data[0]
+  const job = job_data[0];
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {/* header start */}
         <Header />
-        {/* header end */}
 
-        {/* job details breadcrumb start */}
-        <JobDetailsBreadcrumb/>
-        {/* job details breadcrumb end */}
+        <JobDetailsBreadcrumb />
 
-        {/* job details area start */}
-        <JobDetailsV1Area job={job}/>
-        {/* job details area end */}
+        {job ? (
+          <>
+            <JobDetailsV1Area job={job} />
+            <RelatedJobs category={job.category} />
+          </>
+        ) : (
+          <section className="job-details pt-100 lg-pt-80 pb-130 lg-pb-80">
+            <div className="container text-center">
+              <h3>No demo job available</h3>
+              <p className="mt-15 mb-30">
+                Demo listings were removed. Browse live roles on the Signet board.
+              </p>
+              <Link href="/jobs" className="btn-one">
+                Browse jobs
+              </Link>
+            </div>
+          </section>
+        )}
 
-        {/* related job start */}
-        <RelatedJobs category={job.category}/>
-        {/* related job end */}
-
-        {/* job portal intro start */}
-        <JobPortalIntro  />
-        {/* job portal intro end */}
-
-        {/* footer start */}
+        <JobPortalIntro />
         <FooterOne />
-        {/* footer end */}
       </div>
     </Wrapper>
   );
