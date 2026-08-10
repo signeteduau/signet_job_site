@@ -127,8 +127,31 @@ export default function LoginPage() {
             try {
               await loginWithGoogle();
               await goNext();
-            } catch {
-              toast.error("Google sign-in failed or was cancelled.");
+            } catch (err) {
+              const code =
+                err instanceof FirebaseError ? err.code : "";
+              if (code === "auth/unauthorized-domain") {
+                toast.error(
+                  "This domain is not allowed for Google sign-in. Add it in Firebase → Authentication → Settings → Authorized domains."
+                );
+              } else if (code === "auth/popup-blocked") {
+                toast.error("Popup was blocked. Allow popups for this site and try again.");
+              } else if (
+                code === "auth/popup-closed-by-user" ||
+                code === "auth/cancelled-popup-request"
+              ) {
+                toast.error("Google sign-in was cancelled.");
+              } else if (code === "auth/operation-not-allowed") {
+                toast.error(
+                  "Google sign-in is disabled in Firebase. Enable Google under Authentication → Sign-in method."
+                );
+              } else {
+                toast.error(
+                  code
+                    ? `Google sign-in failed (${code}).`
+                    : "Google sign-in failed."
+                );
+              }
             } finally {
               setGoogleLoading(false);
             }
