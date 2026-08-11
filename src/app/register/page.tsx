@@ -1,18 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { FirebaseError } from "firebase/app";
 import AuthShell, { AuthRoleTabs } from "@/app/components/signet/auth-shell";
+import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
 import { UserType } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
-export default function RegisterPage() {
+function RegisterInner() {
   const { register } = useAuth();
   const router = useRouter();
-  const [userType, setUserType] = useState<UserType>("candidate");
+  const search = useSearchParams();
+  const [userType, setUserType] = useState<UserType>(
+    search?.get("type") === "company" ? "company" : "candidate"
+  );
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
@@ -121,5 +125,13 @@ export default function RegisterPage() {
         </p>
       </AuthShell>
     </Wrapper>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<PageLoader label="Loading…" />}>
+      <RegisterInner />
+    </Suspense>
   );
 }

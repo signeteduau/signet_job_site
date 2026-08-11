@@ -14,9 +14,10 @@ import signetLogo from "@/assets/images/logo/signet-icon.png";
 function PublicJobsInner() {
   const search = useSearchParams();
   const initialQ = search?.get("q") || "";
+  const initialLoc = search?.get("location") || "";
   const [term, setTerm] = useState(initialQ);
   const [type, setType] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(initialLoc);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,9 +37,11 @@ function PublicJobsInner() {
   };
 
   useEffect(() => {
-    load({ term: initialQ });
+    setTerm(initialQ);
+    setLocation(initialLoc);
+    load({ term: initialQ, location: initialLoc });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQ]);
+  }, [initialQ, initialLoc]);
 
   return (
     <Wrapper>
