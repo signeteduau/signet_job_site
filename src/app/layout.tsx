@@ -1,47 +1,14 @@
 import "./globals.scss";
 import { Metadata } from "next";
-import localFont from 'next/font/local';
-import { EB_Garamond, Urbanist } from "next/font/google";
+import { Inter } from "next/font/google";
 import BackToTopCom from "./components/common/back-to-top-com";
 import { Providers } from "@/redux/provider";
 
-const gordita = localFont({
-  src: [
-    {
-      path: '../../public/assets/fonts/gordita/gordita_medium-webfont.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../../public/assets/fonts/gordita/gordita_medium-webfont.woff',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../../public/assets/fonts/gordita/gordita_regular-webfont.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../../public/assets/fonts/gordita/gordita_regular-webfont.woff',
-      weight: '400',
-      style: 'normal',
-    },
-  ],
-  variable: '--gorditas-font'
-})
-
-const garamond = EB_Garamond({
+const inter = Inter({
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
-  subsets: ["latin"],
-  variable: "--eb_garamond-font",
-});
-
-// Urbanist mirrors the job_portal app's global typeface.
-const urbanist = Urbanist({
-  weight: ["400", "500", "600", "700", "800", "900"],
-  subsets: ["latin"],
-  variable: "--urbanist-font",
+  variable: "--signet-font",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -59,21 +26,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         <link rel="icon" href="/favicon-signet.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon-signet.png" />
       </head>
       <body
         suppressHydrationWarning={true}
+        className={inter.className}
         style={{
-          ["--gorditas-font" as any]: "var(--urbanist-font)",
-          ["--eb_garamond-font" as any]: "var(--urbanist-font)",
+          ["--gorditas-font" as string]: "var(--signet-font), system-ui, sans-serif",
+          ["--eb_garamond-font" as string]: "var(--signet-font), system-ui, sans-serif",
+          ["--urbanist-font" as string]: "var(--signet-font), system-ui, sans-serif",
         }}
-        className={`${gordita.variable} ${garamond.variable} ${urbanist.variable}`}
       >
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
         <BackToTopCom />
       </body>
     </html>

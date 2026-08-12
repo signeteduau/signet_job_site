@@ -52,35 +52,40 @@ function PostedJobsInner() {
           key={job.id}
           job={job}
           href={`/company/applications?jobId=${job.id}`}
+          showDescription={false}
+          expandable={false}
           footer={
-            <div className="d-flex gap-2 flex-wrap">
-              <Link
-                href={`/company/applications?jobId=${job.id}`}
-                className="signet-btn secondary"
-              >
-                Applications ({job.applicantsCount || 0})
-              </Link>
-              <Link
-                href={`/company/jobs/${job.id}/edit`}
-                className="signet-btn secondary"
-              >
-                Edit
-              </Link>
-              <button
-                className="signet-btn danger"
-                onClick={async () => {
-                  if (!user || !confirm("Delete this job?")) return;
-                  try {
-                    await deleteJob(job.id, user.uid);
-                    toast.success("Job deleted.");
-                    load();
-                  } catch {
-                    toast.error("Could not delete job.");
-                  }
-                }}
-              >
-                Delete
-              </button>
+            <div className="signet-job-manage-footer">
+              <div className="signet-job-manage-actions">
+                <Link
+                  href={`/company/applications?jobId=${job.id}`}
+                  className="signet-btn secondary signet-btn-compact"
+                >
+                  Applications ({job.applicantsCount || 0})
+                </Link>
+                <Link
+                  href={`/company/jobs/${job.id}/edit`}
+                  className="signet-btn secondary signet-btn-compact"
+                >
+                  Edit
+                </Link>
+                <button
+                  type="button"
+                  className="signet-btn danger signet-btn-compact"
+                  onClick={async () => {
+                    if (!user || !confirm("Delete this job?")) return;
+                    try {
+                      await deleteJob(job.id, user.uid);
+                      toast.success("Job deleted.");
+                      load();
+                    } catch {
+                      toast.error("Could not delete job.");
+                    }
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           }
         />

@@ -5,7 +5,12 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { FileUploadField, PanelShimmer } from "@/app/components/signet/shimmer";
+import PhoneField from "@/app/components/signet/phone-field";
 import { useAuth } from "@/context/auth-context";
+import {
+  DEFAULT_PHONE_COUNTRY_CODE,
+  formatFullPhone,
+} from "@/lib/phone-country-codes";
 import { fetchJobById } from "@/lib/services/jobs";
 import { applyToJob, hasApplied } from "@/lib/services/applications";
 import { uploadResume } from "@/lib/services/storage";
@@ -18,6 +23,9 @@ function ApplyInner() {
   const router = useRouter();
   const { user, profile, saveProfile } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
+  const [phoneCountryCode, setPhoneCountryCode] = useState(
+    profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE
+  );
   const [phone, setPhone] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +34,8 @@ function ApplyInner() {
 
   useEffect(() => {
     if (profile?.phone) setPhone(profile.phone);
-  }, [profile?.phone]);
+    if (profile?.phoneCountryCode) setPhoneCountryCode(profile.phoneCountryCode);
+  }, [profile?.phone, profile?.phoneCountryCode]);
 
   useEffect(() => {
     (async () => {
@@ -64,12 +73,13 @@ function ApplyInner() {
         await saveProfile({ resumeUrl, resumeFileName: resumeFile });
         setUploading(false);
       }
+      await saveProfile({ phone, phoneCountryCode });
       await applyToJob({
         userId: user.uid,
         job,
         resumeUrl,
         resumeFile,
-        phone,
+        phone: formatFullPhone(phoneCountryCode, phone),
       });
       toast.success("Application submitted!");
       router.push("/candidate/my-jobs");
@@ -114,10 +124,13 @@ function ApplyInner() {
           Applying to{" "}
           <strong style={{ color: "#12141A" }}>{job.companyName}</strong>
         </p>
-        <div className="signet-field">
-          <label>Phone</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
+        <PhoneField
+          countryCode={phoneCountryCode}
+          phone={phone}
+          onCountryCodeChange={setPhoneCountryCode}
+          onPhoneChange={setPhone}
+          required
+        />
         <FileUploadField
           label="Resume (PDF / DOC)"
           accept=".pdf,.doc,.docx"

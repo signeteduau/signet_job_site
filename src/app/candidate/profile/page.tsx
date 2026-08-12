@@ -4,7 +4,9 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
+import PhoneField from "@/app/components/signet/phone-field";
 import { useAuth } from "@/context/auth-context";
+import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
 import { uploadProfileImage, uploadProfileResume } from "@/lib/services/storage";
 import { FileUploadField } from "@/app/components/signet/shimmer";
 import Link from "next/link";
@@ -13,6 +15,9 @@ import Wrapper from "@/layouts/wrapper";
 function ProfileInner() {
   const { user, profile, saveProfile } = useAuth();
   const [fullName, setFullName] = useState(profile?.fullName || "");
+  const [phoneCountryCode, setPhoneCountryCode] = useState(
+    profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE
+  );
   const [phone, setPhone] = useState(profile?.phone || "");
   const [address, setAddress] = useState(profile?.address || "");
   const [occupation, setOccupation] = useState(profile?.occupation || "");
@@ -28,6 +33,7 @@ function ProfileInner() {
 
   useEffect(() => {
     setFullName(profile?.fullName || "");
+    setPhoneCountryCode(profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE);
     setPhone(profile?.phone || "");
     setAddress(profile?.address || "");
     setOccupation(profile?.occupation || "");
@@ -49,6 +55,7 @@ function ProfileInner() {
             await saveProfile({
               fullName,
               phone,
+              phoneCountryCode,
               address,
               occupation,
               aboutMe,
@@ -108,10 +115,12 @@ function ProfileInner() {
           <label>Email</label>
           <input value={user?.email || ""} disabled />
         </div>
-        <div className="signet-field">
-          <label>Phone</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
+        <PhoneField
+          countryCode={phoneCountryCode}
+          phone={phone}
+          onCountryCodeChange={setPhoneCountryCode}
+          onPhoneChange={setPhone}
+        />
         <div className="signet-field">
           <label>Occupation</label>
           <input value={occupation} onChange={(e) => setOccupation(e.target.value)} />

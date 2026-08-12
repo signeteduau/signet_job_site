@@ -15,6 +15,7 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { timestampToMillis } from "@/lib/date-utils";
 import { ChatMessage, ChatThread } from "@/types/chat";
 import { AppUser } from "@/types/firestore";
 
@@ -139,11 +140,7 @@ export async function fetchUserChats(uid: string): Promise<ChatThread[]> {
         const isCompany = c.companyId === uid;
         return isCompany ? !c.deletedByCompany : !c.deletedByCandidate;
       })
-      .sort((a, b) => {
-        const ta = (a.lastMessageTime as { seconds?: number })?.seconds || 0;
-        const tb = (b.lastMessageTime as { seconds?: number })?.seconds || 0;
-        return tb - ta;
-      });
+      .sort((a, b) => timestampToMillis(b.lastMessageTime) - timestampToMillis(a.lastMessageTime));
   }
 }
 
@@ -162,11 +159,7 @@ export function subscribeToChats(
         const isCompany = c.companyId === uid;
         return isCompany ? !c.deletedByCompany : !c.deletedByCandidate;
       })
-      .sort((a, b) => {
-        const ta = (a.lastMessageTime as { seconds?: number })?.seconds || 0;
-        const tb = (b.lastMessageTime as { seconds?: number })?.seconds || 0;
-        return tb - ta;
-      });
+      .sort((a, b) => timestampToMillis(b.lastMessageTime) - timestampToMillis(a.lastMessageTime));
     cb(list);
   });
 }

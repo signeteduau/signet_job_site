@@ -23,6 +23,37 @@ type CompanyPreview = {
   industry?: string;
 };
 
+const QUICK_ACTIONS = [
+  {
+    href: "/jobs",
+    icon: "bi-briefcase",
+    label: "Browse jobs",
+    desc: "Search open roles",
+    tone: "blue",
+  },
+  {
+    href: "/candidate/my-jobs",
+    icon: "bi-bookmark",
+    label: "My jobs",
+    desc: "Saved & applied",
+    tone: "violet",
+  },
+  {
+    href: "/candidate/chat",
+    icon: "bi-chat-dots",
+    label: "Messages",
+    desc: "Chat with employers",
+    tone: "teal",
+  },
+  {
+    href: "/candidate/companies",
+    icon: "bi-buildings",
+    label: "Companies",
+    desc: "Explore employers",
+    tone: "amber",
+  },
+] as const;
+
 function CandidateHomeInner() {
   const { user, profile } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -30,6 +61,8 @@ function CandidateHomeInner() {
   const [companies, setCompanies] = useState<CompanyPreview[]>([]);
   const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
+
+  const firstName = profile?.fullName?.split(" ")[0] || "there";
 
   useEffect(() => {
     (async () => {
@@ -72,72 +105,79 @@ function CandidateHomeInner() {
   };
 
   return (
-    <AppShell role="candidate" title={`Hi, ${profile?.fullName?.split(" ")[0] || "there"}`}>
-      <div className="signet-stats">
-        <Link href="/jobs" className="stat text-decoration-none">
-          <div className="n"><i className="bi bi-briefcase" /></div>
-          <div className="l">Browse jobs</div>
-        </Link>
-        <Link href="/candidate/my-jobs" className="stat text-decoration-none">
-          <div className="n"><i className="bi bi-bookmark" /></div>
-          <div className="l">My jobs</div>
-        </Link>
-        <Link href="/candidate/chat" className="stat text-decoration-none">
-          <div className="n"><i className="bi bi-chat-dots" /></div>
-          <div className="l">Messages</div>
-        </Link>
-        <Link href="/candidate/companies" className="stat text-decoration-none">
-          <div className="n"><i className="bi bi-buildings" /></div>
-          <div className="l">Companies</div>
-        </Link>
+    <AppShell
+      role="candidate"
+      title={`Welcome back, ${firstName}`}
+      subtitle="Explore new roles, track applications, and stay connected with employers."
+    >
+      <div className="signet-dash-actions">
+        {QUICK_ACTIONS.map((action) => (
+          <Link
+            key={action.href}
+            href={action.href}
+            className={`signet-dash-action tone-${action.tone}`}
+          >
+            <span className="signet-dash-action-icon">
+              <i className={`bi ${action.icon}`} aria-hidden />
+            </span>
+            <span className="signet-dash-action-body">
+              <strong>{action.label}</strong>
+              <span>{action.desc}</span>
+            </span>
+            <i className="bi bi-chevron-right signet-dash-action-chevron" aria-hidden />
+          </Link>
+        ))}
       </div>
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3 style={{ color: "#12141A", fontWeight: 700, fontSize: 20, margin: 0 }}>
-          Latest openings
-        </h3>
-        <Link href="/jobs" style={{ color: "#004CF0", fontWeight: 700 }}>
-          See all
-        </Link>
-      </div>
-
-      {loading && <JobListShimmer count={4} />}
-      {!loading && jobs.length === 0 && (
-        <div className="signet-empty signet-panel">
-          <h4>No jobs yet</h4>
-          <p>When companies post roles, they&apos;ll show up here.</p>
+      <section className="signet-dash-section">
+        <div className="signet-section-head">
+          <div>
+            <h3>Latest openings</h3>
+            <p>Fresh roles from employers on Signet</p>
+          </div>
+          <Link href="/jobs" className="signet-section-link">
+            See all
+          </Link>
         </div>
-      )}
-      {jobs.map((job) => (
-        <JobCard
-          key={job.id}
-          job={job}
-          saved={!!savedMap[job.id]}
-          onSaveToggle={() => toggleSave(job)}
-        />
-      ))}
+
+        {loading && <JobListShimmer count={4} />}
+        {!loading && jobs.length === 0 && (
+          <div className="signet-empty signet-panel">
+            <h4>No jobs yet</h4>
+            <p>When companies post roles, they&apos;ll show up here.</p>
+          </div>
+        )}
+        {jobs.map((job) => (
+          <JobCard
+            key={job.id}
+            job={job}
+            saved={!!savedMap[job.id]}
+            onSaveToggle={() => toggleSave(job)}
+          />
+        ))}
+      </section>
 
       {companies.length > 0 && (
-        <>
-          <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-            <h3 style={{ color: "#12141A", fontWeight: 700, fontSize: 20, margin: 0 }}>
-              Companies hiring
-            </h3>
-            <Link href="/candidate/companies" style={{ color: "#004CF0", fontWeight: 700 }}>
+        <section className="signet-dash-section">
+          <div className="signet-section-head">
+            <div>
+              <h3>Companies hiring</h3>
+              <p>Discover employers actively recruiting</p>
+            </div>
+            <Link href="/companies" className="signet-section-link">
               See all
             </Link>
           </div>
-          <div className="d-flex gap-3 overflow-auto pb-2">
+          <div className="signet-company-rail pb-2">
             {companies.map((c) => {
               const name = c.companyName || c.fullName || "Company";
               return (
                 <Link
                   key={c.uid}
                   href={`/candidate/companies/${c.uid}`}
-                  className="signet-panel text-decoration-none"
-                  style={{ minWidth: 160, flex: "0 0 auto" }}
+                  className="signet-company-chip text-decoration-none"
                 >
-                  <div className="signet-logo-tile mb-2">
+                  <div className="signet-logo-tile signet-logo-tile--sm">
                     {c.logoUrl || c.profileImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={c.logoUrl || c.profileImage} alt={name} />
@@ -145,46 +185,47 @@ function CandidateHomeInner() {
                       <span>{name.charAt(0)}</span>
                     )}
                   </div>
-                  <div className="signet-job-title" style={{ fontSize: 15 }}>
-                    {name}
-                  </div>
+                  <div className="signet-company-chip-name">{name}</div>
                   {c.industry && (
-                    <div style={{ color: "#6B7280", fontSize: 12 }}>{c.industry}</div>
+                    <div className="signet-company-chip-meta">{c.industry}</div>
                   )}
                 </Link>
               );
             })}
           </div>
-        </>
+        </section>
       )}
 
       {articles.length > 0 && (
-        <>
-          <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-            <h3 style={{ color: "#12141A", fontWeight: 700, fontSize: 20, margin: 0 }}>
-              Career tips
-            </h3>
-            <Link href="/candidate/articles" style={{ color: "#004CF0", fontWeight: 700 }}>
+        <section className="signet-dash-section">
+          <div className="signet-section-head">
+            <div>
+              <h3>Career tips</h3>
+              <p>Advice to help you stand out</p>
+            </div>
+            <Link href="/candidate/articles" className="signet-section-link">
               See all
             </Link>
           </div>
-          <div className="row">
+          <div className="signet-dash-articles">
             {articles.map((a) => (
-              <div key={a.id} className="col-md-6">
-                <Link href={`/candidate/articles/${a.id}`} className="signet-article-card">
-                  {a.image && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img className="thumb" src={a.image} alt={a.title} />
-                  )}
-                  <div className="body">
-                    <h3>{a.title}</h3>
-                    <p>{a.subtitle || a.author}</p>
-                  </div>
-                </Link>
-              </div>
+              <Link
+                key={a.id}
+                href={`/candidate/articles/${a.id}`}
+                className="signet-article-card"
+              >
+                {a.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="thumb" src={a.image} alt={a.title} />
+                )}
+                <div className="body">
+                  <h3>{a.title}</h3>
+                  <p>{a.subtitle || a.author}</p>
+                </div>
+              </Link>
             ))}
           </div>
-        </>
+        </section>
       )}
     </AppShell>
   );

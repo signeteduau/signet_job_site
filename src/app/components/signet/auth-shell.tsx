@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import signetLogo from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 
 type Props = {
   children: React.ReactNode;
@@ -39,7 +39,7 @@ export default function AuthShell({
             <div className="signet-brand-mark lg">
               <Image
                 src={signetLogo}
-                alt="Signet"
+                alt={SIGNET_LOGO_ALT}
                 width={64}
                 height={64}
                 sizes="64px"
@@ -75,7 +75,7 @@ export default function AuthShell({
             <Link href="/" className="signet-brand-mark d-lg-none">
               <Image
                 src={signetLogo}
-                alt="Signet"
+                alt={SIGNET_LOGO_ALT}
                 width={44}
                 height={44}
                 sizes="44px"

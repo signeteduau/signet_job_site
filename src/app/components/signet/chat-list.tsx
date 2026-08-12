@@ -3,14 +3,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChatListShimmer } from "@/app/components/signet/shimmer";
 import { subscribeToChats } from "@/lib/services/chat";
+import { formatChatListTime } from "@/lib/date-utils";
 import { ChatThread } from "@/types/chat";
-
-function formatTime(ts: unknown) {
-  const seconds = (ts as { seconds?: number })?.seconds;
-  if (!seconds) return "";
-  const d = new Date(seconds * 1000);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
 
 export default function ChatList({
   uid,
@@ -77,7 +71,7 @@ export default function ChatList({
               <div className="d-flex justify-content-between gap-2">
                 <strong>{title}</strong>
                 <span className="signet-chat-time">
-                  {formatTime(chat.lastMessageTime)}
+                  {formatChatListTime(chat.lastMessageTime)}
                 </span>
               </div>
               <div className="signet-chat-preview">

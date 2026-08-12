@@ -5,7 +5,9 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
+import PhoneField from "@/app/components/signet/phone-field";
 import { useAuth } from "@/context/auth-context";
+import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
 import { uploadProfileImage } from "@/lib/services/storage";
 import Wrapper from "@/layouts/wrapper";
 
@@ -17,6 +19,9 @@ function CompanyProfileInner() {
   const [website, setWebsite] = useState(profile?.website || "");
   const [companySize, setCompanySize] = useState(profile?.companySize || "");
   const [foundedYear, setFoundedYear] = useState(profile?.foundedYear || "");
+  const [phoneCountryCode, setPhoneCountryCode] = useState(
+    profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE
+  );
   const [phone, setPhone] = useState(profile?.phone || "");
   const [companyLocation, setCompanyLocation] = useState(
     profile?.companyLocation || profile?.address || ""
@@ -35,6 +40,7 @@ function CompanyProfileInner() {
     setWebsite(profile?.website || "");
     setCompanySize(profile?.companySize || "");
     setFoundedYear(profile?.foundedYear || "");
+    setPhoneCountryCode(profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE);
     setPhone(profile?.phone || "");
     setCompanyLocation(profile?.companyLocation || profile?.address || "");
     setAbout(profile?.about || "");
@@ -57,6 +63,7 @@ function CompanyProfileInner() {
               companySize,
               foundedYear,
               phone,
+              phoneCountryCode,
               companyLocation,
               address: companyLocation,
               about,
@@ -135,10 +142,12 @@ function CompanyProfileInner() {
             </div>
           </div>
         </div>
-        <div className="signet-field">
-          <label>Phone</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
+        <PhoneField
+          countryCode={phoneCountryCode}
+          phone={phone}
+          onCountryCodeChange={setPhoneCountryCode}
+          onPhoneChange={setPhone}
+        />
         <div className="signet-field">
           <label>Location</label>
           <input value={companyLocation} onChange={(e) => setCompanyLocation(e.target.value)} />

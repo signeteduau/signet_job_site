@@ -10,16 +10,13 @@ import {
   subscribeToMessages,
 } from "@/lib/services/chat";
 import { PageLoader } from "@/app/components/signet/shimmer";
+import {
+  formatChatDateLabel,
+  formatChatMessageTime,
+  isSameDay,
+  parseFirestoreTimestamp,
+} from "@/lib/date-utils";
 import { ChatMessage, ChatThread } from "@/types/chat";
-
-function formatMsgTime(ts: unknown) {
-  const seconds = (ts as { seconds?: number })?.seconds;
-  if (!seconds) return "";
-  return new Date(seconds * 1000).toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
 
 export default function ChatDetail({
   chatId,
@@ -104,7 +101,7 @@ export default function ChatDetail({
         <Link href={back} className="signet-ghost-btn">
           <i className="bi bi-arrow-left" />
         </Link>
-        <div className="signet-logo-tile" style={{ width: 42, height: 42 }}>
+        <div className="signet-logo-tile signet-logo-tile--sm">
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={image} alt={title} />
@@ -121,22 +118,38 @@ export default function ChatDetail({
       </div>
 
       <div className="signet-chat-messages">
-        {messages.map((m) => {
-          const mine = m.senderId === uid;
-          const deleted = isCompany
-            ? m.isDeletedByCompany
-            : m.isDeletedByCandidate;
-          if (deleted) return null;
-          return (
-            <div
-              key={m.id}
-              className={`signet-bubble ${mine ? "mine" : "theirs"}`}
-            >
-              <div className="signet-bubble-text">{m.text}</div>
-              <div className="signet-bubble-time">{formatMsgTime(m.timestamp)}</div>
-            </div>
-          );
-        })}
+        {(() => {
+          let lastVisibleDate: Date | null = null;
+          return messages.map((m) => {
+            const mine = m.senderId === uid;
+            const deleted = isCompany
+              ? m.isDeletedByCompany
+              : m.isDeletedByCandidate;
+            if (deleted) return null;
+
+            const messageDate = parseFirestoreTimestamp(m.timestamp);
+            const showDateDivider =
+              messageDate &&
+              (!lastVisibleDate || !isSameDay(messageDate, lastVisibleDate));
+            if (messageDate) lastVisibleDate = messageDate;
+
+            return (
+              <React.Fragment key={m.id}>
+                {showDateDivider && messageDate && (
+                  <div className="signet-chat-date-divider">
+                    <span>{formatChatDateLabel(messageDate)}</span>
+                  </div>
+                )}
+                <div className={`signet-bubble ${mine ? "mine" : "theirs"}`}>
+                  <div className="signet-bubble-text">{m.text}</div>
+                  <div className="signet-bubble-time">
+                    {formatChatMessageTime(m.timestamp)}
+                  </div>
+                </div>
+              </React.Fragment>
+            );
+          });
+        })()}
         <div ref={bottomRef} />
       </div>
 

@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
 import { usePathname } from "next/navigation";
-import logo from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as logo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import avatar from "@/assets/dashboard/images/avatar_01.jpg";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
 import profile_icon_2 from "@/assets/dashboard/images/icon/icon_24.svg";
@@ -98,7 +98,7 @@ const CandidateAside = ({isOpenSidebar,setIsOpenSidebar}:IProps) => {
       <div className="position-relative">
         <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
           <Link href="/dashboard/candidate-dashboard">
-            <Image src={logo} alt="Signet Employment Hub" width={60} height={60} priority />
+            <Image src={logo} alt={SIGNET_LOGO_ALT} width={60} height={60} priority />
           </Link>
           <button onClick={() => setIsOpenSidebar(false)} className="close-btn d-block d-md-none">
             <i className="bi bi-x-lg"></i>

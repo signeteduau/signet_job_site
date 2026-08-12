@@ -67,7 +67,7 @@ function Inner() {
     <AppShell role="candidate" title={name}>
       <div className="signet-panel">
         <div className="d-flex gap-3 align-items-start flex-wrap">
-          <div className="signet-logo-tile" style={{ width: 72, height: 72 }}>
+          <div className="signet-logo-tile signet-logo-tile--xl">
             {(company.logoUrl || company.profileImage) ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={company.logoUrl || company.profileImage} alt={name} />

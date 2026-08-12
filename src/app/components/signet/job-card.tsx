@@ -141,25 +141,26 @@ export default function JobCard({
 
                 <h3 className="signet-job-title">{job.title}</h3>
 
-                <p className="signet-job-subline">
-                  <strong>{job.companyName || "Company"}</strong>
-                  <span className="dot" aria-hidden>
-                    ·
+                <div className="signet-job-meta">
+                  <span className="signet-job-meta-item">
+                    <i className="bi bi-building" aria-hidden />
+                    <strong>{job.companyName || "Company"}</strong>
                   </span>
-                  {location}
-                  <span className="dot" aria-hidden>
-                    ·
+                  <span className="signet-job-meta-item">
+                    <i className="bi bi-geo-alt" aria-hidden />
+                    {location}
                   </span>
-                  {typeLabel(job.type)}
+                  <span className="signet-job-meta-item">
+                    <i className="bi bi-briefcase" aria-hidden />
+                    {typeLabel(job.type)}
+                  </span>
                   {postedShort && (
-                    <>
-                      <span className="dot" aria-hidden>
-                        ·
-                      </span>
+                    <span className="signet-job-meta-item">
+                      <i className="bi bi-clock" aria-hidden />
                       {postedShort}
-                    </>
+                    </span>
                   )}
-                </p>
+                </div>
               </div>
 
               <div className="signet-job-actions-col">

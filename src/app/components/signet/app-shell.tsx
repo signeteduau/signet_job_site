@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import signetLogo from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import { useAuth } from "@/context/auth-context";
 import { subscribeToChats } from "@/lib/services/chat";
@@ -72,7 +72,8 @@ export default function AppShell({
     <div className="signet-app">
       <div className="signet-ambient" aria-hidden />
       <header className="signet-topbar">
-        <div className="container d-flex align-items-center justify-content-between">
+        <div className="signet-app-layout">
+          <div className="signet-topbar-main d-flex align-items-center justify-content-between">
           <Link
             href={role === "company" ? "/company" : "/candidate"}
             className="signet-brand-link"
@@ -80,7 +81,7 @@ export default function AppShell({
             <span className="signet-brand-mark">
               <Image
                 src={signetLogo}
-                alt="Signet"
+                alt={SIGNET_LOGO_ALT}
                 width={44}
                 height={44}
                 sizes="44px"
@@ -145,10 +146,11 @@ export default function AppShell({
               Logout
             </button>
           </div>
+          </div>
         </div>
       </header>
 
-      <div className="signet-body">
+      <div className="signet-app-layout signet-body">
         <aside className="signet-sidebar">
           <nav>
             <div className="signet-nav-label">Navigate</div>

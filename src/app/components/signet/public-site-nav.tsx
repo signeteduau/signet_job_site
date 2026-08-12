@@ -3,9 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { buildRegisterUrl } from "@/lib/auth-flow";
-import signetLogo from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 
 type Props = {
   rightExtra?: React.ReactNode;
@@ -19,6 +20,7 @@ export default function PublicSiteNav({
   searchTerm,
 }: Props) {
   const { user, profile, loading, homePath } = useAuth();
+  const pathname = usePathname();
   const loggedIn = !loading && user && profile?.profileCompleted;
 
   return (
@@ -28,7 +30,7 @@ export default function PublicSiteNav({
           <span className="signet-brand-mark">
             <Image
               src={signetLogo}
-              alt="Signet"
+              alt={SIGNET_LOGO_ALT}
               width={44}
               height={44}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -42,11 +44,16 @@ export default function PublicSiteNav({
 
         {variant === "browse" && (
           <nav className="nk-nav-links d-none d-lg-flex" aria-label="Main">
-            <Link href="/jobs" className="active">
+            <Link href="/jobs" className={pathname.startsWith("/jobs") ? "active" : ""}>
               Jobs
             </Link>
-            <Link href="/jobs">Companies</Link>
-            <Link href="/">Services</Link>
+            <Link
+              href="/companies"
+              className={pathname.startsWith("/companies") ? "active" : ""}
+            >
+              Companies
+            </Link>
+            {!loggedIn && <Link href="/">Services</Link>}
           </nav>
         )}
 

@@ -14,10 +14,50 @@ import {
 import { formatAppliedDate } from "@/lib/job-utils";
 import Wrapper from "@/layouts/wrapper";
 
+const QUICK_ACTIONS = [
+  {
+    href: "/company/jobs/new",
+    icon: "bi-plus-circle",
+    label: "Post a job",
+    desc: "Create a new vacancy",
+    tone: "blue",
+  },
+  {
+    href: "/company/applications",
+    icon: "bi-people",
+    label: "Applications",
+    desc: "Review candidates",
+    tone: "violet",
+  },
+  {
+    href: "/company/chat",
+    icon: "bi-chat-dots",
+    label: "Messages",
+    desc: "Chat with applicants",
+    tone: "teal",
+  },
+  {
+    href: "/company/jobs",
+    icon: "bi-briefcase",
+    label: "Posted jobs",
+    desc: "Manage your listings",
+    tone: "amber",
+  },
+] as const;
+
+function statusClass(status?: string) {
+  if (status === "Rejected") return "rejected";
+  if (status === "Interview Scheduled") return "interview";
+  if (status === "Hired") return "hired";
+  return "";
+}
+
 function CompanyHomeInner() {
   const { user, profile } = useAuth();
   const [stats, setStats] = useState<CompanyDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const companyName = profile?.companyName || "there";
 
   useEffect(() => {
     (async () => {
@@ -37,130 +77,127 @@ function CompanyHomeInner() {
   return (
     <AppShell
       role="company"
-      title={profile?.companyName || "Company dashboard"}
-      subtitle="Track openings, applicants, and interviews."
+      title={`Welcome back, ${companyName}`}
+      subtitle="Manage vacancies, review applicants, and stay connected with candidates."
     >
-      <div className="signet-stats">
-        <Link href="/company/jobs" className="stat text-decoration-none">
-          <div className="n">{stats?.totalJobs ?? "—"}</div>
-          <div className="l">Posted jobs</div>
-        </Link>
-        <Link href="/company/jobs" className="stat text-decoration-none">
-          <div className="n">{stats?.activeJobs ?? "—"}</div>
-          <div className="l">Active</div>
-        </Link>
-        <Link href="/company/applications" className="stat text-decoration-none">
-          <div className="n">{stats?.applicationCount ?? "—"}</div>
-          <div className="l">Applications</div>
-        </Link>
-        <Link href="/company/applications" className="stat text-decoration-none">
-          <div className="n">{stats?.interviewCount ?? "—"}</div>
-          <div className="l">Interviews</div>
-        </Link>
+      <div className="signet-dash-actions">
+        {QUICK_ACTIONS.map((action) => (
+          <Link
+            key={action.href}
+            href={action.href}
+            className={`signet-dash-action tone-${action.tone}`}
+          >
+            <span className="signet-dash-action-icon">
+              <i className={`bi ${action.icon}`} aria-hidden />
+            </span>
+            <span className="signet-dash-action-body">
+              <strong>{action.label}</strong>
+              <span>{action.desc}</span>
+            </span>
+            <i className="bi bi-chevron-right signet-dash-action-chevron" aria-hidden />
+          </Link>
+        ))}
       </div>
 
-      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h3 style={{ color: "#12141A", fontWeight: 700, fontSize: 20, margin: 0 }}>
-          Recent applicants
-        </h3>
-        <Link href="/company/jobs/new" className="signet-btn">
-          Post a job
-        </Link>
-      </div>
-
-      {loading && (
-        <>
-          <PanelShimmer rows={3} />
-          <JobListShimmer count={3} />
-        </>
-      )}
-
-      {!loading && (stats?.recentApplicants.length || 0) === 0 && (
-        <div className="signet-empty mb-4">
-          <h4>No applicants yet</h4>
-          <p>When candidates apply, they&apos;ll show up here.</p>
-          <Link href="/company/jobs/new" className="signet-btn mt-2">
-            Create your first vacancy
+      <section className="signet-dash-section">
+        <div className="signet-section-head">
+          <div>
+            <h3>Recent applicants</h3>
+            <p>Latest candidates who applied to your roles</p>
+          </div>
+          <Link href="/company/applications" className="signet-section-link">
+            See all
           </Link>
         </div>
-      )}
 
-      {!loading &&
-        stats?.recentApplicants.map((app) => {
-          const applicantId = app.userId || app.id;
-          return (
-            <Link
-              key={`${app.jobId}-${applicantId}`}
-              href={`/company/applications/${app.jobId}/${applicantId}`}
-              className="signet-panel d-block text-decoration-none"
-            >
-              <div className="d-flex justify-content-between gap-2 flex-wrap">
-                <div>
-                  <div style={{ color: "#12141A", fontWeight: 750 }}>
-                    {app.jobTitle}
-                  </div>
-                  <div style={{ color: "#6B7280", fontSize: 13 }}>
-                    Applicant {applicantId.slice(0, 8)}…
-                    {formatAppliedDate(app.appliedAt)
-                      ? ` · ${formatAppliedDate(app.appliedAt)}`
-                      : ""}
-                  </div>
-                </div>
-                <span
-                  className={`signet-status ${
-                    app.status === "Rejected"
-                      ? "rejected"
-                      : app.status === "Interview Scheduled"
-                      ? "interview"
-                      : app.status === "Hired"
-                      ? "hired"
-                      : ""
-                  }`}
-                >
-                  {app.status || "Under Review"}
-                </span>
-              </div>
+        {loading && <PanelShimmer rows={3} />}
+
+        {!loading && (stats?.recentApplicants.length || 0) === 0 && (
+          <div className="signet-empty signet-panel">
+            <h4>No applicants yet</h4>
+            <p>When candidates apply, they&apos;ll show up here.</p>
+            <Link href="/company/jobs/new" className="signet-btn mt-2">
+              Create your first vacancy
             </Link>
-          );
-        })}
+          </div>
+        )}
 
-      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h3 style={{ color: "#12141A", fontWeight: 700, fontSize: 20, margin: 0 }}>
-          Recent postings
-        </h3>
-        <Link href="/company/jobs" style={{ color: "#004CF0", fontWeight: 700 }}>
-          See all
-        </Link>
-      </div>
-
-      {!loading && jobs.length === 0 && (
-        <div className="signet-empty">
-          <h4>No jobs posted yet</h4>
-          <p>Create your first vacancy to start receiving applications.</p>
-        </div>
-      )}
-      {jobs.slice(0, 5).map((job) => (
-        <JobCard
-          key={job.id}
-          job={job}
-          href={`/company/applications?jobId=${job.id}`}
-          showDescription={false}
-          footer={
-            <div className="d-flex gap-2 flex-wrap">
-              <span className="signet-status">
-                {job.applicantsCount || 0} applicants · {job.status || "Active"}
-              </span>
+        {!loading &&
+          stats?.recentApplicants.map((app) => {
+            const applicantId = app.userId || app.id;
+            const appliedOn = formatAppliedDate(app.appliedAt);
+            return (
               <Link
-                href={`/company/jobs/${job.id}/edit`}
-                className="signet-btn secondary"
-                onClick={(e) => e.stopPropagation()}
+                key={`${app.jobId}-${applicantId}`}
+                href={`/company/applications/${app.jobId}/${applicantId}`}
+                className="signet-applicant-row text-decoration-none"
               >
-                Edit
+                <div className="signet-application-head">
+                  <div className="signet-application-meta">
+                    <strong>{app.jobTitle}</strong>
+                    <span className="signet-application-date">
+                      Applicant {applicantId.slice(0, 8)}…
+                      {appliedOn ? ` · Applied ${appliedOn}` : ""}
+                    </span>
+                  </div>
+                  <span className={`signet-status ${statusClass(app.status)}`}>
+                    {app.status || "Under Review"}
+                  </span>
+                </div>
               </Link>
-            </div>
-          }
-        />
-      ))}
+            );
+          })}
+      </section>
+
+      <section className="signet-dash-section">
+        <div className="signet-section-head">
+          <div>
+            <h3>Recent postings</h3>
+            <p>Your active and recent job listings</p>
+          </div>
+          <Link href="/company/jobs" className="signet-section-link">
+            See all
+          </Link>
+        </div>
+
+        {loading && <JobListShimmer count={3} />}
+
+        {!loading && jobs.length === 0 && (
+          <div className="signet-empty signet-panel">
+            <h4>No jobs posted yet</h4>
+            <p>Create your first vacancy to start receiving applications.</p>
+            <Link href="/company/jobs/new" className="signet-btn mt-2">
+              Post a job
+            </Link>
+          </div>
+        )}
+
+        {jobs.slice(0, 5).map((job) => (
+          <JobCard
+            key={job.id}
+            job={job}
+            href={`/company/applications?jobId=${job.id}`}
+            showDescription={false}
+            expandable={false}
+            footer={
+              <div className="signet-application-footer">
+                <div className="signet-application-head">
+                  <span className="signet-status">
+                    {job.applicantsCount || 0} applicants · {job.status || "Active"}
+                  </span>
+                  <Link
+                    href={`/company/jobs/${job.id}/edit`}
+                    className="signet-btn secondary signet-btn-sm signet-application-withdraw"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            }
+          />
+        ))}
+      </section>
     </AppShell>
   );
 }

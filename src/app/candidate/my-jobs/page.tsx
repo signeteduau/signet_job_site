@@ -106,67 +106,71 @@ function MyJobsInner() {
                 logoUrl: app.logoUrl,
               }}
               showDescription={false}
+              expandable={false}
               footer={
-                <div className="w-100">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                    <span
-                      className={`signet-status ${
-                        app.status === "Rejected"
-                          ? "rejected"
-                          : app.status === "Interview Scheduled"
-                          ? "interview"
-                          : app.status === "Hired"
-                          ? "hired"
-                          : ""
-                      }`}
-                    >
-                      {app.status || "Under Review"}
-                    </span>
-                    {appliedOn && (
-                      <span style={{ color: "#6B7280", fontSize: 12 }}>
-                        Applied {appliedOn}
+                <div className="signet-application-footer">
+                  <div className="signet-application-head">
+                    <div className="signet-application-meta">
+                      <span
+                        className={`signet-status ${
+                          app.status === "Rejected"
+                            ? "rejected"
+                            : app.status === "Interview Scheduled"
+                            ? "interview"
+                            : app.status === "Hired"
+                            ? "hired"
+                            : ""
+                        }`}
+                      >
+                        {app.status || "Under Review"}
                       </span>
-                    )}
+                      {appliedOn && (
+                        <span className="signet-application-date">
+                          Applied {appliedOn}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="signet-btn danger signet-btn-sm signet-application-withdraw"
+                      onClick={async () => {
+                        if (!user) return;
+                        if (
+                          !window.confirm(
+                            "Withdraw this application? This cannot be undone."
+                          )
+                        ) {
+                          return;
+                        }
+                        try {
+                          await withdrawApplication(
+                            user.uid,
+                            app.jobId,
+                            app.companyId
+                          );
+                          toast.success("Application withdrawn.");
+                          load();
+                        } catch {
+                          toast.error("Could not withdraw.");
+                        }
+                      }}
+                    >
+                      Withdraw
+                    </button>
                   </div>
                   {app.status === "Interview Scheduled" &&
                     (app.interviewDate || app.interviewTime) && (
-                      <p className="mb-2" style={{ color: "#0E7490", fontSize: 13, fontWeight: 650 }}>
+                      <p className="signet-application-note interview">
                         Interview: {[app.interviewDate, app.interviewTime]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
                     )}
                   {app.status === "Rejected" && app.rejectionReason && (
-                    <p className="mb-2" style={{ color: "#DC2626", fontSize: 13 }}>
+                    <p className="signet-application-note rejected">
                       {app.rejectionReason}
                     </p>
                   )}
-                  <button
-                    className="signet-btn danger"
-                    onClick={async () => {
-                      if (!user) return;
-                      if (
-                        !window.confirm(
-                          "Withdraw this application? This cannot be undone."
-                        )
-                      ) {
-                        return;
-                      }
-                      try {
-                        await withdrawApplication(
-                          user.uid,
-                          app.jobId,
-                          app.companyId
-                        );
-                        toast.success("Application withdrawn.");
-                        load();
-                      } catch {
-                        toast.error("Could not withdraw.");
-                      }
-                    }}
-                  >
-                    Withdraw
-                  </button>
                 </div>
               }
             />

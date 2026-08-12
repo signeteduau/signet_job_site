@@ -4,7 +4,7 @@ import Link from "next/link";
 import LoginForm from "../../forms/login-form";
 import google from "@/assets/images/icon/google.png";
 import facebook from "@/assets/images/icon/facebook.png";
-import signetLogo from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 
 const LoginModal = () => {
   return (
@@ -26,7 +26,7 @@ const LoginModal = () => {
             <div className="text-center">
               <Image
                 src={signetLogo}
-                alt="Signet Employment Hub"
+                alt={SIGNET_LOGO_ALT}
                 width={78}
                 height={78}
                 className="m-auto mb-15"

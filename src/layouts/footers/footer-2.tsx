@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 // internal
-import logo from '@/assets/images/logo/signet-icon.png';
+import { SIGNET_LOGO as logo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import shape from '@/assets/images/shape/shape_28.svg';
 import { WidgetOne, WidgetThree, WidgetTwo } from './component/footer-widgets';
 import SocialLinks from './component/social-links';

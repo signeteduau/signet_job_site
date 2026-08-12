@@ -8,6 +8,7 @@ export type AppUser = {
   profileCompleted: boolean;
   profileImage?: string;
   phone?: string;
+  phoneCountryCode?: string;
   address?: string;
   dob?: string;
   occupation?: string;

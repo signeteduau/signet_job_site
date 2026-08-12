@@ -8,7 +8,7 @@
 ::-webkit-scrollbar-track { background: #14161C;}
 ::-webkit-scrollbar-thumb { background: $color-two;border-radius: 0;}
 body {
-  font-family: var(--gorditas-font);
+  font-family: var(--signet-font, var(--gorditas-font), "Inter", system-ui, sans-serif);
   font-weight: normal;
   font-size: 16px;
   position: relative;

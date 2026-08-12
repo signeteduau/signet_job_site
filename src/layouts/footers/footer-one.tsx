@@ -2,9 +2,9 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 // internal
-import logo from "@/assets/images/logo/signet-icon.png";
-import logo_2 from "@/assets/images/logo/signet-icon.png";
-import logo_w from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as logo, SIGNET_LOGO_ALT } from "@/lib/brand";
+import { SIGNET_LOGO as logo_2 } from "@/lib/brand";
+import { SIGNET_LOGO as logo_w } from "@/lib/brand";
 import shape from "@/assets/images/shape/shape_28.svg";
 import { WidgetOne, WidgetThree, WidgetTwo } from "./component/footer-widgets";
 import SocialLinks from "./component/social-links";
@@ -26,7 +26,7 @@ const FooterOne = ({
 						<div className="col-lg-2 col-md-3 footer-intro mb-15">
 							<div className="logo mb-15">
 								<Link href="/" className="d-flex align-items-center">
-									<Image src={style_2 ? logo_w : style_3 ? logo_2 : logo} alt="Signet Employment Hub" width={84} height={84} priority />
+									<Image src={style_2 ? logo_w : style_3 ? logo_2 : logo} alt={SIGNET_LOGO_ALT} width={84} height={84} priority />
 								</Link>
 							</div>
 							<Image

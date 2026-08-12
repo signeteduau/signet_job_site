@@ -3,7 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 // internal
-import logo from '@/assets/images/logo/signet-icon.png';
+import { SIGNET_LOGO as logo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import icon from '@/assets/images/icon/icon_21.svg';
 import NiceSelect from '@/ui/nice-select';
 import useSticky from '@/hooks/use-sticky';

@@ -2,8 +2,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import logo from '@/assets/images/logo/signet-icon.png';
-import dark_logo from '@/assets/images/logo/signet-icon.png';
+import { SIGNET_LOGO as logo, SIGNET_LOGO_ALT } from "@/lib/brand";
+import { SIGNET_LOGO as dark_logo } from "@/lib/brand";
 import Menus from './component/menus';
 import useSticky from '@/hooks/use-sticky';
 import LoginModal from '@/app/components/common/popup/login-modal';

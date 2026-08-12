@@ -74,7 +74,7 @@ function Inner() {
 
       <div className="signet-panel">
         <div className="d-flex gap-3 align-items-start">
-          <div className="signet-logo-tile" style={{ width: 64, height: 64 }}>
+          <div className="signet-logo-tile signet-logo-tile--lg">
             {applicant?.profileImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={applicant.profileImage} alt="" />

@@ -4,11 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Wrapper from "@/layouts/wrapper";
-import { JobListShimmer } from "@/app/components/signet/shimmer";
+import { NkScrollRail } from "@/app/components/signet/nk-scroll-rail";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
-import { salarySuffix } from "@/lib/job-utils";
 import { Job } from "@/types/firestore";
-import signetLogo from "@/assets/images/logo/signet-icon.png";
+import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 
 type CompanyRow = {
   uid: string;
@@ -20,6 +19,9 @@ type CompanyRow = {
   companyLocation?: string;
   address?: string;
 };
+
+const JOB_SEARCH_BANNER_IMAGE =
+  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1800&q=85";
 
 const CATEGORY_PILLS = [
   { label: "Remote", icon: "bi-house-door", term: "Remote" },
@@ -169,7 +171,7 @@ export default function Home() {
                 <span className="nk-brand-mark">
                   <Image
                     src={signetLogo}
-                    alt="Signet"
+                    alt={SIGNET_LOGO_ALT}
                     width={36}
                     height={36}
                     sizes="36px"
@@ -183,7 +185,7 @@ export default function Home() {
               </Link>
               <nav className="nk-nav-links" aria-label="Primary">
                 <Link href="/jobs">Jobs</Link>
-                <Link href="/jobs">Companies</Link>
+                <Link href="/companies">Companies</Link>
                 <Link href="/register?type=company">Services</Link>
               </nav>
             </div>
@@ -294,62 +296,62 @@ export default function Home() {
 
           <section className="nk-section nk-section-tight">
             <div className="nk-container">
-              <div className="nk-cat-rail-wrap">
-                <div className="nk-cat-rail" aria-label="Browse by category">
-                  {CATEGORY_PILLS.map((item) => (
-                    <button
-                      key={item.label}
-                      type="button"
-                      className="nk-cat-pill"
-                      onClick={() => goSearch({ term: item.term })}
-                    >
-                      <i className={`bi ${item.icon}`} aria-hidden />
-                      <span>{item.label}</span>
-                      <i className="bi bi-chevron-right nk-cat-chevron" aria-hidden />
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <NkScrollRail
+                wrapClassName="nk-cat-rail-wrap"
+                railClassName="nk-cat-rail"
+                ariaLabel="Browse by category"
+              >
+                {CATEGORY_PILLS.map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    className="nk-cat-pill"
+                    onClick={() => goSearch({ term: item.term })}
+                  >
+                    <i className={`bi ${item.icon}`} aria-hidden />
+                    <span>{item.label}</span>
+                    <i className="bi bi-chevron-right nk-cat-chevron" aria-hidden />
+                  </button>
+                ))}
+              </NkScrollRail>
             </div>
           </section>
 
           <section className="nk-section">
             <div className="nk-container">
               <h2 className="nk-section-title">Top companies hiring now</h2>
-              <div className="nk-rail-wrap">
-                <div className="nk-top-hire-rail">
-                  {topHiringBuckets.map((bucket) => (
-                    <button
-                      key={bucket.label}
-                      type="button"
-                      className="nk-top-hire-card"
-                      onClick={() => goSearch({ term: bucket.label })}
-                    >
-                      <div className="nk-top-hire-head">
-                        <strong>{bucket.label}</strong>
-                        <i className="bi bi-chevron-right" aria-hidden />
-                      </div>
-                      <p>{formatCount(bucket.count)} are actively hiring</p>
-                      <div className="nk-top-hire-logos">
-                        {bucket.logos.map((c) => {
-                          const name = companyName(c);
-                          const logo = companyLogo(c);
-                          return (
-                            <span key={c.uid} className="nk-top-hire-logo" title={name}>
-                              {logo ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={logo} alt="" />
-                              ) : (
-                                name.slice(0, 1).toUpperCase()
-                              )}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <NkScrollRail railClassName="nk-top-hire-rail" ariaLabel="Top companies hiring now">
+                {topHiringBuckets.map((bucket) => (
+                  <button
+                    key={bucket.label}
+                    type="button"
+                    className="nk-top-hire-card"
+                    onClick={() => goSearch({ term: bucket.label })}
+                  >
+                    <div className="nk-top-hire-head">
+                      <strong>{bucket.label}</strong>
+                      <i className="bi bi-chevron-right" aria-hidden />
+                    </div>
+                    <p>{formatCount(bucket.count)} are actively hiring</p>
+                    <div className="nk-top-hire-logos">
+                      {bucket.logos.map((c) => {
+                        const name = companyName(c);
+                        const logo = companyLogo(c);
+                        return (
+                          <span key={c.uid} className="nk-top-hire-logo" title={name}>
+                            {logo ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={logo} alt="" />
+                            ) : (
+                              name.slice(0, 1).toUpperCase()
+                            )}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </button>
+                ))}
+              </NkScrollRail>
             </div>
           </section>
 
@@ -358,7 +360,7 @@ export default function Home() {
               <h2 className="nk-section-title">Featured companies actively hiring</h2>
 
               {loading && (
-                <div className="nk-featured-rail">
+                <NkScrollRail railClassName="nk-featured-rail" ariaLabel="Featured companies">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="nk-featured-card is-skeleton" aria-hidden>
                       <span className="nk-shimmer nk-shimmer-logo lg" />
@@ -366,7 +368,7 @@ export default function Home() {
                       <span className="nk-shimmer nk-shimmer-line short" />
                     </div>
                   ))}
-                </div>
+                </NkScrollRail>
               )}
 
               {!loading && companies.length === 0 && (
@@ -377,8 +379,7 @@ export default function Home() {
 
               {!loading && companies.length > 0 && (
                 <>
-                  <div className="nk-rail-wrap">
-                    <div className="nk-featured-rail">
+                  <NkScrollRail railClassName="nk-featured-rail" ariaLabel="Featured companies">
                       {companies.slice(0, 8).map((c) => {
                         const name = companyName(c);
                         const logo = companyLogo(c);
@@ -424,10 +425,9 @@ export default function Home() {
                           </Link>
                         );
                       })}
-                    </div>
-                  </div>
+                  </NkScrollRail>
                   <div className="nk-section-cta">
-                    <Link href="/jobs" className="nk-btn nk-btn-outline">
+                    <Link href="/companies" className="nk-btn nk-btn-outline">
                       View all companies
                     </Link>
                   </div>
@@ -463,103 +463,32 @@ export default function Home() {
 
           <section className="nk-section" id="open-roles">
             <div className="nk-container">
-              <div className="nk-section-head">
-                <h2 className="nk-section-title mb-0">Latest jobs</h2>
-                <Link href="/jobs" className="nk-link">
-                  View all <i className="bi bi-chevron-right" />
-                </Link>
-              </div>
-
-              {loading && <JobListShimmer count={4} />}
-
-              {!loading && jobs.length === 0 && (
-                <div className="nk-empty">
-                  <h4>No live jobs yet</h4>
-                  <p>Post a vacancy from a company account to get started.</p>
-                  <Link href="/register?type=company" className="nk-btn nk-btn-register mt-3">
-                    Post a job
+              <div className="nk-banner">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  className="nk-banner-photo"
+                  src={JOB_SEARCH_BANNER_IMAGE}
+                  alt=""
+                  aria-hidden
+                />
+                <span className="nk-banner-overlay" aria-hidden />
+                <span className="nk-banner-deco" aria-hidden />
+                <div className="nk-banner-copy">
+                  <p className="nk-banner-kicker">Your next career move</p>
+                  <h2>Discover opportunities built for you</h2>
+                  <p>
+                    Browse roles from leading companies, build your profile in minutes,
+                    and apply with one click — all on Signet.
+                  </p>
+                </div>
+                <div className="nk-banner-actions">
+                  <Link href="/jobs" className="nk-btn nk-btn-on-dark">
+                    Browse all jobs
+                  </Link>
+                  <Link href="/register" className="nk-btn nk-btn-banner-ghost">
+                    Register for free
                   </Link>
                 </div>
-              )}
-
-              <div className="nk-job-list">
-                {!loading &&
-                  jobs.slice(0, 6).map((job, index) => (
-                    <React.Fragment key={job.id}>
-                      <Link href={`/jobs/${job.id}`} className="nk-job-card">
-                        <span className="nk-job-logo">
-                          {job.logoUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={job.logoUrl} alt="" />
-                          ) : (
-                            <span>
-                              {(job.companyName || "S").slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                        </span>
-                        <div className="nk-job-body">
-                          <strong>{job.title}</strong>
-                          <em>{job.companyName || "Company"}</em>
-                          <div className="nk-job-meta">
-                            {job.experience && (
-                              <span>
-                                <i className="bi bi-briefcase" /> {job.experience}
-                              </span>
-                            )}
-                            {job.salary && (
-                              <span>
-                                <i className="bi bi-cash" /> {job.salary}
-                                {salarySuffix(job.salary)
-                                  ? ` / ${salarySuffix(job.salary)!.replace(/^\//, "")}`
-                                  : ""}
-                              </span>
-                            )}
-                            {job.location && (
-                              <span>
-                                <i className="bi bi-geo-alt" /> {job.location}
-                              </span>
-                            )}
-                          </div>
-                          {(job.skills || []).length > 0 && (
-                            <div className="nk-job-skills">
-                              {(job.skills || []).slice(0, 4).map((skill) => (
-                                <span key={skill}>{skill}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <span className="nk-job-save">
-                          <i className="bi bi-bookmark" aria-hidden />
-                        </span>
-                      </Link>
-                      {index === 1 && (
-                        <div className="nk-register-strip">
-                          <div className="nk-register-strip-copy">
-                            <strong>
-                              Make the most of Signet — register for free!
-                            </strong>
-                            <ul>
-                              <li>
-                                <i className="bi bi-check-circle-fill" /> Build
-                                your profile
-                              </li>
-                              <li>
-                                <i className="bi bi-check-circle-fill" /> Apply
-                                to jobs
-                              </li>
-                              <li>
-                                <i className="bi bi-check-circle-fill" /> Get
-                                noticed by recruiters
-                              </li>
-                            </ul>
-                          </div>
-                          <Link href="/register" className="nk-btn nk-btn-register">
-                            Register for free
-                          </Link>
-                        </div>
-                      )}
-                    </React.Fragment>
-                  ))}
               </div>
             </div>
           </section>
@@ -572,7 +501,7 @@ export default function Home() {
                 <span className="nk-brand-mark">
                   <Image
                     src={signetLogo}
-                    alt=""
+                    alt={SIGNET_LOGO_ALT}
                     width={32}
                     height={32}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
