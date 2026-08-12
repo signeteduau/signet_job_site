@@ -12,7 +12,7 @@ function Inner() {
   const id = String(params?.id || "");
   if (!user) return null;
   return (
-    <AppShell role="candidate" title="Conversation">
+    <AppShell role="candidate">
       <ChatDetail chatId={id} uid={user.uid} role="candidate" />
     </AppShell>
   );

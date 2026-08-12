@@ -9,7 +9,11 @@ function Inner() {
   const { user } = useAuth();
   if (!user) return null;
   return (
-    <AppShell role="company" title="Chat">
+    <AppShell
+      role="company"
+      title="Messages"
+      subtitle="Reply to candidates and keep hiring conversations in one place."
+    >
       <ChatList uid={user.uid} role="company" />
     </AppShell>
   );

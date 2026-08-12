@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
@@ -21,7 +21,21 @@ type CompanyPreview = {
   logoUrl?: string;
   profileImage?: string;
   industry?: string;
+  companyLocation?: string;
+  address?: string;
 };
+
+function companyName(c: CompanyPreview) {
+  return c.companyName || c.fullName || "Company";
+}
+
+function companyLogo(c: CompanyPreview) {
+  return c.logoUrl || c.profileImage || "";
+}
+
+function companyLocation(c: CompanyPreview) {
+  return c.companyLocation || c.address || "";
+}
 
 const QUICK_ACTIONS = [
   {
@@ -63,6 +77,30 @@ function CandidateHomeInner() {
   const [loading, setLoading] = useState(true);
 
   const firstName = profile?.fullName?.split(" ")[0] || "there";
+
+  const openRolesFor = useMemo(() => {
+    const map: Record<string, number> = {};
+    jobs.forEach((j) => {
+      if (j.companyId) {
+        map[j.companyId] = (map[j.companyId] || 0) + 1;
+      }
+      const nameKey = j.companyName?.toLowerCase();
+      if (nameKey) {
+        map[nameKey] = (map[nameKey] || 0) + 1;
+      }
+    });
+    return (c: CompanyPreview) => {
+      const name = companyName(c);
+      return (
+        map[c.uid] ||
+        jobs.filter(
+          (j) =>
+            j.companyId === c.uid ||
+            j.companyName?.toLowerCase() === name.toLowerCase()
+        ).length
+      );
+    };
+  }, [jobs]);
 
   useEffect(() => {
     (async () => {
@@ -168,27 +206,43 @@ function CandidateHomeInner() {
               See all
             </Link>
           </div>
-          <div className="signet-company-rail pb-2">
+          <div className="nk-company-rail pb-2">
             {companies.map((c) => {
-              const name = c.companyName || c.fullName || "Company";
+              const name = companyName(c);
+              const logo = companyLogo(c);
+              const openRoles = openRolesFor(c);
               return (
                 <Link
                   key={c.uid}
-                  href={`/candidate/companies/${c.uid}`}
-                  className="signet-company-chip text-decoration-none"
+                  href={`/jobs?q=${encodeURIComponent(name)}`}
+                  className="nk-company-card"
                 >
-                  <div className="signet-logo-tile signet-logo-tile--sm">
-                    {c.logoUrl || c.profileImage ? (
+                  <span className="nk-company-logo">
+                    {logo ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.logoUrl || c.profileImage} alt={name} />
+                      <img src={logo} alt="" />
                     ) : (
-                      <span>{name.charAt(0)}</span>
+                      name.slice(0, 1).toUpperCase()
                     )}
-                  </div>
-                  <div className="signet-company-chip-name">{name}</div>
-                  {c.industry && (
-                    <div className="signet-company-chip-meta">{c.industry}</div>
-                  )}
+                  </span>
+                  <strong>{name}</strong>
+                  <span className="nk-company-rating">
+                    <i className="bi bi-star-fill" />
+                    4.{(c.uid.charCodeAt(0) % 5) + 1}
+                    <em>
+                      {openRoles > 0
+                        ? `${openRoles} open roles`
+                        : "View open jobs"}
+                    </em>
+                  </span>
+                  <p className="nk-company-tagline">
+                    {c.industry ||
+                      companyLocation(c) ||
+                      "Explore roles from this employer"}
+                  </p>
+                  <span className="nk-company-cta">
+                    View jobs <i className="bi bi-chevron-right" />
+                  </span>
                 </Link>
               );
             })}

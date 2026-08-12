@@ -67,7 +67,9 @@ export default function JobCard({
     "";
   const initial = (job.companyName || "S").charAt(0).toUpperCase();
   const location = workLocationLabel(job.location, job.type);
-  const description = (job.description || job.rolesAndResponsibilities || "")
+  const rolesAndResponsibilities =
+    "rolesAndResponsibilities" in job ? job.rolesAndResponsibilities : "";
+  const description = (job.description || rolesAndResponsibilities || "")
     .replace(/\s+/g, " ")
     .trim();
   const showDesc =
@@ -75,14 +77,21 @@ export default function JobCard({
     description &&
     description.toLowerCase() !== "nothing" &&
     description.toLowerCase() !== "n/a";
-  const skills = ((job as Job).skills || [])
+  const skills = (job.skills || [])
     .map((s) => String(s).trim())
     .filter(Boolean)
     .slice(0, 4);
-  const postedAgo = formatPostedAgo(job.createdAt);
+  const postedAt =
+    "createdAt" in job && job.createdAt
+      ? job.createdAt
+      : "timestamp" in job
+      ? job.timestamp
+      : undefined;
+  const postedAgo = formatPostedAgo(postedAt);
   const postedShort = postedAgo.replace(/^Posted /, "");
-  const isNew = isJobNew(job.createdAt);
-  const categoryTag = job.category || job.type || "Open role";
+  const isNew = isJobNew(postedAt);
+  const categoryTag =
+    ("category" in job ? job.category : undefined) || job.type || "Open role";
   const isGrant = /grant/i.test(categoryTag);
 
   const shareUrl = useMemo(() => {
@@ -274,7 +283,9 @@ export default function JobCard({
             <div className="signet-job-details-wrap">
               <p className="signet-job-details-text">{description}</p>
               <div className="signet-job-details-meta">
-                {job.experience && <span>{job.experience} experience</span>}
+                {"experience" in job && job.experience && (
+                  <span>{job.experience} experience</span>
+                )}
                 <button
                   type="button"
                   className="signet-job-copy-link"

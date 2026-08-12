@@ -100,7 +100,6 @@ function ProfileInner() {
               }}
             />
             <div className="signet-profile-copy">
-              <p className="signet-eyebrow">Candidate profile</p>
               <h2>{fullName || "Your profile"}</h2>
               <p>{occupation || user?.email}</p>
             </div>

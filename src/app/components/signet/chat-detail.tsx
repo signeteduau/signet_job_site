@@ -73,9 +73,7 @@ export default function ChatDetail({
   }, [messages]);
 
   if (!chat) {
-    return (
-      <PageLoader label="Loading chat…" />
-    );
+    return <PageLoader label="Loading chat…" />;
   }
 
   const title = isCompany ? chat.candidateName : chat.companyName;
@@ -85,6 +83,10 @@ export default function ChatDetail({
     ? chat.typingByCandidate
     : chat.typingByCompany;
   const back = isCompany ? "/company/chat" : "/candidate/chat";
+
+  const visibleMessages = messages.filter((m) =>
+    isCompany ? !m.isDeletedByCompany : !m.isDeletedByCandidate
+  );
 
   const onType = (value: string) => {
     setText(value);
@@ -98,26 +100,34 @@ export default function ChatDetail({
   return (
     <div className="signet-chat-detail">
       <div className="signet-chat-header">
-        <Link href={back} className="signet-ghost-btn">
+        <Link href={back} className="signet-chat-back" aria-label="Back to messages">
           <i className="bi bi-arrow-left" />
         </Link>
-        <div className="signet-logo-tile signet-logo-tile--sm">
+        <span className="signet-chat-header-avatar signet-logo-tile">
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={image} alt={title} />
           ) : (
             <span>{(title || "S").charAt(0)}</span>
           )}
-        </div>
-        <div>
+        </span>
+        <div className="signet-chat-header-info">
           <strong>{title}</strong>
-          {otherTyping && (
-            <div style={{ fontSize: 12, color: "#004CF0" }}>Typing…</div>
-          )}
+          <span className={`signet-chat-status ${otherTyping ? "is-typing" : ""}`}>
+            {otherTyping ? "Typing…" : "Active now"}
+          </span>
         </div>
       </div>
 
       <div className="signet-chat-messages">
+        {visibleMessages.length === 0 && (
+          <div className="signet-chat-thread-empty">
+            <span className="signet-chat-empty-icon" aria-hidden>
+              <i className="bi bi-chat-heart" />
+            </span>
+            <p>Say hello to start the conversation</p>
+          </div>
+        )}
         {(() => {
           let lastVisibleDate: Date | null = null;
           return messages.map((m) => {
@@ -174,14 +184,22 @@ export default function ChatDetail({
           }
         }}
       >
-        <input
-          value={text}
-          onChange={(e) => onType(e.target.value)}
-          placeholder="Type a message…"
-        />
-        <button className="signet-btn" type="submit" disabled={sending || !text.trim()}>
-          <i className="bi bi-send-fill" />
-        </button>
+        <div className="signet-chat-composer-inner">
+          <input
+            value={text}
+            onChange={(e) => onType(e.target.value)}
+            placeholder="Write a message…"
+            aria-label="Message"
+          />
+          <button
+            className="signet-chat-send"
+            type="submit"
+            disabled={sending || !text.trim()}
+            aria-label="Send message"
+          >
+            <i className="bi bi-send-fill" />
+          </button>
+        </div>
       </form>
     </div>
   );

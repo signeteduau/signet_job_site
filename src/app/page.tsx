@@ -186,7 +186,6 @@ export default function Home() {
               <nav className="nk-nav-links" aria-label="Primary">
                 <Link href="/jobs">Jobs</Link>
                 <Link href="/companies">Companies</Link>
-                <Link href="/register?type=company">Services</Link>
               </nav>
             </div>
             <div className="nk-nav-right">
@@ -518,7 +517,7 @@ export default function Home() {
                   <i className="bi bi-instagram" />
                 </a>
                 <a href="#" aria-label="X">
-                  <i className="bi bi-twitter-x" />
+                  <i className="bi bi-twitter" />
                 </a>
                 <a href="#" aria-label="LinkedIn">
                   <i className="bi bi-linkedin" />
