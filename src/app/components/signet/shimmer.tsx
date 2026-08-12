@@ -23,26 +23,21 @@ export function PageLoader({ label = "Loading…" }: { label?: string }) {
 export function JobCardShimmer() {
   return (
     <div className="signet-job-card signet-job-card--skeleton" aria-hidden>
-      <span className="signet-job-accent" />
       <div className="signet-job-card-inner">
-        <div className="signet-job-top">
-          <ShimmerBlock className="sk-logo" />
-          <div className="flex-grow-1">
-            <ShimmerBlock className="sk-line sk-w-40" />
-            <ShimmerBlock className="sk-line sk-w-70 mt-2" />
-            <ShimmerBlock className="sk-line sk-w-50 mt-2" />
+        <div className="signet-job-row">
+          <ShimmerBlock className="sk-logo" style={{ width: 48, height: 48, borderRadius: 10 }} />
+          <div className="signet-job-body flex-grow-1">
+            <div className="d-flex gap-2 mb-2">
+              <ShimmerBlock className="sk-chip" style={{ width: 56, height: 20, borderRadius: 999 }} />
+              <ShimmerBlock className="sk-chip" style={{ width: 36, height: 20, borderRadius: 999 }} />
+            </div>
+            <ShimmerBlock className="sk-line sk-w-70" style={{ height: 18 }} />
+            <ShimmerBlock className="sk-line sk-w-90 mt-2" style={{ height: 14 }} />
+            <div className="d-flex justify-content-between align-items-center mt-3 pt-3">
+              <ShimmerBlock className="sk-line sk-w-30" style={{ height: 14 }} />
+              <ShimmerBlock className="sk-chip" style={{ width: 88, height: 34, borderRadius: 8 }} />
+            </div>
           </div>
-        </div>
-        <ShimmerBlock className="sk-line sk-w-90 mt-3" />
-        <ShimmerBlock className="sk-line sk-w-80 mt-2" />
-        <div className="d-flex gap-2 mt-3">
-          <ShimmerBlock className="sk-chip" />
-          <ShimmerBlock className="sk-chip" />
-          <ShimmerBlock className="sk-chip" />
-        </div>
-        <div className="d-flex justify-content-between mt-3">
-          <ShimmerBlock className="sk-line sk-w-30" />
-          <ShimmerBlock className="sk-chip" />
         </div>
       </div>
     </div>

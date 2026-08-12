@@ -1,8 +1,15 @@
 "use client";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { Job, SavedJob } from "@/types/firestore";
-import { salarySuffix } from "@/lib/job-utils";
+import { useRequireAuth } from "@/hooks/use-require-auth";
+import {
+  formatPostedAgo,
+  isJobNew,
+  normalizeJobType,
+  salarySuffix,
+} from "@/lib/job-utils";
 
 type Props = {
   job: Job | SavedJob;
@@ -11,6 +18,7 @@ type Props = {
   saved?: boolean;
   footer?: React.ReactNode;
   showDescription?: boolean;
+  expandable?: boolean;
 };
 
 function cityOnly(location?: string) {
@@ -18,11 +26,22 @@ function cityOnly(location?: string) {
   return location.split(",")[0]?.trim() || location;
 }
 
-function priorityClass(priority?: string) {
-  const p = (priority || "").toLowerCase();
-  if (p === "high") return "priority-high";
-  if (p === "medium") return "priority-medium";
-  return "priority-low";
+function workLocationLabel(location?: string, type?: string) {
+  const normalized = normalizeJobType(type);
+  if (normalized.includes("remote") || /anywhere|remote/i.test(location || "")) {
+    return "Remote";
+  }
+  return cityOnly(location) || "Flexible";
+}
+
+function typeLabel(type?: string) {
+  const normalized = normalizeJobType(type);
+  if (!normalized) return "Full time";
+  if (normalized.includes("part")) return "Part time";
+  if (normalized.includes("contract")) return "Contract";
+  if (normalized.includes("intern")) return "Internship";
+  if (normalized.includes("remote")) return "Remote";
+  return type || "Full time";
 }
 
 export default function JobCard({
@@ -32,129 +51,250 @@ export default function JobCard({
   saved,
   footer,
   showDescription = true,
+  expandable = true,
 }: Props) {
   const router = useRouter();
-  const link = href || `/candidate/jobs/${job.id || (job as SavedJob).jobId}`;
+  const { requireAuth } = useRequireAuth();
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const link = href || `/jobs/${job.id || (job as SavedJob).jobId}`;
+  const isPublicJobView = link.includes("/jobs/");
+  const showMessaging = isPublicJobView;
   const logo =
     job.logoUrl ||
     (job as Job & { profileImage?: string }).profileImage ||
     "";
   const initial = (job.companyName || "S").charAt(0).toUpperCase();
-  const location = cityOnly(job.location);
-  const description = (job.description || "").replace(/\s+/g, " ").trim();
+  const location = workLocationLabel(job.location, job.type);
+  const description = (job.description || job.rolesAndResponsibilities || "")
+    .replace(/\s+/g, " ")
+    .trim();
   const showDesc =
     showDescription &&
     description &&
     description.toLowerCase() !== "nothing" &&
     description.toLowerCase() !== "n/a";
-  const tone = priorityClass(job.priority);
   const skills = ((job as Job).skills || [])
     .map((s) => String(s).trim())
     .filter(Boolean)
-    .slice(0, 3);
+    .slice(0, 4);
+  const postedAgo = formatPostedAgo(job.createdAt);
+  const postedShort = postedAgo.replace(/^Posted /, "");
+  const isNew = isJobNew(job.createdAt);
+  const categoryTag = job.category || job.type || "Open role";
+  const isGrant = /grant/i.test(categoryTag);
 
-  const open = () => router.push(link);
+  const shareUrl = useMemo(() => {
+    if (typeof window === "undefined") return link;
+    return `${window.location.origin}${link}`;
+  }, [link]);
+
+  const open = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    router.push(link);
+  };
+
+  const copyLink = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success("Link copied!");
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Could not copy link.");
+    }
+  };
+
+  const toggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpanded((v) => !v);
+  };
 
   return (
     <article
-      className={`signet-job-card ${tone}`}
-      role="link"
-      tabIndex={0}
-      onClick={open}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          open();
-        }
-      }}
+      className={`signet-job-card ${expanded ? "is-expanded" : ""} ${isNew ? "is-new" : ""}`}
     >
-      <span className="signet-job-accent" aria-hidden />
       <div className="signet-job-card-inner">
-        <div className="signet-job-top">
-          <div className="signet-logo-frame" aria-hidden>
-            <div className="signet-logo-tile">
-              {logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={logo}
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+        <div className="signet-job-row">
+          <div className="signet-job-logo">
+            {logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="" />
+            ) : (
+              <span>{initial}</span>
+            )}
+          </div>
+
+          <div className="signet-job-body">
+            <div className="signet-job-topline">
+              <div className="signet-job-info">
+                <div className="signet-job-tags">
+                  <span
+                    className={`signet-job-tag ${isGrant ? "grant" : "role"}`}
+                  >
+                    {categoryTag}
+                  </span>
+                  {isNew && <span className="signet-job-new">New</span>}
+                </div>
+
+                <h3 className="signet-job-title">{job.title}</h3>
+
+                <p className="signet-job-subline">
+                  <strong>{job.companyName || "Company"}</strong>
+                  <span className="dot" aria-hidden>
+                    ·
+                  </span>
+                  {location}
+                  <span className="dot" aria-hidden>
+                    ·
+                  </span>
+                  {typeLabel(job.type)}
+                  {postedShort && (
+                    <>
+                      <span className="dot" aria-hidden>
+                        ·
+                      </span>
+                      {postedShort}
+                    </>
+                  )}
+                </p>
+              </div>
+
+              <div className="signet-job-actions-col">
+                <div className="signet-job-salary">
+                  {job.salary ? (
+                    <strong>
+                      {job.salary}
+                      {salarySuffix(job.salary) && (
+                        <span className="signet-job-salary-period">
+                          {" / "}
+                          {salarySuffix(job.salary)!.replace(/^\//, "")}
+                        </span>
+                      )}
+                    </strong>
+                  ) : (
+                    <strong className="muted">Salary TBD</strong>
+                  )}
+                </div>
+
+                <div className="signet-job-icon-actions">
+                  <button
+                    type="button"
+                    className="signet-job-icon-btn"
+                    aria-label="Share job"
+                    onClick={copyLink}
+                  >
+                    <i className="bi bi-share" />
+                  </button>
+                  {showMessaging && (
+                    <button
+                      type="button"
+                      className="signet-job-icon-btn"
+                      aria-label="Message"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (
+                          !requireAuth({
+                            returnUrl: link,
+                            message: "Sign in to message",
+                            role: "candidate",
+                          })
+                        ) {
+                          return;
+                        }
+                        router.push("/candidate/chat");
+                      }}
+                    >
+                      <i className="bi bi-chat" />
+                    </button>
+                  )}
+                  {(onSaveToggle || isPublicJobView) && (
+                    <button
+                      type="button"
+                      className={`signet-job-icon-btn ${saved ? "active" : ""}`}
+                      aria-label={saved ? "Unsave" : "Save"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSaveToggle) {
+                          onSaveToggle();
+                          return;
+                        }
+                        requireAuth({
+                          returnUrl: link,
+                          message: "Sign in to save jobs",
+                          role: "candidate",
+                        });
+                      }}
+                    >
+                      <i className={`bi ${saved ? "bi-star-fill" : "bi-star"}`} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {skills.length > 0 && (
+              <div className="signet-job-skills">
+                {skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
+              </div>
+            )}
+
+            <div className="signet-job-footer">
+              {expandable && showDesc ? (
+                <button
+                  type="button"
+                  className="signet-job-expand-btn"
+                  aria-expanded={expanded}
+                  onClick={toggleExpand}
+                >
+                  {expanded ? "Hide details" : "Expand details"}
+                  <i
+                    className={`bi bi-chevron-${expanded ? "up" : "down"}`}
+                    aria-hidden
+                  />
+                </button>
               ) : (
-                <span style={{ lineHeight: 1 }}>{initial}</span>
+                <span />
+              )}
+              <button type="button" className="signet-job-cta" onClick={open}>
+                View job
+                <i className="bi bi-arrow-right" aria-hidden />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {expandable && showDesc && (
+          <div className={`signet-job-details ${expanded ? "open" : ""}`}>
+            <div className="signet-job-details-wrap">
+              <p className="signet-job-details-text">{description}</p>
+              <div className="signet-job-details-meta">
+                {job.experience && <span>{job.experience} experience</span>}
+                <button
+                  type="button"
+                  className="signet-job-copy-link"
+                  onClick={copyLink}
+                >
+                  {copied ? "Copied!" : "Copy link"}
+                </button>
+              </div>
+              {isGrant && (
+                <p className="signet-job-grant-note">
+                  Grants are not eligible for referral bonuses at this time.
+                </p>
               )}
             </div>
           </div>
-
-          <div className="signet-job-heading">
-            <div className="signet-job-kicker">
-              <span className="company">
-                <i className="bi bi-buildings" />
-                {job.companyName || "Company"}
-              </span>
-            </div>
-            <h3 className="signet-job-title">{job.title}</h3>
-          </div>
-
-          {onSaveToggle && (
-            <button
-              type="button"
-              className={`signet-icon-btn ${saved ? "active" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSaveToggle();
-              }}
-              aria-label={saved ? "Unsave" : "Save"}
-            >
-              <i className={`bi ${saved ? "bi-bookmark-fill" : "bi-bookmark"}`} />
-            </button>
-          )}
-        </div>
-
-        {showDesc && <p className="signet-job-desc">{description}</p>}
-
-        <div className="signet-meta-chips">
-          {job.type && (
-            <span>
-              <i className="bi bi-briefcase" /> {job.type}
-            </span>
-          )}
-          {location && (
-            <span>
-              <i className="bi bi-geo-alt" /> {location}
-            </span>
-          )}
-          {job.priority && (
-            <span className={tone}>
-              <i className="bi bi-flag" /> {job.priority}
-            </span>
-          )}
-        </div>
-
-        {skills.length > 0 && (
-          <div className="signet-skill-chips">
-            {skills.map((skill) => (
-              <span key={skill}>{skill}</span>
-            ))}
-          </div>
         )}
 
-        <div className="signet-job-footer">
-          {job.salary ? (
-            <div className="signet-salary">
-              <i className="bi bi-cash-coin" />
-              <strong>{job.salary}</strong>
-              {salarySuffix(job.salary) && <em>{salarySuffix(job.salary)}</em>}
-            </div>
-          ) : (
-            <div className="signet-salary muted">
-              <strong>Salary not disclosed</strong>
-            </div>
-          )}
-          <span className="signet-job-cta">
-            View role <i className="bi bi-arrow-right" />
-          </span>
-        </div>
+        {!expandable && showDesc && (
+          <p className="signet-job-desc">{description}</p>
+        )}
+
         {footer && (
           <div
             className="signet-job-extra"

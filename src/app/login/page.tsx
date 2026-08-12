@@ -1,18 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { FirebaseError } from "firebase/app";
 import AuthShell from "@/app/components/signet/auth-shell";
-import { resolveHomePath, useAuth } from "@/context/auth-context";
+import { PageLoader } from "@/app/components/signet/shimmer";
+import { useAuth } from "@/context/auth-context";
+import { resolvePostLoginPath } from "@/lib/auth-flow";
 import { auth } from "@/lib/firebase";
 import { getUserProfile } from "@/lib/services/users";
 import Wrapper from "@/layouts/wrapper";
 
-export default function LoginPage() {
+function LoginInner() {
   const { login, loginWithGoogle, resetPassword } = useAuth();
   const router = useRouter();
+  const search = useSearchParams();
+  const returnUrl = search?.get("returnUrl");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -24,7 +28,7 @@ export default function LoginPage() {
     const u = auth.currentUser;
     if (!u) return router.push("/login");
     const p = await getUserProfile(u.uid);
-    router.push(resolveHomePath(p, u));
+    router.push(resolvePostLoginPath(p, u, returnUrl));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -162,9 +166,26 @@ export default function LoginPage() {
         </button>
 
         <p className="signet-auth-switch">
-          New here? <Link href="/register">Create an account</Link>
+          New here?{" "}
+          <Link
+            href={
+              returnUrl
+                ? `/register?returnUrl=${encodeURIComponent(returnUrl)}`
+                : "/register"
+            }
+          >
+            Create an account
+          </Link>
         </p>
       </AuthShell>
     </Wrapper>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<PageLoader label="Loading…" />}>
+      <LoginInner />
+    </Suspense>
   );
 }

@@ -35,7 +35,7 @@ function ApplyInner() {
         setJob(j);
         if (user && j && (await hasApplied(user.uid, j.id))) {
           toast.info("You already applied to this job.");
-          router.replace(`/candidate/jobs/${j.id}`);
+          router.replace(`/jobs/${j.id}`);
         }
       } catch {
         toast.error("Could not load job.");
@@ -98,7 +98,7 @@ function ApplyInner() {
           <p>This role may have been removed.</p>
           <button
             className="signet-btn mt-2"
-            onClick={() => router.push("/candidate/jobs")}
+            onClick={() => router.push("/jobs")}
           >
             Browse jobs
           </button>

@@ -1,16 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { reload } from "firebase/auth";
 import AuthShell from "@/app/components/signet/auth-shell";
-import { resolveHomePath, useAuth } from "@/context/auth-context";
+import { PageLoader } from "@/app/components/signet/shimmer";
+import { useAuth } from "@/context/auth-context";
+import { resolvePostLoginPath } from "@/lib/auth-flow";
 import { getUserProfile } from "@/lib/services/users";
 import Wrapper from "@/layouts/wrapper";
 
-export default function VerifyEmailPage() {
+function VerifyEmailInner() {
   const { user, sendVerification, logout } = useAuth();
   const router = useRouter();
+  const search = useSearchParams();
+  const returnUrl = search?.get("returnUrl");
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -23,14 +27,14 @@ export default function VerifyEmailPage() {
         await reload(user);
         if (user.emailVerified) {
           const p = await getUserProfile(user.uid);
-          router.replace(resolveHomePath(p, user));
+          router.replace(resolvePostLoginPath(p, user, returnUrl));
         }
       } catch {
         /* ignore */
       }
     }, 4000);
     return () => clearInterval(id);
-  }, [user, router]);
+  }, [user, router, returnUrl]);
 
   return (
     <Wrapper>
@@ -73,5 +77,13 @@ export default function VerifyEmailPage() {
         </button>
       </AuthShell>
     </Wrapper>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<PageLoader label="Loading…" />}>
+      <VerifyEmailInner />
+    </Suspense>
   );
 }

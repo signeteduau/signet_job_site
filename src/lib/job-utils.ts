@@ -32,6 +32,53 @@ export function salarySuffix(salary?: string): string | null {
   return null;
 }
 
+export function formatPostedAgo(value: unknown): string {
+  if (!value) return "";
+  try {
+    const anyVal = value as { toDate?: () => Date; seconds?: number };
+    const date =
+      typeof anyVal.toDate === "function"
+        ? anyVal.toDate()
+        : typeof anyVal.seconds === "number"
+        ? new Date(anyVal.seconds * 1000)
+        : new Date(String(value));
+    if (Number.isNaN(date.getTime())) return "";
+
+    const diffMs = Date.now() - date.getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return "Posted just now";
+    if (mins < 60) return `Posted ${mins} minute${mins === 1 ? "" : "s"} ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `Posted ${hrs} hour${hrs === 1 ? "" : "s"} ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `Posted ${days} day${days === 1 ? "" : "s"} ago`;
+    return `Posted ${date.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })}`;
+  } catch {
+    return "";
+  }
+}
+
+export function isJobNew(value: unknown, withinDays = 7): boolean {
+  if (!value) return false;
+  try {
+    const anyVal = value as { toDate?: () => Date; seconds?: number };
+    const date =
+      typeof anyVal.toDate === "function"
+        ? anyVal.toDate()
+        : typeof anyVal.seconds === "number"
+        ? new Date(anyVal.seconds * 1000)
+        : new Date(String(value));
+    if (Number.isNaN(date.getTime())) return false;
+    return Date.now() - date.getTime() < withinDays * 86400000;
+  } catch {
+    return false;
+  }
+}
+
 export function formatAppliedDate(value: unknown): string {
   if (!value) return "";
   try {

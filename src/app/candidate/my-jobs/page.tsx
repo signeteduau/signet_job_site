@@ -82,7 +82,7 @@ function MyJobsInner() {
         <div className="signet-empty">
           <h4>No applications yet</h4>
           <p>Browse jobs and apply to get started.</p>
-          <Link href="/candidate/jobs" className="signet-btn mt-2">
+          <Link href="/jobs" className="signet-btn mt-2">
             Browse jobs
           </Link>
         </div>

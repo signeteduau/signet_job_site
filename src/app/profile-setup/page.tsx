@@ -1,16 +1,20 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import AuthShell from "@/app/components/signet/auth-shell";
+import { PageLoader } from "@/app/components/signet/shimmer";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import { useAuth } from "@/context/auth-context";
+import { resolvePostLoginPath } from "@/lib/auth-flow";
 import { uploadProfileImage } from "@/lib/services/storage";
 import Wrapper from "@/layouts/wrapper";
 
-export default function ProfileSetupPage() {
-  const { user, profile, finishProfileSetup, loading } = useAuth();
+function ProfileSetupInner() {
+  const { user, profile, finishProfileSetup, loading, refreshProfile } = useAuth();
   const router = useRouter();
+  const search = useSearchParams();
+  const returnUrl = search?.get("returnUrl");
   const isCompany = profile?.userType === "company";
   const [fullName, setFullName] = useState(profile?.fullName || "");
   const [phone, setPhone] = useState("");
@@ -56,7 +60,8 @@ export default function ProfileSetupPage() {
           profileImage: imageUrl || "",
         });
         toast.success("Company profile ready!");
-        router.push("/company");
+        const updated = await refreshProfile();
+        router.push(resolvePostLoginPath(updated, user, returnUrl));
       } else {
         await finishProfileSetup({
           fullName,
@@ -66,7 +71,8 @@ export default function ProfileSetupPage() {
           profileImage: imageUrl || "",
         });
         toast.success("Profile ready!");
-        router.push("/candidate");
+        const updated = await refreshProfile();
+        router.push(resolvePostLoginPath(updated, user, returnUrl));
       }
     } catch {
       toast.error("Could not save profile.");
@@ -186,5 +192,13 @@ export default function ProfileSetupPage() {
         </form>
       </AuthShell>
     </Wrapper>
+  );
+}
+
+export default function ProfileSetupPage() {
+  return (
+    <Suspense fallback={<PageLoader label="Loading…" />}>
+      <ProfileSetupInner />
+    </Suspense>
   );
 }

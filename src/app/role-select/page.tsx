@@ -1,16 +1,20 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import AuthShell, { AuthRoleTabs } from "@/app/components/signet/auth-shell";
+import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { withReturnUrl } from "@/lib/auth-flow";
 import { createUserProfile } from "@/lib/services/users";
 import { UserType } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
-export default function RoleSelectPage() {
+function RoleSelectInner() {
   const { user, refreshProfile } = useAuth();
   const router = useRouter();
+  const search = useSearchParams();
+  const returnUrl = search?.get("returnUrl");
   const [userType, setUserType] = useState<UserType>("candidate");
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +31,7 @@ export default function RoleSelectPage() {
           userType === "company" ? user.displayName || "Company" : undefined,
       });
       await refreshProfile();
-      router.push("/profile-setup");
+      router.push(withReturnUrl("/profile-setup", returnUrl));
     } catch {
       toast.error("Could not save role. Try again.");
     } finally {
@@ -53,5 +57,13 @@ export default function RoleSelectPage() {
         </button>
       </AuthShell>
     </Wrapper>
+  );
+}
+
+export default function RoleSelectPage() {
+  return (
+    <Suspense fallback={<PageLoader label="Loading…" />}>
+      <RoleSelectInner />
+    </Suspense>
   );
 }

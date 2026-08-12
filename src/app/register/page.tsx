@@ -7,6 +7,7 @@ import { FirebaseError } from "firebase/app";
 import AuthShell, { AuthRoleTabs } from "@/app/components/signet/auth-shell";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { withReturnUrl } from "@/lib/auth-flow";
 import { UserType } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
@@ -14,6 +15,7 @@ function RegisterInner() {
   const { register } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
+  const returnUrl = search?.get("returnUrl");
   const [userType, setUserType] = useState<UserType>(
     search?.get("type") === "company" ? "company" : "candidate"
   );
@@ -36,7 +38,7 @@ function RegisterInner() {
         companyName: userType === "company" ? companyName || name : undefined,
       });
       toast.success("Account created! Please verify your email.");
-      router.push("/verify-email");
+      router.push(withReturnUrl("/verify-email", returnUrl));
     } catch (err) {
       let message = "Could not create account.";
       if (err instanceof FirebaseError) {

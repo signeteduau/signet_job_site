@@ -27,7 +27,19 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {children} 
-      <ToastContainer />
+      <ToastContainer
+        position="top-center"
+        autoClose={2200}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable={false}
+        limit={2}
+        icon={false}
+        toastClassName="signet-toast"
+        bodyClassName="signet-toast-body"
+      />
     </>
   );
 };

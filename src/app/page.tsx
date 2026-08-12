@@ -21,26 +21,26 @@ type CompanyRow = {
   address?: string;
 };
 
-const QUICK_CHIPS = [
-  "Fresher",
-  "Marketing",
-  "Software & IT",
-  "Banking & Finance",
-  "HR",
-  "Remote",
-  "Internship",
-  "Full Time",
+const CATEGORY_PILLS = [
+  { label: "Remote", icon: "bi-house-door", term: "Remote" },
+  { label: "MNC", icon: "bi-buildings", term: "MNC" },
+  { label: "HR", icon: "bi-people", term: "HR" },
+  { label: "Startup", icon: "bi-rocket-takeoff", term: "Startup" },
+  { label: "Sales", icon: "bi-graph-up", term: "Sales" },
+  { label: "Marketing", icon: "bi-megaphone", term: "Marketing" },
+  { label: "Engineering", icon: "bi-gear", term: "Engineering" },
+  { label: "Software & IT", icon: "bi-code-slash", term: "Software" },
+  { label: "Data Science", icon: "bi-bar-chart-line", term: "Data" },
+  { label: "Fresher", icon: "bi-mortarboard", term: "Fresher" },
 ];
 
-const HIRING_TILES = [
-  { label: "MNCs", icon: "bi-buildings", tone: "blue" },
-  { label: "Startups", icon: "bi-rocket-takeoff", tone: "orange" },
-  { label: "Remote", icon: "bi-laptop", tone: "teal" },
-  { label: "Internship", icon: "bi-mortarboard", tone: "purple" },
-  { label: "Marketing", icon: "bi-megaphone", tone: "pink" },
-  { label: "Software", icon: "bi-code-slash", tone: "indigo" },
-  { label: "HR", icon: "bi-people", tone: "green" },
-  { label: "Finance", icon: "bi-graph-up-arrow", tone: "amber" },
+const TOP_HIRING_BUCKETS = [
+  { label: "MNCs", match: /mnc|corporate|consulting|it services/i },
+  { label: "Product", match: /product|saas|software/i },
+  { label: "Banking & Finance", match: /bank|finance|fintech/i },
+  { label: "Healthcare", match: /health|pharma|medical/i },
+  { label: "Edtech", match: /edtech|education|learning/i },
+  { label: "Startup", match: /startup|early stage/i },
 ];
 
 const POPULAR_ROLES = [
@@ -52,15 +52,19 @@ const POPULAR_ROLES = [
   "Sales Manager",
   "UI/UX Designer",
   "Business Analyst",
-  "Content Writer",
-  "Customer Success",
-  "DevOps Engineer",
-  "Operations",
 ];
 
 function formatCount(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "")}K+`;
   return `${n}`;
+}
+
+function companyName(c: CompanyRow) {
+  return c.companyName || c.fullName || "Company";
+}
+
+function companyLogo(c: CompanyRow) {
+  return c.logoUrl || c.profileImage || "";
 }
 
 export default function Home() {
@@ -78,7 +82,7 @@ export default function Home() {
       try {
         const [jobList, companyList] = await Promise.all([
           fetchJobs(24),
-          fetchCompanies(12),
+          fetchCompanies(16),
         ]);
         if (!alive) return;
         setJobs(jobList);
@@ -97,10 +101,7 @@ export default function Home() {
     };
   }, []);
 
-  const goSearch = (overrides?: {
-    term?: string;
-    location?: string;
-  }) => {
+  const goSearch = (overrides?: { term?: string; location?: string }) => {
     const params = new URLSearchParams();
     const q = (overrides?.term ?? designation).trim();
     const loc = (overrides?.location ?? location).trim();
@@ -111,17 +112,6 @@ export default function Home() {
     router.push(qs ? `/jobs?${qs}` : "/jobs");
   };
 
-  const roleCounts = useMemo(() => {
-    return POPULAR_ROLES.map((role) => {
-      const key = role.toLowerCase();
-      const count = jobs.filter((j) => {
-        const hay = `${j.title} ${j.category} ${(j.skills || []).join(" ")}`.toLowerCase();
-        return key.split(" ").some((w) => w.length > 2 && hay.includes(w));
-      }).length;
-      return { role, count: Math.max(count, Math.floor(jobs.length / 6) || 1) };
-    });
-  }, [jobs]);
-
   const jobsByCompany = useMemo(() => {
     const map: Record<string, number> = {};
     jobs.forEach((j) => {
@@ -131,6 +121,43 @@ export default function Home() {
     });
     return map;
   }, [jobs]);
+
+  const topHiringBuckets = useMemo(() => {
+    return TOP_HIRING_BUCKETS.map((bucket) => {
+      const matchedJobs = jobs.filter((j) => {
+        const hay = `${j.category} ${j.type} ${j.companyName} ${j.title}`.toLowerCase();
+        return bucket.match.test(hay);
+      });
+      const matchedCompanies = companies.filter((c) => {
+        const hay = `${c.industry} ${companyName(c)}`.toLowerCase();
+        return bucket.match.test(hay);
+      });
+      const pool = matchedCompanies.length ? matchedCompanies : companies;
+      const count = Math.max(
+        matchedJobs.length,
+        matchedCompanies.length,
+        Math.ceil(jobs.length / 6)
+      );
+      return {
+        label: bucket.label,
+        count,
+        logos: pool.slice(0, 4),
+      };
+    });
+  }, [jobs, companies]);
+
+  const roleCounts = useMemo(() => {
+    return POPULAR_ROLES.map((role) => {
+      const key = role.toLowerCase();
+      const count = jobs.filter((j) => {
+        const hay = `${j.title} ${j.category} ${(j.skills || []).join(" ")}`.toLowerCase();
+        return key.split(" ").some((w) => w.length > 2 && hay.includes(w));
+      }).length;
+      return { role, count: Math.max(count, 1) };
+    });
+  }, [jobs]);
+
+  const suggestedSearch = jobs[0]?.title || "software developer";
 
   return (
     <Wrapper>
@@ -152,7 +179,6 @@ export default function Home() {
                 </span>
                 <span className="nk-brand-text">
                   <strong>SIGNET</strong>
-                  <em>Employment Hub</em>
                 </span>
               </Link>
               <nav className="nk-nav-links" aria-label="Primary">
@@ -163,12 +189,12 @@ export default function Home() {
             </div>
             <div className="nk-nav-right">
               <Link href="/register?type=company" className="nk-nav-employer">
-                For employers
+                For employers <i className="bi bi-chevron-down" />
               </Link>
               <Link href="/login" className="nk-btn nk-btn-ghost">
                 Login
               </Link>
-              <Link href="/register" className="nk-btn nk-btn-primary">
+              <Link href="/register" className="nk-btn nk-btn-register">
                 Register
               </Link>
             </div>
@@ -177,27 +203,23 @@ export default function Home() {
 
         <main>
           <section className="nk-hero">
-            <div className="nk-hero-grid" aria-hidden />
-            <div className="nk-hero-glow" aria-hidden />
-            <div className="nk-hero-orb nk-hero-orb-a" aria-hidden />
-            <div className="nk-hero-orb nk-hero-orb-b" aria-hidden />
-            <div className="nk-hero-orb nk-hero-orb-c" aria-hidden />
+            <div className="nk-hero-bg" aria-hidden>
+              <span className="nk-hero-blob nk-hero-blob-a" />
+              <span className="nk-hero-blob nk-hero-blob-b" />
+              <span className="nk-hero-blob nk-hero-blob-c" />
+              <span className="nk-hero-grid" />
+            </div>
             <div className="nk-container nk-hero-inner">
-              <p className="nk-hero-brand">
-                <span className="nk-hero-dot" /> SIGNET EMPLOYMENT HUB
-              </p>
-              <h1>
-                Find your <span>dream job</span> now
-              </h1>
+              <h1>Find your dream job now</h1>
               <p className="nk-hero-sub">
-                {loading
-                  ? "Loading openings for you to explore"
-                  : (
-                    <>
-                      <strong>{formatCount(Math.max(jobs.length, 1))}+</strong>{" "}
-                      jobs for you to explore
-                    </>
-                  )}
+                {loading ? (
+                  "Loading openings for you to explore"
+                ) : (
+                  <>
+                    <strong>{formatCount(Math.max(jobs.length, 50))}+</strong> jobs
+                    for you to explore
+                  </>
+                )}
               </p>
 
               <form
@@ -208,149 +230,82 @@ export default function Home() {
                 }}
               >
                 <div className="nk-search-shell">
-                  <div className="nk-search-field nk-search-designation">
-                    <span className="nk-search-ico" aria-hidden>
-                      <i className="bi bi-search" />
-                    </span>
-                    <span className="nk-search-control">
-                      <span className="nk-search-label">Skills / Role</span>
-                      <input
-                        value={designation}
-                        onChange={(e) => setDesignation(e.target.value)}
-                        placeholder="e.g. UI Designer, React, Signet"
-                        aria-label="Skills or designations"
-                      />
-                    </span>
+                  <label className="nk-search-segment nk-search-designation">
+                    <i className="bi bi-search" aria-hidden />
+                    <input
+                      value={designation}
+                      onChange={(e) => setDesignation(e.target.value)}
+                      placeholder="Enter skills / designations / companies"
+                      aria-label="Skills or designations"
+                    />
                     {designation ? (
                       <button
                         type="button"
                         className="nk-search-clear"
-                        aria-label="Clear skills"
+                        aria-label="Clear search"
                         onClick={() => setDesignation("")}
                       >
                         <i className="bi bi-x" />
                       </button>
                     ) : null}
-                  </div>
+                  </label>
 
-                  <span className="nk-search-divider" aria-hidden />
+                  <label className="nk-search-segment nk-search-exp">
+                    <select
+                      value={experience}
+                      onChange={(e) => setExperience(e.target.value)}
+                      aria-label="Experience"
+                      data-empty={!experience ? "true" : "false"}
+                    >
+                      <option value="">Select experience</option>
+                      <option value="Fresher">Fresher</option>
+                      <option value="1">1 year</option>
+                      <option value="2">2 years</option>
+                      <option value="3">3 years</option>
+                      <option value="5">5+ years</option>
+                    </select>
+                  </label>
 
-                  <div className="nk-search-field nk-search-exp">
-                    <span className="nk-search-ico" aria-hidden>
-                      <i className="bi bi-briefcase" />
-                    </span>
-                    <span className="nk-search-control">
-                      <span className="nk-search-label">Experience</span>
-                      <select
-                        value={experience}
-                        onChange={(e) => setExperience(e.target.value)}
-                        aria-label="Experience"
-                        data-empty={!experience ? "true" : "false"}
-                      >
-                        <option value="">Select experience</option>
-                        <option value="Fresher">Fresher</option>
-                        <option value="1">1 year</option>
-                        <option value="2">2 years</option>
-                        <option value="3">3 years</option>
-                        <option value="5">5+ years</option>
-                      </select>
-                    </span>
-                  </div>
+                  <label className="nk-search-segment nk-search-location">
+                    <input
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="Enter location"
+                      aria-label="Location"
+                    />
+                  </label>
 
-                  <span className="nk-search-divider" aria-hidden />
-
-                  <div className="nk-search-field nk-search-location">
-                    <span className="nk-search-ico" aria-hidden>
-                      <i className="bi bi-geo-alt" />
-                    </span>
-                    <span className="nk-search-control">
-                      <span className="nk-search-label">Location</span>
-                      <input
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="City or remote"
-                        aria-label="Location"
-                      />
-                    </span>
-                    {location ? (
-                      <button
-                        type="button"
-                        className="nk-search-clear"
-                        aria-label="Clear location"
-                        onClick={() => setLocation("")}
-                      >
-                        <i className="bi bi-x" />
-                      </button>
-                    ) : null}
-                  </div>
-
-                  <button type="submit" className="nk-btn nk-btn-search">
-                    <i className="bi bi-search" aria-hidden />
+                  <button type="submit" className="nk-search-submit">
                     Search
                   </button>
                 </div>
               </form>
 
-              <div className="nk-chips-wrap">
-                <span className="nk-chips-label">Popular searches</span>
-                <div className="nk-chips" role="list">
-                  {QUICK_CHIPS.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      className="nk-chip"
-                      role="listitem"
-                      onClick={() => goSearch({ term: chip })}
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="nk-trust">
-                <span>
-                  <i className="bi bi-shield-check" /> Verified employers
-                </span>
-                <span>
-                  <i className="bi bi-phone" /> App synced
-                </span>
-                <span>
-                  <i className="bi bi-lightning-charge" /> Fast apply
-                </span>
-              </div>
+              <button
+                type="button"
+                className="nk-suggested-search"
+                onClick={() => goSearch({ term: suggestedSearch })}
+              >
+                <i className="bi bi-arrow-repeat" aria-hidden />
+                {suggestedSearch}
+              </button>
             </div>
           </section>
 
-          <section className="nk-section nk-hiring">
+          <section className="nk-section nk-section-tight">
             <div className="nk-container">
-              <div className="nk-rail-wrap">
-                <div className="nk-rail" aria-label="Hiring categories">
-                  {HIRING_TILES.map((tile, i) => (
+              <div className="nk-cat-rail-wrap">
+                <div className="nk-cat-rail" aria-label="Browse by category">
+                  {CATEGORY_PILLS.map((item) => (
                     <button
-                      key={tile.label}
+                      key={item.label}
                       type="button"
-                      className={`nk-hire-card tone-${tile.tone}`}
-                      style={{ animationDelay: `${i * 40}ms` }}
-                      onClick={() => goSearch({ term: tile.label })}
+                      className="nk-cat-pill"
+                      onClick={() => goSearch({ term: item.term })}
                     >
-                      <span className="nk-hire-icon">
-                        <i className={`bi ${tile.icon}`} />
-                      </span>
-                      <strong>{tile.label}</strong>
-                      <em>
-                        {formatCount(
-                          Math.max(
-                            1,
-                            jobs.filter((j) =>
-                              `${j.title} ${j.category} ${j.type}`
-                                .toLowerCase()
-                                .includes(tile.label.toLowerCase().split(" ")[0])
-                            ).length || Math.ceil(jobs.length / 5)
-                          )
-                        )}{" "}
-                        are actively hiring
-                      </em>
+                      <i className={`bi ${item.icon}`} aria-hidden />
+                      <span>{item.label}</span>
+                      <i className="bi bi-chevron-right nk-cat-chevron" aria-hidden />
                     </button>
                   ))}
                 </div>
@@ -360,21 +315,53 @@ export default function Home() {
 
           <section className="nk-section">
             <div className="nk-container">
-              <div className="nk-section-head">
-                <div>
-                  <p className="nk-eyebrow">Top companies</p>
-                  <h2>Featured companies actively hiring</h2>
+              <h2 className="nk-section-title">Top companies hiring now</h2>
+              <div className="nk-rail-wrap">
+                <div className="nk-top-hire-rail">
+                  {topHiringBuckets.map((bucket) => (
+                    <button
+                      key={bucket.label}
+                      type="button"
+                      className="nk-top-hire-card"
+                      onClick={() => goSearch({ term: bucket.label })}
+                    >
+                      <div className="nk-top-hire-head">
+                        <strong>{bucket.label}</strong>
+                        <i className="bi bi-chevron-right" aria-hidden />
+                      </div>
+                      <p>{formatCount(bucket.count)} are actively hiring</p>
+                      <div className="nk-top-hire-logos">
+                        {bucket.logos.map((c) => {
+                          const name = companyName(c);
+                          const logo = companyLogo(c);
+                          return (
+                            <span key={c.uid} className="nk-top-hire-logo" title={name}>
+                              {logo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={logo} alt="" />
+                              ) : (
+                                name.slice(0, 1).toUpperCase()
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <Link href="/jobs" className="nk-link">
-                  View all <i className="bi bi-chevron-right" />
-                </Link>
               </div>
+            </div>
+          </section>
+
+          <section className="nk-section nk-section-soft">
+            <div className="nk-container">
+              <h2 className="nk-section-title">Featured companies actively hiring</h2>
 
               {loading && (
-                <div className="nk-company-rail">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="nk-company-card is-skeleton" aria-hidden>
-                      <span className="nk-shimmer nk-shimmer-logo" />
+                <div className="nk-featured-rail">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="nk-featured-card is-skeleton" aria-hidden>
+                      <span className="nk-shimmer nk-shimmer-logo lg" />
                       <span className="nk-shimmer nk-shimmer-line" />
                       <span className="nk-shimmer nk-shimmer-line short" />
                     </div>
@@ -389,71 +376,73 @@ export default function Home() {
               )}
 
               {!loading && companies.length > 0 && (
-                <div className="nk-rail-wrap">
-                <div className="nk-company-rail">
-                  {companies.map((c) => {
-                    const name = c.companyName || c.fullName || "Company";
-                    const logo = c.logoUrl || c.profileImage;
-                    const openRoles =
-                      jobsByCompany[c.uid] ||
-                      jobs.filter(
-                        (j) =>
-                          j.companyId === c.uid ||
-                          j.companyName?.toLowerCase() === name.toLowerCase()
-                      ).length;
-                    return (
-                      <Link
-                        key={c.uid}
-                        href={`/jobs?q=${encodeURIComponent(name)}`}
-                        className="nk-company-card"
-                      >
-                        <span className="nk-company-logo">
-                          {logo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={logo} alt="" />
-                          ) : (
-                            <span>{name.slice(0, 1).toUpperCase()}</span>
-                          )}
-                        </span>
-                        <strong>{name}</strong>
-                        <span className="nk-company-rating">
-                          <i className="bi bi-star-fill" />
-                          4.{(c.uid.charCodeAt(0) % 5) + 1}
-                          <em>
-                            {openRoles > 0
-                              ? `${openRoles} open roles`
-                              : "Actively hiring"}
-                          </em>
-                        </span>
-                        <p className="nk-company-tagline">
-                          {c.industry ||
-                            c.companyLocation ||
-                            c.address ||
-                            "Grow your career with us"}
-                        </p>
-                        <span className="nk-company-tags">
-                          <span>{c.industry ? "Verified" : "New"}</span>
-                          <span>Hiring</span>
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-                </div>
+                <>
+                  <div className="nk-rail-wrap">
+                    <div className="nk-featured-rail">
+                      {companies.slice(0, 8).map((c) => {
+                        const name = companyName(c);
+                        const logo = companyLogo(c);
+                        const openRoles =
+                          jobsByCompany[c.uid] ||
+                          jobs.filter(
+                            (j) =>
+                              j.companyId === c.uid ||
+                              j.companyName?.toLowerCase() === name.toLowerCase()
+                          ).length;
+                        return (
+                          <Link
+                            key={c.uid}
+                            href={`/jobs?q=${encodeURIComponent(name)}`}
+                            className="nk-featured-card"
+                          >
+                            <span className="nk-featured-logo">
+                              {logo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={logo} alt="" />
+                              ) : (
+                                <span>{name.slice(0, 1).toUpperCase()}</span>
+                              )}
+                            </span>
+                            <div className="nk-featured-info">
+                              <strong>{name}</strong>
+                              <span className="nk-featured-rating">
+                                <i className="bi bi-star-fill" />
+                                4.{(c.uid.charCodeAt(0) % 5) + 1}
+                                <em>
+                                  {openRoles > 0
+                                    ? `${openRoles} open roles`
+                                    : "Actively hiring"}
+                                </em>
+                              </span>
+                            </div>
+                            <p className="nk-featured-tagline">
+                              {c.industry ||
+                                c.companyLocation ||
+                                "Explore open roles and apply in minutes"}
+                            </p>
+                            <span className="nk-featured-cta">View jobs</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="nk-section-cta">
+                    <Link href="/jobs" className="nk-btn nk-btn-outline">
+                      View all companies
+                    </Link>
+                  </div>
+                </>
               )}
             </div>
           </section>
 
-          <section className="nk-section nk-section-soft">
+          <section className="nk-section">
             <div className="nk-container">
               <div className="nk-roles-panel">
-                <div className="nk-section-head">
-                  <div>
-                    <p className="nk-eyebrow">By role</p>
-                    <h2>Discover jobs across popular roles</h2>
-                    <p>Select a role and we’ll show you relevant jobs for it</p>
-                  </div>
-                </div>
+                <h2 className="nk-section-title">Discover jobs across popular roles</h2>
+                <p className="nk-section-sub">
+                  Select a role and we&apos;ll show you relevant jobs for it
+                </p>
                 <div className="nk-role-grid">
                   {roleCounts.map(({ role, count }) => (
                     <button
@@ -475,10 +464,7 @@ export default function Home() {
           <section className="nk-section" id="open-roles">
             <div className="nk-container">
               <div className="nk-section-head">
-                <div>
-                  <p className="nk-eyebrow">Fresh openings</p>
-                  <h2>Latest jobs</h2>
-                </div>
+                <h2 className="nk-section-title mb-0">Latest jobs</h2>
                 <Link href="/jobs" className="nk-link">
                   View all <i className="bi bi-chevron-right" />
                 </Link>
@@ -490,7 +476,7 @@ export default function Home() {
                 <div className="nk-empty">
                   <h4>No live jobs yet</h4>
                   <p>Post a vacancy from a company account to get started.</p>
-                  <Link href="/register?type=company" className="nk-btn nk-btn-primary mt-3">
+                  <Link href="/register?type=company" className="nk-btn nk-btn-register mt-3">
                     Post a job
                   </Link>
                 </div>
@@ -498,14 +484,9 @@ export default function Home() {
 
               <div className="nk-job-list">
                 {!loading &&
-                  jobs.slice(0, 8).map((job) => {
-                    const suffix = salarySuffix(job.salary);
-                    return (
-                      <Link
-                        key={job.id}
-                        href={`/jobs/${job.id}`}
-                        className="nk-job-card"
-                      >
+                  jobs.slice(0, 6).map((job, index) => (
+                    <React.Fragment key={job.id}>
+                      <Link href={`/jobs/${job.id}`} className="nk-job-card">
                         <span className="nk-job-logo">
                           {job.logoUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -520,67 +501,65 @@ export default function Home() {
                           <strong>{job.title}</strong>
                           <em>{job.companyName || "Company"}</em>
                           <div className="nk-job-meta">
-                            {job.location && (
-                              <span>
-                                <i className="bi bi-geo-alt" /> {job.location}
-                              </span>
-                            )}
-                            {job.type && (
-                              <span>
-                                <i className="bi bi-briefcase" /> {job.type}
-                              </span>
-                            )}
                             {job.experience && (
                               <span>
-                                <i className="bi bi-bar-chart" /> {job.experience}
+                                <i className="bi bi-briefcase" /> {job.experience}
                               </span>
                             )}
                             {job.salary && (
                               <span>
                                 <i className="bi bi-cash" /> {job.salary}
-                                {suffix || ""}
+                                {salarySuffix(job.salary)
+                                  ? ` / ${salarySuffix(job.salary)!.replace(/^\//, "")}`
+                                  : ""}
+                              </span>
+                            )}
+                            {job.location && (
+                              <span>
+                                <i className="bi bi-geo-alt" /> {job.location}
                               </span>
                             )}
                           </div>
                           {(job.skills || []).length > 0 && (
                             <div className="nk-job-skills">
-                              {(job.skills || []).slice(0, 3).map((skill) => (
+                              {(job.skills || []).slice(0, 4).map((skill) => (
                                 <span key={skill}>{skill}</span>
                               ))}
                             </div>
                           )}
                         </div>
-                        <span className="nk-job-side">
-                          <span className="nk-job-cta">Apply</span>
-                          <i className="bi bi-chevron-right nk-job-chevron" />
+                        <span className="nk-job-save">
+                          <i className="bi bi-bookmark" aria-hidden />
                         </span>
                       </Link>
-                    );
-                  })}
-              </div>
-            </div>
-          </section>
-
-          <section className="nk-section">
-            <div className="nk-container">
-              <div className="nk-banner">
-                <div className="nk-banner-deco" aria-hidden />
-                <div className="nk-banner-copy">
-                  <p className="nk-banner-kicker">For employers</p>
-                  <h2>Hire talent with Signet</h2>
-                  <p>
-                    Post roles, review applicants, and message candidates — synced
-                    with the Signet Jobs app.
-                  </p>
-                </div>
-                <div className="nk-banner-actions">
-                  <Link href="/register?type=company" className="nk-btn nk-btn-on-dark">
-                    Start hiring
-                  </Link>
-                  <Link href="/login" className="nk-btn nk-btn-ghost-light">
-                    Employer login
-                  </Link>
-                </div>
+                      {index === 1 && (
+                        <div className="nk-register-strip">
+                          <div className="nk-register-strip-copy">
+                            <strong>
+                              Make the most of Signet — register for free!
+                            </strong>
+                            <ul>
+                              <li>
+                                <i className="bi bi-check-circle-fill" /> Build
+                                your profile
+                              </li>
+                              <li>
+                                <i className="bi bi-check-circle-fill" /> Apply
+                                to jobs
+                              </li>
+                              <li>
+                                <i className="bi bi-check-circle-fill" /> Get
+                                noticed by recruiters
+                              </li>
+                            </ul>
+                          </div>
+                          <Link href="/register" className="nk-btn nk-btn-register">
+                            Register for free
+                          </Link>
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
               </div>
             </div>
           </section>
@@ -588,7 +567,7 @@ export default function Home() {
 
         <footer className="nk-footer">
           <div className="nk-container nk-footer-grid">
-            <div>
+            <div className="nk-footer-brand-col">
               <div className="nk-brand nk-footer-brand">
                 <span className="nk-brand-mark">
                   <Image
@@ -601,29 +580,50 @@ export default function Home() {
                 </span>
                 <strong>SIGNET</strong>
               </div>
-              <p>Employment Hub by Hands On Recruitment</p>
+              <p className="nk-footer-connect">Connect with us</p>
+              <div className="nk-footer-social">
+                <a href="#" aria-label="Facebook">
+                  <i className="bi bi-facebook" />
+                </a>
+                <a href="#" aria-label="Instagram">
+                  <i className="bi bi-instagram" />
+                </a>
+                <a href="#" aria-label="X">
+                  <i className="bi bi-twitter-x" />
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                  <i className="bi bi-linkedin" />
+                </a>
+              </div>
             </div>
             <div>
-              <h4>Job seekers</h4>
+              <h4>About us</h4>
+              <Link href="/">Careers</Link>
+              <Link href="/register?type=company">Employer home</Link>
               <Link href="/jobs">Browse jobs</Link>
-              <Link href="/register">Create account</Link>
-              <Link href="/login">Login</Link>
             </div>
             <div>
-              <h4>Employers</h4>
-              <Link href="/register?type=company">Post a job</Link>
-              <Link href="/login">Employer login</Link>
+              <h4>Help center</h4>
               <Link href="/support">Support</Link>
+              <Link href="/support">Report issue</Link>
             </div>
             <div>
               <h4>Legal</h4>
-              <Link href="/privacy">Privacy</Link>
-              <Link href="/terms">Terms</Link>
+              <Link href="/privacy">Privacy policy</Link>
+              <Link href="/terms">Terms &amp; conditions</Link>
+            </div>
+            <div className="nk-footer-app">
+              <strong>Apply on the go</strong>
+              <p>Get real-time job updates on our App</p>
+              <div className="nk-footer-stores">
+                <span className="nk-store-badge">Google Play</span>
+                <span className="nk-store-badge">App Store</span>
+              </div>
             </div>
           </div>
           <div className="nk-container nk-footer-bottom">
             <span>© {new Date().getFullYear()} Signet Employment Hub</span>
-            <span>Powered by Hands On Recruitment</span>
+            <span>All rights reserved</span>
           </div>
         </footer>
       </div>

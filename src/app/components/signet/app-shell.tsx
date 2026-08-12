@@ -13,7 +13,7 @@ type NavItem = { href: string; label: string; icon: string; badge?: number };
 
 const candidateNavBase: Omit<NavItem, "badge">[] = [
   { href: "/candidate", label: "Home", icon: "bi-house" },
-  { href: "/candidate/jobs", label: "Jobs", icon: "bi-briefcase" },
+  { href: "/jobs", label: "Jobs", icon: "bi-briefcase" },
   { href: "/candidate/chat", label: "Chat", icon: "bi-chat-dots" },
   { href: "/candidate/my-jobs", label: "My Jobs", icon: "bi-bookmark" },
   { href: "/candidate/profile", label: "Profile", icon: "bi-person" },

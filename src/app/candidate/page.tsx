@@ -74,7 +74,7 @@ function CandidateHomeInner() {
   return (
     <AppShell role="candidate" title={`Hi, ${profile?.fullName?.split(" ")[0] || "there"}`}>
       <div className="signet-stats">
-        <Link href="/candidate/jobs" className="stat text-decoration-none">
+        <Link href="/jobs" className="stat text-decoration-none">
           <div className="n"><i className="bi bi-briefcase" /></div>
           <div className="l">Browse jobs</div>
         </Link>
@@ -96,7 +96,7 @@ function CandidateHomeInner() {
         <h3 style={{ color: "#12141A", fontWeight: 700, fontSize: 20, margin: 0 }}>
           Latest openings
         </h3>
-        <Link href="/candidate/jobs" style={{ color: "#004CF0", fontWeight: 700 }}>
+        <Link href="/jobs" style={{ color: "#004CF0", fontWeight: 700 }}>
           See all
         </Link>
       </div>

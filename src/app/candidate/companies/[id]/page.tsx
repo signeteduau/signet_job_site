@@ -147,9 +147,9 @@ function Inner() {
         </div>
       )}
       {jobs.map((job) => (
-        <JobCard key={job.id} job={job} href={`/candidate/jobs/${job.id}`} />
+        <JobCard key={job.id} job={job} href={`/jobs/${job.id}`} />
       ))}
-      <Link href="/candidate/jobs" className="signet-btn secondary mt-2">
+      <Link href="/jobs" className="signet-btn secondary mt-2">
         Browse all jobs
       </Link>
     </AppShell>

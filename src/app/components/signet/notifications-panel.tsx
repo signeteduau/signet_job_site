@@ -29,7 +29,7 @@ function resolveDeepLink(
     return role === "company" ? "/company/chat" : "/candidate/chat";
   }
   if (jobId && role === "candidate") {
-    return `/candidate/jobs/${jobId}`;
+    return `/jobs/${jobId}`;
   }
   if (jobId && role === "company") {
     if (applicantId) {
