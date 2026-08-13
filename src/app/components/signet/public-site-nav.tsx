@@ -24,48 +24,47 @@ export default function PublicSiteNav({
   const loggedIn = !loading && user && profile?.profileCompleted;
 
   return (
-    <header className={`signet-site-nav ${variant === "browse" ? "nk-nav-browse" : ""}`}>
-      <div className="container nk-nav-inner">
-        <Link href="/" className="signet-brand-link">
-          <span className="signet-brand-mark">
-            <Image
-              src={signetLogo}
-              alt={SIGNET_LOGO_ALT}
-              width={44}
-              height={44}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </span>
-          <span className="d-none d-sm-flex flex-column">
-            <span className="signet-brand">SIGNET</span>
-            <span className="signet-sub">Employment Hub</span>
-          </span>
-        </Link>
-
-        {variant === "browse" && (
-          <nav className="nk-nav-links d-none d-lg-flex" aria-label="Main">
+    <header className={`nk-nav ${variant === "browse" ? "nk-nav-browse" : ""}`}>
+      <div className="nk-container nk-nav-inner">
+        <div className="nk-nav-left">
+          <Link href="/" className="nk-brand">
+            <span className="nk-brand-mark">
+              <Image
+                src={signetLogo}
+                alt={SIGNET_LOGO_ALT}
+                width={36}
+                height={36}
+                sizes="36px"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                priority
+              />
+            </span>
+          </Link>
+          <nav className="nk-nav-links" aria-label="Primary">
+            <Link href="/" className={pathname === "/" ? "active" : ""}>
+              <Link href="/"><i className="bi bi-house" /> Home</Link>
+            </Link>
             <Link href="/jobs" className={pathname.startsWith("/jobs") ? "active" : ""}>
-              Jobs
+              <i className="bi bi-briefcase" /> Jobs
             </Link>
-            <Link
-              href="/companies"
-              className={pathname.startsWith("/companies") ? "active" : ""}
-            >
-              Companies
+            <Link href="/companies" className={pathname.startsWith("/companies") ? "active" : ""}>
+              <i className="bi bi-building" /> Companies
             </Link>
-            {!loggedIn && <Link href="/">Services</Link>}
+            <Link href="/career-tips" className={pathname.startsWith("/career-tips") ? "active" : ""}>
+              <i className="bi bi-lightbulb" /> Career Tips
+            </Link>
           </nav>
-        )}
+        </div>
 
-        <div className="nk-nav-actions">
+        <div className="nk-nav-right">
           {rightExtra}
           {loggedIn ? (
             <>
-              <Link href={homePath} className="signet-ghost-btn">
+              <Link href={homePath} className="nk-btn nk-btn-ghost">
                 Dashboard
               </Link>
-              <Link href="/jobs" className="signet-btn signet-btn-sm">
-                Browse jobs
+              <Link href="/jobs" className="nk-btn nk-btn-register">
+                Browse jobs <i className="bi bi-arrow-right" />
               </Link>
             </>
           ) : (
@@ -76,15 +75,15 @@ export default function PublicSiteNav({
                     ? `/login?returnUrl=${encodeURIComponent(`/jobs?q=${searchTerm}`)}`
                     : "/login"
                 }
-                className="signet-ghost-btn"
+                className="nk-btn nk-btn-ghost"
               >
                 Login
               </Link>
               <Link
                 href={buildRegisterUrl(searchTerm ? `/jobs?q=${searchTerm}` : undefined)}
-                className="signet-btn signet-btn-sm nk-nav-register"
+                className="nk-btn nk-btn-register"
               >
-                Register
+                Register <i className="bi bi-arrow-right" />
               </Link>
             </>
           )}

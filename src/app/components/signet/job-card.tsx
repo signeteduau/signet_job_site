@@ -261,7 +261,7 @@ export default function JobCard({
                   aria-expanded={expanded}
                   onClick={toggleExpand}
                 >
-                  {expanded ? "Hide details" : "Expand details"}
+                  {expanded ? "Hide details" : "Details"}
                   <i
                     className={`bi bi-chevron-${expanded ? "up" : "down"}`}
                     aria-hidden
@@ -271,7 +271,7 @@ export default function JobCard({
                 <span />
               )}
               <button type="button" className="signet-job-cta" onClick={open}>
-                View job
+                View Job
                 <i className="bi bi-arrow-right" aria-hidden />
               </button>
             </div>

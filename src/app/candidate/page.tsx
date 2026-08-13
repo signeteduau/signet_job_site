@@ -170,7 +170,7 @@ function CandidateHomeInner() {
       <section className="signet-dash-section">
         <div className="signet-section-head">
           <div>
-            <h3>Latest openings</h3>
+            <h3>Latest Openings</h3>
             <p>Fresh roles from employers on Signet</p>
           </div>
           <Link href="/jobs" className="signet-section-link">
@@ -199,7 +199,7 @@ function CandidateHomeInner() {
         <section className="signet-dash-section">
           <div className="signet-section-head">
             <div>
-              <h3>Companies hiring</h3>
+              <h3>Companies Hiring</h3>
               <p>Discover employers actively recruiting</p>
             </div>
             <Link href="/companies" className="signet-section-link">
@@ -229,10 +229,10 @@ function CandidateHomeInner() {
                   <span className="nk-company-rating">
                     <i className="bi bi-star-fill" />
                     4.{(c.uid.charCodeAt(0) % 5) + 1}
-                    <em>
+                    <em>(
                       {openRoles > 0
                         ? `${openRoles} open roles`
-                        : "View open jobs"}
+                        : "View open jobs"})
                     </em>
                   </span>
                   <p className="nk-company-tagline">
@@ -241,7 +241,7 @@ function CandidateHomeInner() {
                       "Explore roles from this employer"}
                   </p>
                   <span className="nk-company-cta">
-                    View jobs <i className="bi bi-chevron-right" />
+                    View Jobs <i className="bi bi-chevron-right" />
                   </span>
                 </Link>
               );

@@ -25,7 +25,7 @@ const Header = () => {
               <ul className="d-flex align-items-center style-none">
                 <li className="d-none d-md-block">
                   <Link href={user ? "/company/jobs/new" : "/register"} className="job-post-btn tran3s">
-                    Post Job
+                    Post a Job
                   </Link>
                 </li>
                 {user ? (
@@ -92,7 +92,7 @@ const Header = () => {
                   {/* menus end */}
                   <li className="d-md-none">
                     <Link href="/register" className="job-post-btn tran3s">
-                      Post Job
+                      Post a Job
                     </Link>
                   </li>
                   <li className="d-md-none">

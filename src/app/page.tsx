@@ -179,24 +179,23 @@ export default function Home() {
                     priority
                   />
                 </span>
-                <span className="nk-brand-text">
-                  <strong>SIGNET</strong>
-                </span>
               </Link>
               <nav className="nk-nav-links" aria-label="Primary">
-                <Link href="/jobs">Jobs</Link>
-                <Link href="/companies">Companies</Link>
+                <Link href="/"><i className="bi bi-house" /> Home</Link>
+                <Link href="/jobs"><i className="bi bi-briefcase" /> Jobs</Link>
+                <Link href="/companies"><i className="bi bi-building" /> Companies</Link>
+                <Link href="/career-tips"><i className="bi bi-lightbulb" /> Career Tips</Link>
               </nav>
             </div>
             <div className="nk-nav-right">
-              <Link href="/register?type=company" className="nk-nav-employer">
+              {/* <Link href="/register?type=company" className="nk-nav-employer">
                 For employers <i className="bi bi-chevron-down" />
-              </Link>
+              </Link> */}
               <Link href="/login" className="nk-btn nk-btn-ghost">
                 Login
               </Link>
               <Link href="/register" className="nk-btn nk-btn-register">
-                Register
+                Register <i className="bi bi-arrow-right" />
               </Link>
             </div>
           </div>
@@ -211,14 +210,13 @@ export default function Home() {
               <span className="nk-hero-grid" />
             </div>
             <div className="nk-container nk-hero-inner">
-              <h1>Find your dream job now</h1>
+              <h1>Discover Your Next Great Opportunity</h1>
               <p className="nk-hero-sub">
                 {loading ? (
                   "Loading openings for you to explore"
                 ) : (
                   <>
-                    <strong>{formatCount(Math.max(jobs.length, 50))}+</strong> jobs
-                    for you to explore
+                    Browse <strong>{formatCount(Math.max(jobs.length, 50))}+</strong> open positions
                   </>
                 )}
               </p>
@@ -318,8 +316,8 @@ export default function Home() {
 
           <section className="nk-section">
             <div className="nk-container">
-              <h2 className="nk-section-title">Top companies hiring now</h2>
-              <NkScrollRail railClassName="nk-top-hire-rail" ariaLabel="Top companies hiring now">
+              <h2 className="nk-section-title">Explore Top Employers</h2>
+              <NkScrollRail railClassName="nk-top-hire-rail" ariaLabel="Explore Top Employers">
                 {topHiringBuckets.map((bucket) => (
                   <button
                     key={bucket.label}
@@ -356,10 +354,10 @@ export default function Home() {
 
           <section className="nk-section nk-section-soft">
             <div className="nk-container">
-              <h2 className="nk-section-title">Featured companies actively hiring</h2>
+              <h2 className="nk-section-title">Employers Ready to Hire</h2>
 
               {loading && (
-                <NkScrollRail railClassName="nk-featured-rail" ariaLabel="Featured companies">
+                <NkScrollRail railClassName="nk-featured-rail" ariaLabel="Employers ready to hire">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="nk-featured-card is-skeleton" aria-hidden>
                       <span className="nk-shimmer nk-shimmer-logo lg" />
@@ -408,11 +406,11 @@ export default function Home() {
                               <span className="nk-featured-rating">
                                 <i className="bi bi-star-fill" />
                                 4.{(c.uid.charCodeAt(0) % 5) + 1}
-                                <em>
+                                <em>(
                                   {openRoles > 0
                                     ? `${openRoles} open roles`
                                     : "Actively hiring"}
-                                </em>
+                                )</em>
                               </span>
                             </div>
                             <p className="nk-featured-tagline">
@@ -420,13 +418,13 @@ export default function Home() {
                                 c.companyLocation ||
                                 "Explore open roles and apply in minutes"}
                             </p>
-                            <span className="nk-featured-cta">View jobs</span>
+                            <span className="nk-featured-cta">View Jobs</span>
                           </Link>
                         );
                       })}
                   </NkScrollRail>
                   <div className="nk-section-cta">
-                    <Link href="/companies" className="nk-btn nk-btn-outline">
+                    <Link href="/companies" className="nk-search-submit">
                       View all companies
                     </Link>
                   </div>
@@ -438,9 +436,9 @@ export default function Home() {
           <section className="nk-section">
             <div className="nk-container">
               <div className="nk-roles-panel">
-                <h2 className="nk-section-title">Discover jobs across popular roles</h2>
+                <h2 className="nk-section-title">Find Opportunities Across Top Fields</h2>
                 <p className="nk-section-sub">
-                  Select a role and we&apos;ll show you relevant jobs for it
+                  Choose your profession to see open positions
                 </p>
                 <div className="nk-role-grid">
                   {roleCounts.map(({ role, count }) => (
@@ -477,7 +475,7 @@ export default function Home() {
                   <h2>Discover opportunities built for you</h2>
                   <p>
                     Browse roles from leading companies, build your profile in minutes,
-                    and apply with one click — all on Signet.
+                    and apply with one click — all on Signet Employment Hub.
                   </p>
                 </div>
                 <div className="nk-banner-actions">
@@ -506,9 +504,8 @@ export default function Home() {
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 </span>
-                <strong>SIGNET</strong>
               </div>
-              <p className="nk-footer-connect">Connect with us</p>
+              <p className="nk-footer-connect">We're Social!</p>
               <div className="nk-footer-social">
                 <a href="#" aria-label="Facebook">
                   <i className="bi bi-facebook" />
@@ -541,17 +538,17 @@ export default function Home() {
               <Link href="/terms">Terms &amp; conditions</Link>
             </div>
             <div className="nk-footer-app">
-              <strong>Apply on the go</strong>
+              <strong>Download our App</strong>
               <p>Get real-time job updates on our App</p>
               <div className="nk-footer-stores">
-                <span className="nk-store-badge">Google Play</span>
-                <span className="nk-store-badge">App Store</span>
+                <span className="nk-store-badge nk-search-submit">Google Play</span>
+                <span className="nk-store-badge nk-search-submit">App Store</span>
               </div>
             </div>
           </div>
           <div className="nk-container nk-footer-bottom">
-            <span>© {new Date().getFullYear()} Signet Employment Hub</span>
-            <span>All rights reserved</span>
+            <span>© {new Date().getFullYear()} Signet Employment Hub. All Rights Reserved.</span>
+            <span>All trademarks are the property of their respective owners.</span>
           </div>
         </footer>
       </div>

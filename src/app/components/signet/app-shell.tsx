@@ -153,7 +153,6 @@ export default function AppShell({
       <div className="signet-app-layout signet-body">
         <aside className="signet-sidebar">
           <nav>
-            <div className="signet-nav-label">Navigate</div>
             {nav.map((item) => {
               const active =
                 pathname === item.href ||
@@ -177,7 +176,7 @@ export default function AppShell({
             })}
             {role === "company" && (
               <Link href="/company/jobs/new" className="signet-cta-nav">
-                <i className="bi bi-plus-lg" /> Post Job
+                <i className="bi bi-plus-lg" /> Post a Job
               </Link>
             )}
           </nav>
@@ -187,9 +186,6 @@ export default function AppShell({
           {title && (
             <header className="signet-page-head">
               <div>
-                <p className="signet-eyebrow">
-                  {role === "company" ? "Employer workspace" : "Candidate hub"}
-                </p>
                 <h1 className="signet-page-title">{title}</h1>
                 {subtitle && <p className="signet-page-sub">{subtitle}</p>}
               </div>

@@ -188,7 +188,7 @@ function PublicJobsInner() {
                             companies.
                           </p>
                         </div>
-                        <Link href="/register" className="signet-btn">
+                        <Link href="/register" className="nk-search-submit">
                           Register for free
                         </Link>
                       </div>
@@ -207,14 +207,14 @@ function PublicJobsInner() {
                 Complete your profile to apply faster and stand out to
                 recruiters.
               </p>
-              <Link href="/register" className="signet-btn secondary w-100">
+              <Link href="/register" className="nk-search-submit">
                 Get started
               </Link>
             </div>
             <div className="nk-browse-promo-card muted">
               <h4>Are you hiring?</h4>
-              <p>Post jobs and manage applicants from your company dashboard.</p>
-              <Link href="/register?type=company" className="signet-ghost-btn w-100">
+              <p>Post a Jobs and manage applicants from your company dashboard.</p>
+              <Link href="/register?type=company" className="nk-search-submit">
                 Post a job
               </Link>
             </div>

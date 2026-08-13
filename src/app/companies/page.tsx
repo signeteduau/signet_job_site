@@ -182,7 +182,7 @@ function PublicCompaniesInner() {
                 <h1>
                   {filters.term
                     ? `Companies matching "${filters.term}"`
-                    : "Browse companies"}
+                    : "Browse Companies"}
                 </h1>
                 <p>
                   {loading
@@ -249,10 +249,10 @@ function PublicCompaniesInner() {
                       <span className="nk-company-rating">
                         <i className="bi bi-star-fill" />
                         4.{(c.uid.charCodeAt(0) % 5) + 1}
-                        <em>
+                        <em>(
                           {openRoles > 0
                             ? `${openRoles} open roles`
-                            : "View open jobs"}
+                            : "View open jobs"})
                         </em>
                       </span>
                       <p className="nk-company-tagline">
@@ -261,7 +261,7 @@ function PublicCompaniesInner() {
                           "Explore roles from this employer"}
                       </p>
                       <span className="nk-company-cta">
-                        View jobs <i className="bi bi-chevron-right" />
+                        View Jobs <i className="bi bi-chevron-right" />
                       </span>
                     </Link>
                   );

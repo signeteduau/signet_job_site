@@ -112,7 +112,7 @@ $signet-page-pad: 16px;
   flex-shrink: 0;
   background: transparent;
   border: none;
-  box-shadow: 0 6px 16px rgba(0, 76, 240, 0.18);
+  
   overflow: hidden;
   padding: 0;
   line-height: 0;
@@ -180,7 +180,7 @@ $signet-page-pad: 16px;
   background: #fff;
   border: 1px solid $s-border;
   color: $s-ink;
-  border-radius: 14px;
+  border-radius: 50px;
   min-height: 40px;
   padding: 0 14px;
   font-size: 13px;
@@ -283,11 +283,11 @@ $signet-page-pad: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 8px 14px;
   border-radius: 14px;
   color: $s-muted !important;
   text-decoration: none !important;
-  font-weight: 650;
+  font-weight: 600;
   transition: 0.2s $s-ease;
   i { font-size: 18px; width: 22px; text-align: center; }
   &:hover {
@@ -316,13 +316,12 @@ $signet-page-pad: 16px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px;
-  border-radius: 16px;
+  padding: 8px 14px;
+  border-radius: 14px;
   background: $s-grad;
   color: #fff !important;
-  font-weight: 750;
+  font-weight: 600;
   text-decoration: none !important;
-  box-shadow: 0 12px 28px rgba(0, 76, 240, 0.28);
   transition: transform 0.2s $s-ease;
   &:hover { transform: translateY(-1px); }
 }
@@ -349,7 +348,7 @@ $signet-page-pad: 16px;
 }
 
 .signet-page-title {
-  font-size: clamp(26px, 3vw, 34px) !important;
+  font-size: clamp(26px, 1vw, 34px) !important;
   font-weight: 850 !important;
   letter-spacing: -0.04em;
   line-height: 1.1;
@@ -360,7 +359,7 @@ $signet-page-pad: 16px;
 .signet-page-sub {
   margin: 8px 0 0;
   color: $s-muted;
-  font-size: 15px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -495,16 +494,16 @@ $signet-page-pad: 16px;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .signet-job-tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 3px 8px;
+  border-radius: 50px;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   &.grant {
@@ -512,24 +511,27 @@ $signet-page-pad: 16px;
     color: #be123c;
   }
   &.role {
-    background: #eef2ff;
-    color: #4338ca;
+    background: #0042DB;
+    color: #fff;
   }
 }
 
 .signet-job-new {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #ef4444;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #ef4444;
+    border-radius: 50px;
+    padding: 2px 8px;
 }
 
 .signet-job-title {
   margin: 0 0 4px;
   color: $s-ink !important;
   font-size: 16px;
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.3;
 }
@@ -548,9 +550,11 @@ $signet-page-pad: 16px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  font-weight: 500;
   min-width: 0;
   padding-right: 14px;
-  margin-right: 14px;
+  margin-right: 4px;
+  font-size: 12px;
   border-right: 1px solid #e2e8f0;
   &:last-child {
     padding-right: 0;
@@ -589,7 +593,7 @@ $signet-page-pad: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 12px;
   @media (max-width: 640px) {
     flex-direction: row;
     align-items: center;
@@ -605,7 +609,7 @@ $signet-page-pad: 16px;
   strong {
     display: inline;
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 600;
     color: $s-ink;
     letter-spacing: -0.02em;
     &.muted {
@@ -616,7 +620,6 @@ $signet-page-pad: 16px;
   }
   .signet-job-salary-period {
     font-size: 13px;
-    font-weight: 600;
     color: #64748b;
   }
 }
@@ -628,10 +631,10 @@ $signet-page-pad: 16px;
 }
 
 .signet-job-icon-btn {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   border: 1px solid #e8ebf3;
-  border-radius: 8px;
+  border-radius: 50px;
   background: #fff;
   color: #64748b;
   display: inline-flex;
@@ -706,9 +709,9 @@ $signet-page-pad: 16px;
   align-items: center;
   gap: 6px;
   margin-left: auto;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border: 1px solid #004cF0;
+  border-radius: 50px;
   background: rgba(0, 76, 240, 0.08);
   color: $s-blue !important;
   font-size: 13px;
@@ -838,7 +841,7 @@ $signet-page-pad: 16px;
   padding: 5px 12px;
   border-radius: 9px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   box-shadow: none;
   white-space: nowrap;
   &:hover { transform: none; }
@@ -881,7 +884,7 @@ $signet-page-pad: 16px;
   flex-shrink: 0;
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: 50px;
   overflow: hidden;
   box-shadow: 0 0 0 1px $s-border, 0 6px 16px rgba(11, 18, 32, 0.06);
 }
@@ -915,7 +918,7 @@ $signet-page-pad: 16px;
   &--lg {
     width: 56px;
     height: 56px;
-    border-radius: 14px;
+    border-radius: 50px;
     font-size: 18px;
   }
   &--xl {
@@ -1193,22 +1196,21 @@ $signet-page-pad: 16px;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 48px;
-  padding: 10px 22px;
+  min-height: 40px;
+  padding: 8px 22px;
   border: none;
-  border-radius: 16px;
+  font-size: 14px;
+  border-radius: 50px;
   background: $s-grad;
   color: #fff !important;
-  font-weight: 750;
+  font-weight: 500;
   text-decoration: none !important;
-  box-shadow: 0 12px 28px rgba(0, 76, 240, 0.24);
-  transition: transform 0.2s $s-ease, box-shadow 0.2s $s-ease;
-  &:hover { transform: translateY(-1px); box-shadow: 0 16px 32px rgba(0, 76, 240, 0.3); }
+  transition: transform 0.2s $s-ease;
+  &:hover { transform: translateY(-1px); }
   &:disabled { opacity: 0.55; transform: none; }
   &.secondary {
     background: #fff;
     border: 1px solid $s-border;
-    box-shadow: 0 4px 12px rgba(11, 18, 32, 0.04);
     color: $s-ink !important;
     &:hover { border-color: rgba(0, 76, 240, 0.35); color: $s-blue !important; }
   }
@@ -1235,7 +1237,6 @@ $signet-page-pad: 16px;
   input, select, textarea {
     width: 100%;
     background: $s-surface-2 !important;
-    border: 1px solid transparent !important;
     color: $s-ink !important;
     border-radius: 14px !important;
     padding: 13px 16px !important;
@@ -1315,7 +1316,7 @@ $signet-page-pad: 16px;
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border-radius: 14px;
+  border-radius: 50px;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid $s-border;
   color: $s-ink !important;
@@ -1453,7 +1454,7 @@ $signet-page-pad: 16px;
 .signet-auth-lead {
   margin: 0;
   color: $s-muted;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -1594,9 +1595,8 @@ $signet-page-pad: 16px;
   .signet-btn {
     min-height: 42px;
     padding: 8px 18px;
-    border-radius: 10px;
+    border-radius: 50px;
     font-size: 14px;
-    box-shadow: 0 8px 18px rgba(0, 76, 240, 0.18);
   }
 }
 
@@ -1643,7 +1643,6 @@ $signet-page-pad: 16px;
   background: #fff;
   border: 1px solid $s-border;
   color: $s-ink !important;
-  box-shadow: 0 6px 16px rgba(11, 18, 32, 0.05);
   &:hover {
     border-color: rgba(0, 76, 240, 0.35);
     color: $s-blue !important;
@@ -1651,9 +1650,9 @@ $signet-page-pad: 16px;
 }
 
 .signet-btn-sm {
-  min-height: 40px;
+  min-height: 38px;
   padding: 8px 16px;
-  border-radius: 14px;
+  border-radius: 50px;
   font-size: 13px;
 }
 
@@ -1662,7 +1661,7 @@ $signet-page-pad: 16px;
   margin: 14px 0 0;
   color: $s-muted;
   font-size: 13px;
-  a { font-weight: 750; }
+  a { font-weight: 600; }
 }
 
 .signet-auth-footer { margin-top: 12px; }
@@ -1867,7 +1866,7 @@ $signet-page-pad: 16px;
       align-items: center;
       gap: 10px;
       padding: 12px 14px;
-      border-radius: 14px;
+      border-radius: 50px;
       background: $s-surface-2;
       color: $s-ink;
       font-weight: 700;
@@ -1928,6 +1927,7 @@ $signet-page-pad: 16px;
   border: 1px dashed $s-border;
   border-radius: 24px;
   h4 { color: $s-ink !important; font-weight: 800 !important; letter-spacing: -0.03em; }
+  p { font-size: 14px; }
 }
 
 .signet-loading {
@@ -1976,13 +1976,13 @@ $signet-page-pad: 16px;
 .sk-logo {
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: 50px;
   flex-shrink: 0;
 }
 .sk-icon {
   width: 42px;
   height: 42px;
-  border-radius: 14px;
+  border-radius: 50px;
   flex-shrink: 0;
 }
 .sk-line {
@@ -2021,7 +2021,7 @@ $signet-page-pad: 16px;
 
 .signet-upload-box {
   position: relative;
-  border-radius: 14px;
+  border-radius: 50px;
   overflow: hidden;
   background: $s-surface-2;
   border: 1px dashed $s-border;
@@ -2282,7 +2282,7 @@ $signet-page-pad: 16px;
     line-height: 1.2;
   }
   span {
-    font-size: 12px;
+    font-size: 10px;
     color: $s-muted;
     line-height: 1.25;
   }
@@ -2452,9 +2452,9 @@ $signet-page-pad: 16px;
 .signet-status {
   display: inline-block;
   padding: 5px 10px;
-  border-radius: 10px;
+  border-radius: 50px;
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 500;
   background: rgba(0, 76, 240, 0.1);
   color: $s-blue;
   &.rejected { background: rgba(220, 38, 38, 0.1); color: #DC2626; }
@@ -2530,7 +2530,7 @@ $signet-page-pad: 16px;
   .signet-logo-tile {
     width: 48px;
     height: 48px;
-    border-radius: 14px;
+    border-radius: 50px;
     box-shadow: 0 4px 12px rgba(11, 18, 32, 0.08);
   }
 }
@@ -2861,7 +2861,7 @@ $signet-page-pad: 16px;
   .icon {
     width: 42px;
     height: 42px;
-    border-radius: 14px;
+    border-radius: 50px;
     background: rgba(0, 76, 240, 0.1);
     color: $s-blue;
     display: flex;
@@ -2916,7 +2916,7 @@ body:has(.nk-site) {
 }
 
 .nk-container {
-  width: min(1140px, calc(100% - 40px));
+  width: min(1170px, calc(100% - 40px));
   margin: 0 auto;
 }
 
@@ -2933,6 +2933,7 @@ body:has(.nk-site) {
 
 .nk-nav-inner {
   min-height: 62px;
+  max-width: 1170px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2955,8 +2956,8 @@ body:has(.nk-site) {
 }
 
 .nk-brand-mark {
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(37, 80, 235, 0.18);
@@ -2982,6 +2983,8 @@ body:has(.nk-site) {
   display: none;
   gap: 22px;
   a {
+    gap: 6px;
+    display: inline-flex;
     position: relative;
     color: #3d4263 !important;
     text-decoration: none !important;
@@ -3022,8 +3025,8 @@ body:has(.nk-site) {
 
 .nk-btn {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 8px;
   border-radius: 999px;
   font-weight: 700;
@@ -3035,6 +3038,7 @@ body:has(.nk-site) {
   &:active { transform: translateY(1px); }
 }
 
+.nk-btn i { display: inline-flex; }
 .nk-btn-ghost {
   padding: 9px 18px;
   color: $nk-blue !important;
@@ -3050,12 +3054,7 @@ body:has(.nk-site) {
 .nk-btn-register {
   padding: 9px 20px;
   color: #fff !important;
-  background: linear-gradient(135deg, #1f47e0 0%, $nk-blue-2 100%);
-  box-shadow: 0 6px 16px rgba(37, 80, 235, 0.25);
-  &:hover {
-    color: #fff !important;
-    box-shadow: 0 8px 20px rgba(37, 80, 235, 0.32);
-  }
+  background: linear-gradient(135deg, #244EE4 0%, $nk-blue-2 100%);
 }
 
 .nk-btn-outline {
@@ -3108,7 +3107,7 @@ body:has(.nk-site) {
 }
 
 .nk-section-title {
-  margin: 0 0 18px;
+  margin: 0 0 22px;
   text-align: center;
   font-size: clamp(20px, 2.4vw, 24px);
   font-weight: 800;
@@ -3191,7 +3190,8 @@ body:has(.nk-site) {
 }
 
 .nk-rail-arrow-left {
-  left: 0;
+  left: -2%;
+  top: 43%;
   transform: translateY(-50%);
   &:hover:not(:disabled) {
     transform: translateY(calc(-50% - 1px));
@@ -3199,7 +3199,8 @@ body:has(.nk-site) {
 }
 
 .nk-rail-arrow-right {
-  right: 0;
+  right: -2%;
+  top: 43%;
   transform: translateY(-50%);
   &:hover:not(:disabled) {
     transform: translateY(calc(-50% - 1px));
@@ -3226,13 +3227,12 @@ body:has(.nk-site) {
   gap: 10px;
   padding: 10px 14px;
   border: 1px solid transparent;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #1f47e0 0%, $nk-blue-2 100%);
+  border-radius: 50px;
+  background: linear-gradient(135deg, #244EE4 0%, $nk-blue-2 100%);
   color: #fff;
   font-size: 13px;
   font-weight: 650;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(37, 80, 235, 0.22);
   transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   > i:first-child {
     width: 28px;
@@ -3247,6 +3247,7 @@ body:has(.nk-site) {
   }
   span {
     color: #fff;
+    font-weight: 500;
   }
   .nk-cat-chevron {
     color: rgba(255, 255, 255, 0.9);
@@ -3255,7 +3256,6 @@ body:has(.nk-site) {
   }
   &:hover {
     filter: brightness(1.05);
-    box-shadow: 0 8px 20px rgba(37, 80, 235, 0.28);
     transform: translateY(-1px);
   }
 }
@@ -3294,7 +3294,6 @@ body:has(.nk-site) {
 }
 
 .nk-top-hire-card p {
-  margin: 6px 0 12px;
   font-size: 12px;
   color: $nk-muted;
   font-weight: 600;
@@ -3302,7 +3301,7 @@ body:has(.nk-site) {
 
 .nk-top-hire-logos {
   display: flex;
-  gap: 8px;
+  gap: 14px;
 }
 
 .nk-top-hire-logo {
@@ -3330,12 +3329,11 @@ body:has(.nk-site) {
   scroll-snap-align: start;
   text-align: center;
   padding: 20px 16px 16px;
-  border: 1px solid $nk-border;
+  border: 1px solid #234DE3;
   border-radius: 16px;
   background: #fff;
   text-decoration: none !important;
   color: inherit !important;
-  box-shadow: 0 4px 14px rgba(18, 18, 36, 0.05);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   &:hover {
     box-shadow: 0 10px 24px rgba(37, 80, 235, 0.1);
@@ -3353,14 +3351,14 @@ body:has(.nk-site) {
   margin: 0 auto 14px;
   border-radius: 12px;
   border: 1px solid $nk-border;
-  background: #fff;
+  background: #244EE4;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   font-size: 24px;
   font-weight: 800;
-  color: $nk-blue;
+  color: #fff;
   img {
     width: 100%;
     height: 100%;
@@ -3427,7 +3425,7 @@ body:has(.nk-site) {
   gap: 20px;
   flex-wrap: wrap;
   padding: 20px 22px;
-  border-radius: 14px;
+  border-radius: 50px;
   background: linear-gradient(135deg, #fff7f5 0%, #ffede8 100%);
   border: 1px solid rgba(255, 117, 85, 0.18);
   strong {
@@ -3466,7 +3464,7 @@ body:has(.nk-site) {
 
 .nk-hero {
   position: relative;
-  padding: 64px 0 36px;
+  padding: 64px 0 20px;
   text-align: center;
   overflow: hidden;
 }
@@ -3532,7 +3530,7 @@ body:has(.nk-site) {
 }
 
 .nk-hero-sub {
-  margin: 0 0 36px;
+  margin: 0 0 20px;
   color: $nk-muted;
   font-size: 16px;
   font-weight: 500;
@@ -3546,6 +3544,7 @@ body:has(.nk-site) {
   max-width: 1000px;
   margin: 0 auto 18px;
 }
+
 
 .nk-search-shell {
   display: grid;
@@ -3653,25 +3652,17 @@ body:has(.nk-site) {
   padding: 0 22px;
   border: 0;
   border-radius: 12px;
-  background: linear-gradient(135deg, #1f47e0 0%, #457eff 100%);
+  background: linear-gradient(135deg, #244EE4 0%, #457eff 100%);
   color: #fff !important;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.2) inset,
-    0 10px 22px rgba(37, 80, 235, 0.32);
   transition: filter 0.2s ease, box-shadow 0.2s ease;
-  &:hover {
-    filter: brightness(1.04);
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.25) inset,
-      0 14px 28px rgba(37, 80, 235, 0.38);
-  }
+  
   @media (min-width: 992px) {
-    margin: 0 10px 0 0;
+    margin: 0 5px 0 0;
     min-height: 44px;
-    min-width: 100px;
+    min-width: 110px;
     padding: 0 20px;
     border-radius: 999px;
     align-self: center;
@@ -3841,7 +3832,6 @@ body:has(.nk-site) {
   display: flex;
   gap: 14px;
   overflow-x: auto;
-  padding: 4px 2px 12px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -3886,7 +3876,7 @@ body:has(.nk-site) {
 .nk-hire-icon {
   width: 46px;
   height: 46px;
-  border-radius: 14px;
+  border-radius: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3906,7 +3896,7 @@ body:has(.nk-site) {
   flex: 0 0 220px;
   scroll-snap-align: start;
   background: #fff;
-  border: 1px solid rgba(232, 234, 243, 0.95);
+  border: 1px solid #244FE4;
   border-radius: 20px;
   padding: 18px;
   text-decoration: none !important;
@@ -3926,10 +3916,6 @@ body:has(.nk-site) {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 18px 36px rgba(37, 80, 235, 0.12);
-  }
   &.is-skeleton {
     pointer-events: none;
     gap: 10px;
@@ -3939,7 +3925,7 @@ body:has(.nk-site) {
 .nk-company-logo {
   width: 52px;
   height: 52px;
-  border-radius: 14px;
+  border-radius: 50px;
   border: 1px solid $nk-border;
   background: linear-gradient(180deg, #fff, #f5f7ff);
   display: inline-flex;
@@ -3976,7 +3962,7 @@ body:has(.nk-site) {
   margin: 0;
   font-size: 12.5px;
   color: $nk-muted;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -4018,6 +4004,7 @@ body:has(.nk-site) {
   grid-template-columns: 280px minmax(0, 1fr);
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
+    padding: 15px;
   }
 }
 
@@ -4053,7 +4040,7 @@ body:has(.nk-site) {
   margin-bottom: 22px;
   padding: 12px 16px;
   border: 1px solid $nk-border;
-  border-radius: 14px;
+  border-radius: 50px;
   background: #fff;
   box-shadow: 0 4px 14px rgba(18, 18, 36, 0.04);
   i {
@@ -4065,7 +4052,7 @@ body:has(.nk-site) {
 
 .signet-site.nk-browse-page .nk-companies-search input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 2px 12px;
   border: 0 !important;
   border-radius: 0 !important;
   outline: 0;
@@ -4115,11 +4102,7 @@ body:has(.nk-site) {
 }
 
 .nk-roles-panel {
-  background: #fff;
-  border: 1px solid $nk-border;
   border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 14px rgba(18, 18, 36, 0.04);
 }
 
 .nk-role-grid {
@@ -4211,7 +4194,7 @@ body:has(.nk-site) {
 .nk-job-logo {
   width: 54px;
   height: 54px;
-  border-radius: 14px;
+  border-radius: 50px;
   border: 1px solid $nk-border;
   background: linear-gradient(180deg, #fff, #f5f7ff);
   display: inline-flex;
@@ -4294,7 +4277,6 @@ body:has(.nk-site) {
   padding: 32px;
   border-radius: 24px;
   color: #fff !important;
-  box-shadow: 0 20px 48px rgba(37, 80, 235, 0.28);
   h1, h2, h3, h4, h5, h6 {
     margin: 0 0 8px;
     font-size: 26px;
@@ -4306,7 +4288,7 @@ body:has(.nk-site) {
     margin: 0;
     color: #fff !important;
     opacity: 0.92;
-    font-weight: 550;
+    line-height: 1.5em;
     max-width: 52ch;
   }
   @media (min-width: 768px) {
@@ -4388,7 +4370,7 @@ body:has(.nk-site) {
   background-size: 200% 100%;
   animation: signet-shimmer 1.2s linear infinite;
 }
-.nk-shimmer-logo { width: 52px; height: 52px; border-radius: 14px; }
+.nk-shimmer-logo { width: 52px; height: 52px; border-radius: 50px; }
 .nk-shimmer-logo.lg { width: 72px; height: 72px; border-radius: 12px; margin: 0 auto 14px; display: block; }
 .nk-shimmer-line { height: 12px; width: 80%; margin-top: 4px; }
 .nk-shimmer-line.short { width: 55%; }
@@ -4538,7 +4520,6 @@ body:has(.nk-site) {
     color: $nk-muted !important;
     text-decoration: none !important;
     font-size: 13px;
-    font-weight: 600;
     &:hover { color: $nk-blue !important; }
   }
 }
@@ -4600,20 +4581,17 @@ body:has(.nk-site) {
 
 .nk-footer-stores {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
 .nk-store-badge {
   display: inline-flex;
+  border-radius: 50px;
   align-items: center;
   justify-content: center;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: #121224;
   color: #fff;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .nk-footer-brand {
@@ -4656,6 +4634,7 @@ body:has(.nk-site) {
   align-items: center;
   gap: 28px;
   margin-left: 12px;
+  padding-top: 8px;
   a {
     color: #474d6a !important;
     text-decoration: none !important;
@@ -4680,7 +4659,7 @@ body:has(.nk-site) {
 }
 
 .nk-nav-register {
-  background: linear-gradient(135deg, #1f47e0 0%, $nk-blue-2 100%) !important;
+  background: linear-gradient(135deg, #244EE4 0%, $nk-blue-2 100%) !important;
   border: none !important;
   box-shadow: 0 8px 20px rgba(37, 80, 235, 0.25);
   &:hover {
@@ -4762,9 +4741,10 @@ body:has(.nk-site) {
 
 .nk-browse-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 280px;
+  max-width:  1170px;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
   gap: 28px;
-  padding: 28px 16px 80px;
+  padding: 28px 0;
   align-items: start;
   @media (max-width: 1200px) {
     grid-template-columns: 260px minmax(0, 1fr);
@@ -4858,8 +4838,7 @@ body:has(.nk-site) {
   cursor: pointer;
   margin: 0;
   span {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 12px;
     color: #474d6a;
     line-height: 1.3;
   }
@@ -4874,7 +4853,7 @@ body:has(.nk-site) {
 .nk-filter-search {
   width: 100%;
   border: 1px solid #e7eaf3 !important;
-  border-radius: 12px !important;
+  border-radius: 50px !important;
   padding: 10px 12px !important;
   font-size: 13px !important;
   font-weight: 600;
@@ -4898,16 +4877,16 @@ body:has(.nk-site) {
   margin-bottom: 22px;
   h1 {
     margin: 0 0 6px;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 850;
+    font-size: clamp(24px, 1vw, 32px);
+    font-weight: 700;
     letter-spacing: -0.04em;
     color: $s-ink !important;
   }
   p {
     margin: 0;
     color: #6f7594;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 500;
   }
 }
 
@@ -4930,7 +4909,7 @@ body:has(.nk-site) {
   position: relative;
   background: #fff;
   border: 1px solid #e8ebf3;
-  border-radius: 14px;
+  border-radius: 50px;
   overflow: hidden;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 4px 14px rgba(15, 23, 42, 0.04);
   transition: border-color 0.2s $s-ease, box-shadow 0.2s $s-ease, transform 0.2s $s-ease;
@@ -4996,7 +4975,7 @@ body:has(.nk-site) {
   font-size: 18px;
   font-weight: 800;
   color: $s-blue;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  
   img {
     width: 100%;
     height: 100%;
@@ -5165,16 +5144,15 @@ body:has(.nk-site) {
     font-size: 18px;
     font-weight: 850;
     color: $s-ink;
-    margin-bottom: 4px;
   }
   p {
     margin: 0;
     color: #7c2d12;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
   }
   .signet-btn {
-    background: linear-gradient(135deg, #1f47e0 0%, $nk-blue-2 100%) !important;
+    background: linear-gradient(135deg, #244EE4 0%, $nk-blue-2 100%) !important;
     border: none !important;
     white-space: nowrap;
   }
@@ -5198,7 +5176,6 @@ body:has(.nk-site) {
   border: 1px solid #e7eaf3;
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
   &.muted {
     background: linear-gradient(180deg, #fff, #f8f9fc);
   }
@@ -5211,9 +5188,8 @@ body:has(.nk-site) {
   p {
     margin: 0 0 16px;
     color: #667085;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1.55;
-    font-weight: 600;
   }
 }
 

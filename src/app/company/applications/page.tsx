@@ -173,7 +173,7 @@ function ApplicationsInner() {
                   href={`/company/applications/${jobId}/${applicantId}`}
                   className="signet-btn"
                 >
-                  View details
+                  Details
                 </Link>
                 {app.resumeUrl && (
                   <a
