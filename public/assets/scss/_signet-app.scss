@@ -1517,7 +1517,7 @@ $signet-page-pad: 16px;
   }
   input, select, textarea {
     width: 100%;
-    background: $s-surface-2 !important;
+    background-color: $s-surface-2 !important;
     color: $s-ink !important;
     border-radius: 14px !important;
     padding: 13px 16px !important;
@@ -1526,10 +1526,127 @@ $signet-page-pad: 16px;
     &:focus {
       border-color: rgba(0, 76, 240, 0.4) !important;
       box-shadow: 0 0 0 4px rgba(0, 76, 240, 0.1);
-      background: #fff !important;
+      background-color: #fff !important;
     }
   }
   textarea { min-height: 120px; resize: vertical; }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 40px !important;
+    cursor: pointer;
+    background-color: $s-surface-2 !important;
+    background-image: linear-gradient(45deg, transparent 50%, #9aa0ac 50%),
+      linear-gradient(135deg, #9aa0ac 50%, transparent 50%) !important;
+    background-position: calc(100% - 18px) calc(50% + 1px),
+      calc(100% - 12px) calc(50% + 1px) !important;
+    background-size: 6px 6px, 6px 6px !important;
+    background-repeat: no-repeat !important;
+    &:focus {
+      background-color: #fff !important;
+      background-image: linear-gradient(45deg, transparent 50%, #9aa0ac 50%),
+        linear-gradient(135deg, #9aa0ac 50%, transparent 50%) !important;
+    }
+  }
+}
+
+.signet-text-editor {
+  .signet-text-editor-shell {
+    border: 1px solid $s-border;
+    border-radius: 14px;
+    overflow: hidden;
+    background: $s-surface-2;
+    transition: border-color 0.2s $s-ease, box-shadow 0.2s $s-ease;
+    &:focus-within {
+      border-color: rgba(0, 76, 240, 0.4);
+      box-shadow: 0 0 0 4px rgba(0, 76, 240, 0.1);
+      background: #fff;
+    }
+  }
+  .signet-text-editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(232, 235, 243, 0.95);
+    background: rgba(255, 255, 255, 0.72);
+  }
+  .signet-text-editor-btn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s $s-ease, color 0.15s $s-ease;
+    &:hover {
+      background: rgba(0, 76, 240, 0.08);
+      color: $s-blue;
+    }
+  }
+  textarea {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    min-height: 140px;
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+}
+
+.signet-search-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid rgba(232, 235, 243, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(26, 27, 41, 0.12);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.signet-search-suggestion {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  color: $s-ink;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.15s $s-ease;
+  i {
+    color: #94a3b8;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &:hover,
+  &.is-active {
+    background: rgba(0, 76, 240, 0.08);
+    color: $s-blue;
+    i { color: $s-blue; }
+  }
 }
 
 .signet-phone-field {
@@ -2298,21 +2415,86 @@ $signet-page-pad: 16px;
     font-size: 13px;
     color: $s-muted;
   }
+
+  .signet-upload-dropzone {
+    position: relative;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 140px;
+    padding: 24px 20px;
+    margin: 0;
+    cursor: pointer;
+    text-align: center;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  .signet-upload-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(0, 76, 240, 0.1);
+    color: $s-blue;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .signet-upload-title {
+    display: block;
+    width: 100%;
+    color: $s-ink;
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.35;
+    text-transform: none;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .signet-upload-sub {
+    display: block;
+    width: 100%;
+    color: $s-muted;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: none;
+  }
 }
 
 .signet-upload-box {
   position: relative;
-  border-radius: 50px;
+  border-radius: 16px;
   overflow: hidden;
-  background: $s-surface-2;
-  border: 1px dashed $s-border;
-  input[type="file"] {
-    width: 100%;
-    padding: 14px 16px !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
+  background: linear-gradient(180deg, #fbfcff 0%, #f5f7ff 100%);
+  border: 1px dashed rgba(0, 76, 240, 0.22);
+  transition: border-color 0.2s $s-ease, background 0.2s $s-ease, box-shadow 0.2s $s-ease;
+  &:hover {
+    border-color: rgba(0, 76, 240, 0.38);
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(37, 80, 235, 0.08);
   }
+}
+
+.signet-upload-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .signet-upload-field.is-uploading .signet-upload-box {
@@ -2716,7 +2898,7 @@ $signet-page-pad: 16px;
   input, select {
     flex: 1;
     min-width: 140px;
-    background: #fff !important;
+    background-color: #fff !important;
     border: 1px solid $s-border !important;
     color: $s-ink !important;
     border-radius: 16px !important;
@@ -2727,6 +2909,20 @@ $signet-page-pad: 16px;
       border-color: rgba(0, 76, 240, 0.4) !important;
       box-shadow: 0 0 0 4px rgba(0, 76, 240, 0.1);
     }
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 40px !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    background-image: linear-gradient(45deg, transparent 50%, #9aa0ac 50%),
+      linear-gradient(135deg, #9aa0ac 50%, transparent 50%) !important;
+    background-position: calc(100% - 18px) calc(50% + 1px),
+      calc(100% - 12px) calc(50% + 1px) !important;
+    background-size: 6px 6px, 6px 6px !important;
+    background-repeat: no-repeat !important;
   }
 }
 
@@ -3377,6 +3573,8 @@ body:has(.nk-site) {
 }
 
 .nk-section-tight {
+  position: relative;
+  z-index: 1;
   padding-top: 8px;
   padding-bottom: 28px;
 }
@@ -3745,9 +3943,10 @@ body:has(.nk-site) {
 
 .nk-hero {
   position: relative;
+  z-index: 20;
   padding: 64px 0 20px;
   text-align: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .nk-hero-bg {
@@ -3826,6 +4025,10 @@ body:has(.nk-site) {
   margin: 0 auto 18px;
 }
 
+.nk-search-wrap {
+  position: relative;
+  z-index: 30;
+}
 
 .nk-search-shell {
   display: grid;
@@ -3913,10 +4116,10 @@ body:has(.nk-site) {
     cursor: pointer;
     background-image: linear-gradient(45deg, transparent 50%, #9199ae 50%),
       linear-gradient(135deg, #9199ae 50%, transparent 50%);
-    background-position: calc(100% - 2px) calc(50% + 2px), calc(100% + 4px) calc(50% + 2px);
+    background-position: calc(100% - 18px) calc(50% + 2px), calc(100% - 12px) calc(50% + 2px);
     background-size: 6px 6px, 6px 6px;
     background-repeat: no-repeat;
-    padding-right: 18px;
+    padding-right: 36px;
     &[data-empty="true"] {
       color: #9199ae;
       font-weight: 400;
@@ -3984,6 +4187,25 @@ body:has(.nk-site) {
       transition: background-color 9999s ease-out 0s;
     }
   }
+}
+
+.nk-search-designation {
+  position: relative;
+}
+
+.nk-search-designation-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.nk-search-suggestions {
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
 .nk-search-exp select {

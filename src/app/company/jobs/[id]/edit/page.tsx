@@ -8,6 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { JOB_TYPES } from "@/lib/job-utils";
 import { assertJobOwnedByCompany, updateJob } from "@/lib/services/jobs";
 import { uploadJobAttachment } from "@/lib/services/storage";
+import SignetTextEditorField from "@/app/components/signet/text-editor-field";
 import { FileUploadField, PageLoader } from "@/app/components/signet/shimmer";
 import Wrapper from "@/layouts/wrapper";
 
@@ -175,14 +176,13 @@ function Inner() {
           <label>Skills (comma separated)</label>
           <input value={skills} onChange={(e) => setSkills(e.target.value)} />
         </div>
-        <div className="signet-field">
-          <label>Description</label>
-          <textarea
-            required
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
+        <SignetTextEditorField
+          label="Description"
+          required
+          value={description}
+          onChange={setDescription}
+          placeholder="Describe the role, team, and what success looks like…"
+        />
         <div className="signet-field">
           <label>Roles & responsibilities</label>
           <textarea value={roles} onChange={(e) => setRoles(e.target.value)} />
@@ -192,7 +192,8 @@ function Inner() {
           accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
           uploading={uploading}
           uploadLabel="Uploading attachment…"
-          hint={attachment ? `Selected: ${attachment.name}` : undefined}
+          selectedFileName={attachment?.name}
+          formatsHint="PDF, DOC, or image"
           currentLabel={
             attachmentUrl ? (
               <a href={attachmentUrl} target="_blank" rel="noreferrer">

@@ -150,8 +150,11 @@ img:focus-visible,img:focus {
   }
 }
 
-.nice-select:after {
-  right: 0px;
+.nice-select {
+  padding-right: 36px !important;
+  &:after {
+    right: 16px !important;
+  }
 }
 
 

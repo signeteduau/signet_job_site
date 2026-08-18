@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Wrapper from "@/layouts/wrapper";
 import { NkScrollRail } from "@/app/components/signet/nk-scroll-rail";
+import SearchSuggestions from "@/app/components/signet/search-suggestions";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
 import { Job } from "@/types/firestore";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
@@ -71,12 +72,14 @@ function companyLogo(c: CompanyRow) {
 
 export default function Home() {
   const router = useRouter();
+  const designationInputRef = useRef<HTMLInputElement>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [designation, setDesignation] = useState("");
   const [location, setLocation] = useState("");
   const [experience, setExperience] = useState("");
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -159,6 +162,17 @@ export default function Home() {
     });
   }, [jobs]);
 
+  const roleSuggestions = useMemo(() => {
+    const pool = new Set<string>([
+      ...POPULAR_ROLES,
+      ...CATEGORY_PILLS.map((item) => item.label),
+      ...jobs.map((j) => j.title).filter((v): v is string => Boolean(v)),
+      ...jobs.map((j) => j.category).filter((v): v is string => Boolean(v)),
+      ...jobs.flatMap((j) => j.skills || []).filter((v): v is string => Boolean(v)),
+    ]);
+    return Array.from(pool).sort((a, b) => a.localeCompare(b));
+  }, [jobs]);
+
   const suggestedSearch = jobs[0]?.title || "software developer";
 
   return (
@@ -228,28 +242,36 @@ export default function Home() {
                   goSearch();
                 }}
               >
-                <div className="nk-search-shell">
-                  <label className="nk-search-segment nk-search-designation">
-                    <i className="bi bi-search" aria-hidden />
-                    <input
-                      value={designation}
-                      onChange={(e) => setDesignation(e.target.value)}
-                      placeholder="Enter skills / designations / companies"
-                      aria-label="Skills or designations"
-                    />
-                    {designation ? (
-                      <button
-                        type="button"
-                        className="nk-search-clear"
-                        aria-label="Clear search"
-                        onClick={() => setDesignation("")}
-                      >
-                        <i className="bi bi-x" />
-                      </button>
-                    ) : null}
-                  </label>
+                <div className="nk-search-wrap">
+                  <div className="nk-search-shell">
+                    <div className="nk-search-segment nk-search-designation">
+                      <label className="nk-search-designation-label">
+                        <i className="bi bi-search" aria-hidden />
+                        <input
+                          ref={designationInputRef}
+                          value={designation}
+                          onChange={(e) => setDesignation(e.target.value)}
+                          onFocus={() => setSuggestionsOpen(true)}
+                          placeholder="Enter skills / designations / companies"
+                          aria-label="Skills or designations"
+                          autoComplete="off"
+                          aria-expanded={suggestionsOpen && designation.trim().length > 0}
+                          aria-controls="landing-search-suggestions"
+                        />
+                      </label>
+                      {designation ? (
+                        <button
+                          type="button"
+                          className="nk-search-clear"
+                          aria-label="Clear search"
+                          onClick={() => setDesignation("")}
+                        >
+                          <i className="bi bi-x" />
+                        </button>
+                      ) : null}
+                    </div>
 
-                  <label className="nk-search-segment nk-search-exp">
+                    <label className="nk-search-segment nk-search-exp">
                     <select
                       value={experience}
                       onChange={(e) => setExperience(e.target.value)}
@@ -274,9 +296,20 @@ export default function Home() {
                     />
                   </label>
 
-                  <button type="submit" className="nk-search-submit">
-                    Search
-                  </button>
+                    <button type="submit" className="nk-search-submit">
+                      Search
+                    </button>
+                  </div>
+                  <SearchSuggestions
+                    id="landing-search-suggestions"
+                    query={designation}
+                    suggestions={roleSuggestions}
+                    inputRef={designationInputRef}
+                    open={suggestionsOpen}
+                    onOpenChange={setSuggestionsOpen}
+                    className="nk-search-suggestions"
+                    onSelect={(value) => setDesignation(value)}
+                  />
                 </div>
               </form>
 

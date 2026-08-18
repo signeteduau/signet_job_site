@@ -104,6 +104,8 @@ type FileUploadFieldProps = {
   label: string;
   accept?: string;
   hint?: string;
+  formatsHint?: string;
+  selectedFileName?: string;
   uploading?: boolean;
   uploadLabel?: string;
   currentLabel?: React.ReactNode | null;
@@ -111,17 +113,23 @@ type FileUploadFieldProps = {
   onFile: (file: File) => void | Promise<void>;
 };
 
-/** File input with shimmer/progress overlay while uploading. */
+/** File input with custom upload zone and shimmer overlay while uploading. */
 export function FileUploadField({
   label,
   accept,
   hint,
+  formatsHint,
+  selectedFileName,
   uploading = false,
   uploadLabel = "Uploading…",
   currentLabel,
   disabled,
   onFile,
 }: FileUploadFieldProps) {
+  const [internalName, setInternalName] = React.useState<string | null>(null);
+  const fileName = selectedFileName ?? internalName;
+  const helperText = hint || formatsHint || "PDF, DOC, or image";
+
   return (
     <div className={`signet-field signet-upload-field ${uploading ? "is-uploading" : ""}`}>
       <label>{label}</label>
@@ -136,21 +144,31 @@ export function FileUploadField({
             </div>
           </div>
         )}
-        <input
-          type="file"
-          accept={accept}
-          disabled={disabled || uploading}
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            e.target.value = "";
-            if (!file) return;
-            await onFile(file);
-          }}
-        />
+        <label className="signet-upload-dropzone">
+          <input
+            type="file"
+            className="signet-upload-input"
+            accept={accept}
+            disabled={disabled || uploading}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file) return;
+              setInternalName(file.name);
+              await onFile(file);
+            }}
+          />
+          <span className="signet-upload-icon" aria-hidden>
+            <i className={`bi ${fileName ? "bi-file-earmark-check" : "bi-cloud-arrow-up"}`} />
+          </span>
+          <span className="signet-upload-title">
+            {fileName ? fileName : "Click to upload"}
+          </span>
+          <span className="signet-upload-sub">
+            {fileName ? "Click to replace file" : helperText}
+          </span>
+        </label>
       </div>
-      {hint && !uploading && (
-        <small style={{ color: "#6B7280" }}>{hint}</small>
-      )}
     </div>
   );
 }

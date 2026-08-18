@@ -178,6 +178,13 @@ select,
 .nice-select .option:hover,
 .nice-select .option.selected { background: rgba(0, 76, 240, 0.08) !important; }
 
+.nice-select {
+  padding-right: 36px !important;
+  &:after {
+    right: 16px !important;
+  }
+}
+
 // Gradient pill CTAs
 .btn-one,
 .btn-four,
