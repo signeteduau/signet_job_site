@@ -16,7 +16,8 @@ export const metadata: Metadata = {
   description:
     "Signet Employment Hub - powered by Hands On Recruitment. Discover jobs, hire top talent, and grow your career.",
   icons: {
-    icon: "/favicon-signet.png",
+    icon: [{ url: "/favicon-signet.png", type: "image/png" }],
+    apple: "/favicon-signet.png",
   },
 };
 
@@ -27,10 +28,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <head>
-        <link rel="icon" href="/favicon-signet.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/favicon-signet.png" />
-      </head>
       <body
         suppressHydrationWarning={true}
         className={inter.className}
