@@ -79,6 +79,39 @@ export function isJobNew(value: unknown, withinDays = 7): boolean {
   }
 }
 
+/** Split job description / responsibilities text into display bullet points. */
+export function splitJobTextToPoints(text?: string): string[] {
+  const raw = (text || "").trim();
+  if (!raw) return [];
+
+  const cleanPoint = (line: string) =>
+    line
+      .replace(/^[\s•·▪◦\-–—*]+/, "")
+      .replace(/^\d+[.)]\s*/, "")
+      .trim();
+
+  const byNewline = raw
+    .split(/\r?\n+/)
+    .map(cleanPoint)
+    .filter(Boolean);
+  if (byNewline.length > 1) return byNewline;
+
+  const byInlineBullet = raw
+    .split(/\s*[•·▪◦]\s+|\s+-\s+(?=[A-Za-z0-9])/)
+    .map(cleanPoint)
+    .filter(Boolean);
+  if (byInlineBullet.length > 1) return byInlineBullet;
+
+  const bySemicolon = raw
+    .split(/\s*;\s+/)
+    .map(cleanPoint)
+    .filter(Boolean);
+  if (bySemicolon.length > 1) return bySemicolon;
+
+  const single = cleanPoint(raw);
+  return single ? [single] : [];
+}
+
 export function formatAppliedDate(value: unknown): string {
   if (!value) return "";
   try {
