@@ -1,20 +1,92 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import JobCard from "@/app/components/signet/job-card";
 import PublicSiteNav from "@/app/components/signet/public-site-nav";
-import { JobCardShimmer, PanelShimmer } from "@/app/components/signet/shimmer";
+import { PanelShimmer } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { applyUrl } from "@/lib/auth-flow";
-import { salarySuffix } from "@/lib/job-utils";
+import { normalizeJobType, salarySuffix, splitJobTextToPoints } from "@/lib/job-utils";
 import { hasApplied } from "@/lib/services/applications";
-import { fetchJobById } from "@/lib/services/jobs";
+import { fetchJobById, fetchJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
 import { openOrCreateChat } from "@/lib/services/chat";
 import { Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
+
+function pickRelatedJobs(current: Job, all: Job[], limit = 6) {
+  const others = all.filter((j) => j.id !== current.id);
+  const scored = others
+    .map((j) => {
+      let score = 0;
+      if (j.companyId && j.companyId === current.companyId) score += 4;
+      if (
+        j.companyName &&
+        current.companyName &&
+        j.companyName.toLowerCase() === current.companyName.toLowerCase()
+      ) {
+        score += 3;
+      }
+      if (j.category && j.category === current.category) score += 2;
+      if (j.type && j.type === current.type) score += 1;
+      return { j, score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const matched = scored.filter((x) => x.score > 0).map((x) => x.j);
+  const fallback = scored.map((x) => x.j);
+  const merged = [...matched];
+  fallback.forEach((j) => {
+    if (merged.length >= limit) return;
+    if (!merged.some((m) => m.id === j.id)) merged.push(j);
+  });
+  return merged.slice(0, limit);
+}
+
+function relatedJobTypeLabel(type?: string) {
+  const normalized = normalizeJobType(type);
+  if (!normalized) return "Full time";
+  if (normalized.includes("part")) return "Part time";
+  if (normalized.includes("contract")) return "Contract";
+  if (normalized.includes("intern")) return "Internship";
+  if (normalized.includes("remote")) return "Remote";
+  return type || "Full time";
+}
+
+function relatedLocationLabel(job: Job) {
+  const normalized = normalizeJobType(job.type);
+  if (normalized.includes("remote") || /anywhere|remote/i.test(job.location || "")) {
+    return "Remote";
+  }
+  return job.location?.split(",")[0]?.trim() || "Flexible";
+}
+
+function relatedSalaryLabel(job: Job) {
+  if (!job.salary) return "Salary TBD";
+  const suffix = salarySuffix(job.salary);
+  return suffix ? `${job.salary}${suffix}` : job.salary;
+}
+
+function JobDetailText({
+  text,
+  emptyLabel = "No description provided.",
+}: {
+  text?: string;
+  emptyLabel?: string;
+}) {
+  const points = splitJobTextToPoints(text);
+  if (!points.length) {
+    return <p className="signet-job-detail-text">{emptyLabel}</p>;
+  }
+  return (
+    <ul className="signet-job-detail-list">
+      {points.map((point, index) => (
+        <li key={index}>{point}</li>
+      ))}
+    </ul>
+  );
+}
 
 export default function PublicJobDetailPage() {
   const params = useParams();
@@ -22,6 +94,7 @@ export default function PublicJobDetailPage() {
   const router = useRouter();
   const { user, profile, isCandidateReady, requireAuth } = useRequireAuth();
   const [job, setJob] = useState<Job | null>(null);
+  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
   const [saved, setSaved] = useState(false);
   const [applied, setApplied] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -29,8 +102,16 @@ export default function PublicJobDetailPage() {
   useEffect(() => {
     (async () => {
       try {
-        const j = await fetchJobById(id);
+        const [j, allJobs] = await Promise.all([
+          fetchJobById(id),
+          fetchJobs(50),
+        ]);
         setJob(j);
+        if (j) {
+          setRelatedJobs(pickRelatedJobs(j, allJobs));
+        } else {
+          setRelatedJobs([]);
+        }
         if (user && j) {
           if (isCandidateReady) {
             setSaved(await isJobSaved(user.uid, j.id));
@@ -45,6 +126,12 @@ export default function PublicJobDetailPage() {
       }
     })();
   }, [id, user, isCandidateReady]);
+
+  const salaryLabel = useMemo(() => {
+    if (!job?.salary) return "Salary TBD";
+    const suffix = salarySuffix(job.salary);
+    return suffix ? `${job.salary}${suffix}` : job.salary;
+  }, [job]);
 
   const handleApply = () => {
     if (
@@ -117,11 +204,15 @@ export default function PublicJobDetailPage() {
           }
         />
 
-        <main className="container" style={{ padding: "32px 16px 72px", maxWidth: 860 }}>
+        <main className="container signet-job-detail-layout">
           {loading && (
             <>
-              <JobCardShimmer />
-              <PanelShimmer rows={6} />
+              <div className="signet-job-detail-main">
+                <PanelShimmer rows={8} />
+              </div>
+              <aside className="signet-job-detail-sidebar" aria-hidden>
+                <PanelShimmer rows={5} />
+              </aside>
             </>
           )}
           {!loading && !job && (
@@ -135,22 +226,26 @@ export default function PublicJobDetailPage() {
           )}
           {!loading && job && (
             <>
-              <JobCard
-                job={job}
-                href={`/jobs/${job.id}`}
-                showDescription={false}
-                saved={saved}
-                onSaveToggle={handleSave}
-              />
-              <div className="signet-panel">
-                <h2 style={{ marginTop: 0, fontWeight: 850 }}>{job.title}</h2>
-                <p style={{ color: "#6B7280" }}>
-                  {job.companyName}
-                  {job.location ? ` · ${job.location}` : ""}
-                  {job.salary
-                    ? ` · ${job.salary}${salarySuffix(job.salary) || ""}`
-                    : ""}
-                </p>
+              <article className="signet-job-detail-main signet-panel">
+                <h1 className="signet-job-detail-title">{job.title}</h1>
+
+                <div className="signet-job-meta signet-job-detail-meta">
+                  <span className="signet-job-meta-item">
+                    <i className="bi bi-building" aria-hidden />
+                    <strong>{job.companyName || "Company"}</strong>
+                  </span>
+                  {job.location && (
+                    <span className="signet-job-meta-item">
+                      <i className="bi bi-geo-alt" aria-hidden />
+                      {job.location}
+                    </span>
+                  )}
+                  <span className="signet-job-meta-item">
+                    <i className="bi bi-cash-stack" aria-hidden />
+                    {salaryLabel}
+                  </span>
+                </div>
+
                 <div className="signet-meta-chips mb-3">
                   {job.type && (
                     <span>
@@ -168,18 +263,15 @@ export default function PublicJobDetailPage() {
                     </span>
                   )}
                 </div>
-                <h3 style={{ fontWeight: 800, fontSize: 18 }}>Description</h3>
-                <p style={{ whiteSpace: "pre-wrap", color: "#374151", lineHeight: 1.7 }}>
-                  {job.description || "No description provided."}
-                </p>
+
+                <h3 className="signet-job-detail-section-title">Description</h3>
+                <JobDetailText text={job.description} />
                 {job.rolesAndResponsibilities && (
                   <>
-                    <h3 style={{ fontWeight: 800, fontSize: 18 }}>
+                    <h3 className="signet-job-detail-section-title">
                       Roles &amp; responsibilities
                     </h3>
-                    <p style={{ whiteSpace: "pre-wrap", color: "#374151", lineHeight: 1.7 }}>
-                      {job.rolesAndResponsibilities}
-                    </p>
+                    <JobDetailText text={job.rolesAndResponsibilities} />
                   </>
                 )}
                 {!!job.skills?.length && (
@@ -217,11 +309,91 @@ export default function PublicJobDetailPage() {
                   </button>
                 </div>
                 {!isCandidateReady && (
-                  <p className="mt-3 mb-0" style={{ color: "#6B7280", fontSize: 14 }}>
+                  <p className="signet-job-detail-note">
                     Browse freely — sign in only when you apply, save, or message.
                   </p>
                 )}
-              </div>
+              </article>
+
+              <aside className="signet-job-detail-sidebar">
+                <div className="signet-related-jobs">
+                  <div className="signet-related-jobs-head">
+                    <h3>Related jobs</h3>
+                    {!relatedJobs.length ? (
+                      <p>Browse similar roles</p>
+                    ) : (
+                      <p>{relatedJobs.length} similar role{relatedJobs.length === 1 ? "" : "s"}</p>
+                    )}
+                  </div>
+                  {relatedJobs.length === 0 && (
+                    <p className="signet-related-jobs-empty">
+                      No similar roles right now.
+                    </p>
+                  )}
+                  <div className="signet-related-jobs-list">
+                    {relatedJobs.map((related) => {
+                      const logo = related.logoUrl || "";
+                      const initial = (related.companyName || "S")
+                        .charAt(0)
+                        .toUpperCase();
+                      const typeLabel = relatedJobTypeLabel(related.type);
+                      const categoryTag =
+                        related.category?.trim() || typeLabel;
+                      const isGrant = /grant/i.test(categoryTag);
+                      return (
+                        <Link
+                          key={related.id}
+                          href={`/jobs/${related.id}`}
+                          className="signet-related-job"
+                        >
+                          <div className="signet-related-job-top">
+                            <span className="signet-related-job-logo">
+                              {logo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={logo} alt="" />
+                              ) : (
+                                <span>{initial}</span>
+                              )}
+                            </span>
+                            <span
+                              className={`signet-related-job-tag ${
+                                isGrant ? "is-grant" : ""
+                              }`}
+                            >
+                              {categoryTag}
+                            </span>
+                          </div>
+                          <strong className="signet-related-job-title">
+                            {related.title}
+                          </strong>
+                          <div className="signet-related-job-meta">
+                            <span>
+                              <i className="bi bi-building" aria-hidden />
+                              {related.companyName || "Company"}
+                            </span>
+                            <span>
+                              <i className="bi bi-geo-alt" aria-hidden />
+                              {relatedLocationLabel(related)}
+                            </span>
+                          </div>
+                          <div className="signet-related-job-foot">
+                            <span
+                              className={`signet-related-job-salary ${
+                                related.salary ? "" : "is-muted"
+                              }`}
+                            >
+                              {relatedSalaryLabel(related)}
+                            </span>
+                            <span className="signet-related-job-arrow" aria-hidden>
+                              <i className="bi bi-arrow-right" />
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </aside>
             </>
           )}
         </main>
