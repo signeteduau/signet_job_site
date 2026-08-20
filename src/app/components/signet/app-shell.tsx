@@ -21,7 +21,7 @@ const candidateNavBase: Omit<NavItem, "badge">[] = [
 
 const companyNavBase: Omit<NavItem, "badge">[] = [
   { href: "/company", label: "Home", icon: "bi-house" },
-  { href: "/company/applications", label: "Application", icon: "bi-people" },
+  { href: "/company/applications", label: "Applications", icon: "bi-people" },
   { href: "/company/chat", label: "Chat", icon: "bi-chat-dots" },
   { href: "/company/jobs", label: "Posted", icon: "bi-briefcase" },
   { href: "/company/profile", label: "Profile", icon: "bi-person" },

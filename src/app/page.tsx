@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Wrapper from "@/layouts/wrapper";
 import { NkScrollRail } from "@/app/components/signet/nk-scroll-rail";
 import SearchSuggestions from "@/app/components/signet/search-suggestions";
+import { jobMatchesSearchTerm } from "@/lib/job-utils";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
 import { Job } from "@/types/firestore";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
@@ -62,6 +63,11 @@ function formatCount(n: number) {
   return `${n}`;
 }
 
+function jobCountLabel(n: number) {
+  if (n === 1) return "1 Job";
+  return `${formatCount(n)} Jobs`;
+}
+
 function companyName(c: CompanyRow) {
   return c.companyName || c.fullName || "Company";
 }
@@ -86,7 +92,7 @@ export default function Home() {
     (async () => {
       try {
         const [jobList, companyList] = await Promise.all([
-          fetchJobs(24),
+          fetchJobs(100),
           fetchCompanies(16),
         ]);
         if (!alive) return;
@@ -152,14 +158,10 @@ export default function Home() {
   }, [jobs, companies]);
 
   const roleCounts = useMemo(() => {
-    return POPULAR_ROLES.map((role) => {
-      const key = role.toLowerCase();
-      const count = jobs.filter((j) => {
-        const hay = `${j.title} ${j.category} ${(j.skills || []).join(" ")}`.toLowerCase();
-        return key.split(" ").some((w) => w.length > 2 && hay.includes(w));
-      }).length;
-      return { role, count: Math.max(count, 1) };
-    });
+    return POPULAR_ROLES.map((role) => ({
+      role,
+      count: jobs.filter((j) => jobMatchesSearchTerm(j, role)).length,
+    }));
   }, [jobs]);
 
   const roleSuggestions = useMemo(() => {
@@ -481,7 +483,7 @@ export default function Home() {
                       onClick={() => goSearch({ term: role })}
                     >
                       <strong>{role}</strong>
-                      <em>{formatCount(count)} Jobs</em>
+                      <em>{jobCountLabel(count)}</em>
                       <i className="bi bi-chevron-right" />
                     </button>
                   ))}

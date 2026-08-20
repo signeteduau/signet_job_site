@@ -1,3 +1,56 @@
+export function normalizeSearchText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9+#]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+type JobSearchFields = {
+  title?: string;
+  category?: string;
+  skills?: string[];
+  description?: string;
+  companyName?: string;
+  location?: string;
+};
+
+/** Searchable text blob for a job — shared by browse page and landing counts. */
+export function jobSearchHaystack(job: JobSearchFields): string {
+  return normalizeSearchText(
+    [
+      job.title,
+      job.category,
+      (job.skills || []).join(" "),
+      job.description,
+      job.companyName,
+      job.location,
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+}
+
+/**
+ * Match jobs to a free-text query.
+ * - Full phrase match wins.
+ * - Multi-word queries require every token (2+ chars) to appear — e.g. "UI/UX Designer"
+ *   matches jobs with ui + ux + designer, not every "Graphics designer".
+ */
+export function jobMatchesSearchTerm(job: JobSearchFields, term: string): boolean {
+  const q = term.trim();
+  if (!q) return true;
+
+  const hay = jobSearchHaystack(job);
+  const normalized = normalizeSearchText(q.replace(/\//g, " "));
+  if (normalized && hay.includes(normalized)) return true;
+
+  const tokens = normalized.split(" ").filter((t) => t.length >= 2);
+  if (tokens.length === 0) return false;
+  if (tokens.length === 1) return hay.includes(tokens[0]);
+  return tokens.every((t) => hay.includes(t));
+}
+
 /** Normalize job type labels across Flutter ("Full Time") and web ("Full-time"). */
 export function normalizeJobType(type?: string): string {
   return (type || "")

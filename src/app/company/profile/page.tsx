@@ -8,7 +8,10 @@ import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
 import { useAuth } from "@/context/auth-context";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
-import { uploadProfileImage } from "@/lib/services/storage";
+import {
+  getStorageErrorMessage,
+  uploadProfileImage,
+} from "@/lib/services/storage";
 import Wrapper from "@/layouts/wrapper";
 
 function CompanyProfileInner() {
@@ -97,8 +100,8 @@ function CompanyProfileInner() {
                   setLogoUrl(url);
                   await saveProfile({ logoUrl: url, profileImage: url });
                   toast.success("Logo updated.");
-                } catch {
-                  toast.error("Could not upload logo.");
+                } catch (err) {
+                  toast.error(getStorageErrorMessage(err));
                 } finally {
                   setUploading(false);
                 }

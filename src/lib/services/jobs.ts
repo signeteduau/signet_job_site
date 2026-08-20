@@ -18,7 +18,7 @@ import {
 import { db } from "@/lib/firebase";
 import { Job } from "@/types/firestore";
 import { enrichJobLogos, resolveLogoFromRecord } from "@/lib/services/company-logo";
-import { normalizeJobType } from "@/lib/job-utils";
+import { normalizeJobType, jobMatchesSearchTerm } from "@/lib/job-utils";
 
 function mapJob(id: string, data: DocumentData): Job {
   return {
@@ -122,13 +122,7 @@ export async function searchJobs(opts: {
       return false;
     }
     if (!term) return true;
-    return (
-      j.title.toLowerCase().includes(term) ||
-      j.companyName.toLowerCase().includes(term) ||
-      j.location.toLowerCase().includes(term) ||
-      (j.category || "").toLowerCase().includes(term) ||
-      (j.skills || []).some((s) => s.toLowerCase().includes(term))
-    );
+    return jobMatchesSearchTerm(j, term);
   });
 }
 

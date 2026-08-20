@@ -7,7 +7,11 @@ import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
 import { useAuth } from "@/context/auth-context";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
-import { uploadProfileImage, uploadProfileResume } from "@/lib/services/storage";
+import {
+  getStorageErrorMessage,
+  uploadProfileImage,
+  uploadProfileResume,
+} from "@/lib/services/storage";
 import { FileUploadField } from "@/app/components/signet/shimmer";
 import Link from "next/link";
 import Wrapper from "@/layouts/wrapper";
@@ -92,8 +96,8 @@ function ProfileInner() {
                   setPhotoUrl(url);
                   await saveProfile({ profileImage: url });
                   toast.success("Photo updated.");
-                } catch {
-                  toast.error("Could not upload photo.");
+                } catch (err) {
+                  toast.error(getStorageErrorMessage(err));
                 } finally {
                   setUploading(false);
                 }

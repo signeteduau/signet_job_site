@@ -1,5 +1,25 @@
+import { FirebaseError } from "firebase/app";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+
+/** Profile uploads must use profile_images/{uid}.jpg — Firebase Storage rules match the mobile app. */
+const PROFILE_IMAGE_PATH = (uid: string) => `profile_images/${uid}.jpg`;
+
+export function getStorageErrorMessage(err: unknown): string {
+  const code = err instanceof FirebaseError ? err.code : "";
+  switch (code) {
+    case "storage/unauthorized":
+      return "Upload not allowed. Sign in again, or ask admin to check Firebase Storage rules.";
+    case "storage/canceled":
+      return "Upload was cancelled.";
+    case "storage/quota-exceeded":
+      return "Storage quota exceeded.";
+    case "storage/unauthenticated":
+      return "You must be signed in to upload files.";
+    default:
+      return code ? `Upload failed (${code}).` : "Upload failed.";
+  }
+}
 
 function extFromFile(file: File, fallback: string) {
   const fromName = file.name.split(".").pop()?.toLowerCase();
@@ -15,8 +35,7 @@ export async function uploadProfileImage(
   uid: string,
   file: File
 ): Promise<string> {
-  const ext = extFromFile(file, "jpg");
-  const storageRef = ref(storage, `profile_images/${uid}.${ext}`);
+  const storageRef = ref(storage, PROFILE_IMAGE_PATH(uid));
   await uploadBytes(storageRef, file, {
     contentType: file.type || "image/jpeg",
   });
