@@ -42,16 +42,13 @@ export default function PublicSiteNav({
           </Link>
           <nav className="nk-nav-links" aria-label="Primary">
             <Link href="/" className={pathname === "/" ? "active" : ""}>
-              <Link href="/"><i className="bi bi-house" /> Home</Link>
+              <i className="bi bi-house" /> Home
             </Link>
             <Link href="/jobs" className={pathname.startsWith("/jobs") ? "active" : ""}>
               <i className="bi bi-briefcase" /> Jobs
             </Link>
             <Link href="/companies" className={pathname.startsWith("/companies") ? "active" : ""}>
               <i className="bi bi-building" /> Companies
-            </Link>
-            <Link href="/career-tips" className={pathname.startsWith("/career-tips") ? "active" : ""}>
-              <i className="bi bi-lightbulb" /> Career Tips
             </Link>
           </nav>
         </div>

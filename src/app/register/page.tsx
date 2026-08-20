@@ -5,9 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { FirebaseError } from "firebase/app";
 import AuthShell, { AuthRoleTabs } from "@/app/components/signet/auth-shell";
+import GoogleAuthButton from "@/app/components/signet/google-auth-button";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
-import { withReturnUrl } from "@/lib/auth-flow";
+import { resolvePostLoginPath, withReturnUrl } from "@/lib/auth-flow";
+import { auth } from "@/lib/firebase";
+import { getUserProfile } from "@/lib/services/users";
 import { UserType } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
@@ -25,6 +28,13 @@ function RegisterInner() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const goNext = async () => {
+    const u = auth.currentUser;
+    if (!u) return router.push("/login");
+    const p = await getUserProfile(u.uid);
+    router.push(resolvePostLoginPath(p, u, returnUrl));
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +71,25 @@ function RegisterInner() {
         subtitle="Choose how you’ll use Signet, then set up access."
       >
         <AuthRoleTabs value={userType} onChange={setUserType} />
+
+        <GoogleAuthButton
+          mode="signup"
+          userType={userType}
+          companyName={companyName}
+          returnUrl={returnUrl}
+          onBeforeSignIn={() => {
+            if (userType === "company" && !companyName.trim()) {
+              toast.error("Enter your company name first.");
+              return false;
+            }
+            return true;
+          }}
+          onSuccess={goNext}
+        />
+
+        <div className="signet-auth-divider">
+          <span>or</span>
+        </div>
 
         <form onSubmit={onSubmit} className="signet-auth-form">
           {userType === "company" ? (
@@ -123,7 +152,16 @@ function RegisterInner() {
         </form>
 
         <p className="signet-auth-switch">
-          Already have an account? <Link href="/login">Sign in</Link>
+          Already have an account?{" "}
+          <Link
+            href={
+              returnUrl
+                ? `/login?returnUrl=${encodeURIComponent(returnUrl)}`
+                : "/login"
+            }
+          >
+            Sign in
+          </Link>
         </p>
       </AuthShell>
     </Wrapper>

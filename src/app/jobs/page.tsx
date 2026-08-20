@@ -107,7 +107,7 @@ function PublicJobsInner() {
         <div className="signet-ambient" aria-hidden />
         <PublicSiteNav variant="browse" />
 
-        <main className="container nk-browse-layout">
+        <main className="nk-container nk-browse-layout">
           <JobFiltersSidebar
             filters={filters}
             locations={locations}

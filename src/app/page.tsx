@@ -198,7 +198,6 @@ export default function Home() {
                 <Link href="/"><i className="bi bi-house" /> Home</Link>
                 <Link href="/jobs"><i className="bi bi-briefcase" /> Jobs</Link>
                 <Link href="/companies"><i className="bi bi-building" /> Companies</Link>
-                <Link href="/career-tips"><i className="bi bi-lightbulb" /> Career Tips</Link>
               </nav>
             </div>
             <div className="nk-nav-right">
@@ -538,21 +537,7 @@ export default function Home() {
                   />
                 </span>
               </div>
-              <p className="nk-footer-connect">We're Social!</p>
-              <div className="nk-footer-social">
-                <a href="#" aria-label="Facebook">
-                  <i className="bi bi-facebook" />
-                </a>
-                <a href="#" aria-label="Instagram">
-                  <i className="bi bi-instagram" />
-                </a>
-                <a href="#" aria-label="X">
-                  <i className="bi bi-twitter" />
-                </a>
-                <a href="#" aria-label="LinkedIn">
-                  <i className="bi bi-linkedin" />
-                </a>
-              </div>
+              <p className="nk-footer-brand-name">{SIGNET_LOGO_ALT}</p>
             </div>
             <div>
               <h4>About us</h4>
@@ -573,10 +558,7 @@ export default function Home() {
             <div className="nk-footer-app">
               <strong>Download our App</strong>
               <p>Get real-time job updates on our App</p>
-              <div className="nk-footer-stores">
-                <span className="nk-store-badge nk-search-submit">Google Play</span>
-                <span className="nk-store-badge nk-search-submit">App Store</span>
-              </div>
+              <p className="nk-footer-coming-soon">We&apos;re working on it — Coming Soon</p>
             </div>
           </div>
           <div className="nk-container nk-footer-bottom">

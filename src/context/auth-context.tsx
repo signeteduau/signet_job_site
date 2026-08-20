@@ -21,8 +21,18 @@ import {
   reauthenticateWithCredential,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import { resolvePostLoginPath } from "@/lib/auth-flow";
 import { auth } from "@/lib/firebase";
+import {
+  GOOGLE_AUTH_COMPANY_KEY,
+  GOOGLE_AUTH_RETURN_URL_KEY,
+  GOOGLE_AUTH_USER_TYPE_KEY,
+  GoogleRedirectInProgress,
+} from "@/lib/google-auth";
 import {
   createUserProfile,
   getUserProfile,
@@ -43,7 +53,11 @@ type AuthContextType = {
     userType: UserType;
     companyName?: string;
   }) => Promise<User>;
-  loginWithGoogle: (userType?: UserType) => Promise<User>;
+  loginWithGoogle: (opts?: {
+    userType?: UserType;
+    companyName?: string;
+    returnUrl?: string | null;
+  }) => Promise<User>;
   logout: () => Promise<void>;
   sendVerification: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -64,6 +78,89 @@ function resolveHomePath(profile: AppUser | null, user: User | null): string {
   return profile.userType === "company" ? "/company" : "/candidate";
 }
 
+async function ensureGoogleUserProfile(
+  firebaseUser: User,
+  userType?: UserType,
+  companyName?: string
+): Promise<AppUser | null> {
+  let profile = await getUserProfile(firebaseUser.uid);
+  if (profile || !userType) {
+    return profile;
+  }
+
+  const fullName =
+    userType === "company"
+      ? companyName?.trim() || firebaseUser.displayName || "Company"
+      : firebaseUser.displayName || "User";
+
+  await createUserProfile({
+    uid: firebaseUser.uid,
+    email: firebaseUser.email || "",
+    fullName,
+    userType,
+    companyName:
+      userType === "company"
+        ? companyName?.trim() || firebaseUser.displayName || "Company"
+        : undefined,
+  });
+  profile = await getUserProfile(firebaseUser.uid);
+  return profile;
+}
+
+function buildGoogleProvider() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  provider.addScope("email");
+  provider.addScope("profile");
+  return provider;
+}
+
+function storeGoogleAuthIntent(
+  userType?: UserType,
+  companyName?: string,
+  returnUrl?: string | null
+) {
+  if (typeof window === "undefined") return;
+  if (userType) {
+    sessionStorage.setItem(GOOGLE_AUTH_USER_TYPE_KEY, userType);
+  } else {
+    sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
+  }
+  if (companyName?.trim()) {
+    sessionStorage.setItem(GOOGLE_AUTH_COMPANY_KEY, companyName.trim());
+  } else {
+    sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
+  }
+  if (returnUrl) {
+    sessionStorage.setItem(GOOGLE_AUTH_RETURN_URL_KEY, returnUrl);
+  } else {
+    sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+  }
+}
+
+function readGoogleAuthIntent(): {
+  userType?: UserType;
+  companyName?: string;
+  returnUrl?: string | null;
+} {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  const userType = sessionStorage.getItem(GOOGLE_AUTH_USER_TYPE_KEY) as
+    | UserType
+    | null;
+  const companyName = sessionStorage.getItem(GOOGLE_AUTH_COMPANY_KEY);
+  const returnUrl = sessionStorage.getItem(GOOGLE_AUTH_RETURN_URL_KEY);
+  sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
+  sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
+  sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+  return {
+    userType: userType === "company" || userType === "candidate" ? userType : undefined,
+    companyName: companyName || undefined,
+    returnUrl,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<AppUser | null>(null);
@@ -81,7 +178,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const redirectResult = await getRedirectResult(auth);
+        if (!redirectResult?.user || !mounted) return;
+        const intent = readGoogleAuthIntent();
+        const p = await ensureGoogleUserProfile(
+          redirectResult.user,
+          intent.userType,
+          intent.companyName
+        );
+        setUser(redirectResult.user);
+        setProfile(p);
+        if (typeof window !== "undefined") {
+          window.location.replace(
+            resolvePostLoginPath(p, redirectResult.user, intent.returnUrl)
+          );
+        }
+      } catch {
+        // Redirect errors surface on the next explicit sign-in attempt.
+      }
+    })();
+
     const unsub = onAuthStateChanged(auth, async (u) => {
+      if (!mounted) return;
       setUser(u);
       if (u) {
         try {
@@ -95,7 +217,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setLoading(false);
     });
-    return () => unsub();
+
+    return () => {
+      mounted = false;
+      unsub();
+    };
   }, []);
 
   const value = useMemo<AuthContextType>(
@@ -126,19 +252,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await refreshProfile();
         return cred.user;
       },
-      loginWithGoogle: async (userType) => {
-        const provider = new GoogleAuthProvider();
-        const cred = await signInWithPopup(auth, provider);
-        let p = await getUserProfile(cred.user.uid);
-        if (!p && userType) {
-          await createUserProfile({
-            uid: cred.user.uid,
-            email: cred.user.email || "",
-            fullName: cred.user.displayName || "User",
-            userType,
-          });
-          p = await getUserProfile(cred.user.uid);
+      loginWithGoogle: async ({ userType, companyName, returnUrl } = {}) => {
+        const provider = buildGoogleProvider();
+        storeGoogleAuthIntent(userType, companyName, returnUrl);
+
+        let cred;
+        try {
+          cred = await signInWithPopup(auth, provider);
+        } catch (err) {
+          const code = err instanceof FirebaseError ? err.code : "";
+          if (code === "auth/popup-blocked") {
+            await signInWithRedirect(auth, provider);
+            throw new GoogleRedirectInProgress();
+          }
+          sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
+          sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
+          sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+          throw err;
         }
+
+        sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
+        sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
+        sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+
+        const p = await ensureGoogleUserProfile(
+          cred.user,
+          userType,
+          companyName
+        );
         setProfile(p);
         return cred.user;
       },

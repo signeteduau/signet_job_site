@@ -167,7 +167,7 @@ function PublicCompaniesInner() {
         <div className="signet-ambient" aria-hidden />
         <PublicSiteNav variant="browse" searchTerm={filters.term} />
 
-        <main className="container nk-browse-layout nk-companies-layout">
+        <main className="nk-container nk-browse-layout nk-companies-layout">
           <CompanyFiltersSidebar
             filters={filters}
             industries={industries}

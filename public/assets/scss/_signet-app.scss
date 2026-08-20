@@ -5034,6 +5034,15 @@ body:has(.nk-site) {
   font-weight: 550;
 }
 
+.nk-footer-brand-name {
+  margin: 12px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: $nk-ink !important;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
 .nk-footer-connect {
   margin: 16px 0 10px !important;
   font-size: 13px !important;
@@ -5087,6 +5096,305 @@ body:has(.nk-site) {
   gap: 8px;
 }
 
+.nk-footer-coming-soon {
+  margin: 0 !important;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f3f6ff;
+  border: 1px dashed rgba(37, 80, 235, 0.28);
+  color: $nk-blue !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.4;
+}
+
+.signet-legal-shell {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f8ff 0%, #ffffff 220px);
+  padding: 24px 16px 48px;
+
+  &.is-embed {
+    background: #fff;
+    padding: 16px 14px 24px;
+    min-height: auto;
+  }
+}
+
+.signet-legal-doc {
+  max-width: 860px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid $nk-border;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+
+  &.is-embed {
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.signet-legal-header {
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid $nk-border;
+  background: linear-gradient(180deg, #fafbff 0%, #fff 100%);
+
+  .is-embed & {
+    padding: 0 0 16px;
+    background: transparent;
+    border-bottom: 1px solid #eef1f6;
+  }
+
+  h1 {
+    margin: 8px 0 12px;
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    line-height: 1.2;
+    color: $nk-ink;
+    font-weight: 800;
+  }
+}
+
+.signet-legal-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.signet-legal-brand-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: $nk-ink;
+}
+
+.signet-legal-brand-entity {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: $nk-muted;
+}
+
+.signet-legal-kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: $nk-blue;
+}
+
+.signet-legal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $nk-muted;
+}
+
+.signet-legal-notice {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f7f9ff;
+  border: 1px solid rgba(37, 80, 235, 0.12);
+  color: #4b5565;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.signet-legal-toc {
+  padding: 20px 28px;
+  border-bottom: 1px solid $nk-border;
+  background: #fcfdff;
+
+  strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: $nk-ink;
+  }
+
+  ol {
+    margin: 0;
+    padding-left: 1.2rem;
+    columns: 2;
+    column-gap: 24px;
+
+    @media (max-width: 640px) {
+      columns: 1;
+    }
+  }
+
+  li {
+    break-inside: avoid;
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  a {
+    color: $nk-blue;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.signet-legal-body-wrap {
+  padding: 24px 28px 32px;
+
+  .is-embed & {
+    padding: 16px 0 0;
+  }
+}
+
+.signet-legal-section {
+  scroll-margin-top: 16px;
+
+  & + & {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #eef1f6;
+  }
+
+  h2 {
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    color: $nk-ink;
+    font-weight: 800;
+  }
+}
+
+.signet-legal-section-num {
+  color: $nk-blue;
+  margin-right: 6px;
+}
+
+.signet-legal-subsection {
+  margin-top: 16px;
+
+  h3 {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    color: #243042;
+    font-weight: 700;
+  }
+}
+
+.signet-legal-p,
+.signet-legal-ul,
+.signet-legal-dl,
+.signet-legal-table-wrap {
+  color: #4b5565;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.signet-legal-p {
+  margin: 0 0 12px;
+
+  a {
+    color: $nk-blue;
+    word-break: break-word;
+  }
+}
+
+.signet-legal-ul {
+  margin: 0 0 14px;
+  padding-left: 1.25rem;
+
+  li + li {
+    margin-top: 6px;
+  }
+}
+
+.signet-legal-dl {
+  margin: 0 0 14px;
+}
+
+.signet-legal-dl-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 8px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef1f6;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  dt {
+    margin: 0;
+    font-weight: 700;
+    color: #243042;
+  }
+
+  dd {
+    margin: 0;
+
+    a {
+      color: $nk-blue;
+      word-break: break-word;
+    }
+  }
+}
+
+.signet-legal-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 16px;
+  border: 1px solid #eef1f6;
+  border-radius: 10px;
+}
+
+.signet-legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #eef1f6;
+  }
+
+  th {
+    background: #f7f9ff;
+    color: #243042;
+    font-weight: 700;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.signet-legal-footer {
+  padding: 0 28px 28px;
+}
+
+.signet-legal-loading {
+  padding: 32px;
+  color: $nk-muted;
+  font-size: 14px;
+}
+
+.signet-legal-card {
+  max-width: 720px;
+}
+
 .nk-store-badge {
   display: inline-flex;
   border-radius: 50px;
@@ -5124,6 +5432,12 @@ body:has(.nk-site) {
 
 .nk-browse-page {
   background: #f8f9fc;
+
+  .nk-container {
+    @media (max-width: 767px) {
+      width: min(1170px, calc(100% - 32px));
+    }
+  }
 }
 
 .nk-nav-inner {
@@ -5255,6 +5569,10 @@ body:has(.nk-site) {
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+  @media (max-width: 767px) {
+    padding: 16px 0 24px;
+    gap: 16px;
   }
 }
 
@@ -5642,6 +5960,16 @@ body:has(.nk-site) {
   border-radius: 22px;
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
   border: 1px solid rgba(251, 146, 60, 0.22);
+  @media (max-width: 767px) {
+    padding: 20px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    .nk-search-submit {
+      width: 100%;
+      justify-content: center;
+    }
+  }
   strong {
     display: block;
     font-size: 18px;

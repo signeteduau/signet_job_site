@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { FirebaseError } from "firebase/app";
 import AuthShell from "@/app/components/signet/auth-shell";
+import GoogleAuthButton from "@/app/components/signet/google-auth-button";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
 import { resolvePostLoginPath } from "@/lib/auth-flow";
@@ -13,7 +14,7 @@ import { getUserProfile } from "@/lib/services/users";
 import Wrapper from "@/layouts/wrapper";
 
 function LoginInner() {
-  const { login, loginWithGoogle, resetPassword } = useAuth();
+  const { login, resetPassword } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
   const returnUrl = search?.get("returnUrl");
@@ -21,7 +22,6 @@ function LoginInner() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [resetting, setResetting] = useState(false);
 
   const goNext = async () => {
@@ -122,48 +122,7 @@ function LoginInner() {
           <span>or</span>
         </div>
 
-        <button
-          type="button"
-          className="signet-btn google w-100"
-          disabled={googleLoading}
-          onClick={async () => {
-            setGoogleLoading(true);
-            try {
-              await loginWithGoogle();
-              await goNext();
-            } catch (err) {
-              const code =
-                err instanceof FirebaseError ? err.code : "";
-              if (code === "auth/unauthorized-domain") {
-                toast.error(
-                  "This domain is not allowed for Google sign-in. Add it in Firebase → Authentication → Settings → Authorized domains."
-                );
-              } else if (code === "auth/popup-blocked") {
-                toast.error("Popup was blocked. Allow popups for this site and try again.");
-              } else if (
-                code === "auth/popup-closed-by-user" ||
-                code === "auth/cancelled-popup-request"
-              ) {
-                toast.error("Google sign-in was cancelled.");
-              } else if (code === "auth/operation-not-allowed") {
-                toast.error(
-                  "Google sign-in is disabled in Firebase. Enable Google under Authentication → Sign-in method."
-                );
-              } else {
-                toast.error(
-                  code
-                    ? `Google sign-in failed (${code}).`
-                    : "Google sign-in failed."
-                );
-              }
-            } finally {
-              setGoogleLoading(false);
-            }
-          }}
-        >
-          <i className="bi bi-google" />
-          {googleLoading ? "Connecting…" : "Continue with Google"}
-        </button>
+        <GoogleAuthButton mode="login" returnUrl={returnUrl} onSuccess={goNext} />
 
         <p className="signet-auth-switch">
           New here?{" "}
