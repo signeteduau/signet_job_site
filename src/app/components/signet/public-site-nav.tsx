@@ -50,6 +50,12 @@ export default function PublicSiteNav({
             <Link href="/companies" className={pathname.startsWith("/companies") ? "active" : ""}>
               <i className="bi bi-building" /> Companies
             </Link>
+            <Link
+              href="/career-tips"
+              className={pathname.startsWith("/career-tips") ? "active" : ""}
+            >
+              <i className="bi bi-journal-text" /> Career Tips
+            </Link>
           </nav>
         </div>
 

@@ -200,6 +200,7 @@ export default function Home() {
                 <Link href="/"><i className="bi bi-house" /> Home</Link>
                 <Link href="/jobs"><i className="bi bi-briefcase" /> Jobs</Link>
                 <Link href="/companies"><i className="bi bi-building" /> Companies</Link>
+                <Link href="/career-tips"><i className="bi bi-journal-text" /> Career Tips</Link>
               </nav>
             </div>
             <div className="nk-nav-right">
@@ -546,6 +547,7 @@ export default function Home() {
               <Link href="/">Careers</Link>
               <Link href="/register?type=company">Employer home</Link>
               <Link href="/jobs">Browse jobs</Link>
+              <Link href="/career-tips">Career tips</Link>
             </div>
             <div>
               <h4>Help center</h4>

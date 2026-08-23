@@ -112,9 +112,9 @@ export default function AppShell({
             </Link>
             {role === "candidate" && (
               <Link
-                href="/candidate/articles"
+                href="/career-tips"
                 className="signet-icon-pill d-none d-md-inline-flex"
-                title="Articles"
+                title="Career Tips"
               >
                 <i className="bi bi-journal-text" />
               </Link>

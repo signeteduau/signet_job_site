@@ -27,6 +27,12 @@ service cloud.firestore {
       }
     }
 
+    // Career tips / blog articles — public read for web + app webviews
+    match /articles/{articleId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
     // Everything else stays signed-in only (matches mobile app)
     match /{document=**} {
       allow read, write: if request.auth != null;
