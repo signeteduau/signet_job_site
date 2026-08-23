@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Run on VPS as root: bash vps-deploy.sh
-# Hestia user: user | Domain: signemploymenthub.com
+# Hestia user: user | Domain: signetemploymenthub.com
 
 set -euo pipefail
 
 HESTIA_USER="user"
-DOMAIN="signemploymenthub.com"
+DOMAIN="signetemploymenthub.com"
 APP_DIR="/home/${HESTIA_USER}/apps/signet"
 REPO="https://github.com/signeteduau/signet_job_site.git"
 PORT="3000"
