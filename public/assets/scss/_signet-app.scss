@@ -4195,6 +4195,18 @@ body:has(.nk-site) {
   }
 }
 
+.nk-search-shell--single {
+  @media (min-width: 992px) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .nk-search-segment {
+    @media (min-width: 992px) {
+      border-right: none;
+    }
+  }
+}
+
 .nk-search-designation {
   position: relative;
 }
@@ -6095,10 +6107,20 @@ body:has(.nk-site) {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1fr;
   gap: 28px;
-  align-items: end;
+  align-items: start;
   max-width: 1180px;
+}
+
+.nk-career-hero-search-block {
+  width: 100%;
+  max-width: 760px;
+
+  .nk-search {
+    max-width: none;
+    margin: 0;
+  }
 }
 
 .nk-career-kicker {
@@ -6119,22 +6141,25 @@ body:has(.nk-site) {
 }
 
 .nk-career-hero-copy {
-  h1 {
-    margin: 0 0 12px;
-    color: $nk-ink;
-    font-size: clamp(32px, 4.8vw, 48px);
-    font-weight: 850;
-    letter-spacing: -0.045em;
-    line-height: 1.05;
-    max-width: 640px;
+  .nk-career-hero-headline {
+    margin: 0;
+    max-width: none;
+    color: $nk-muted;
+    font-size: clamp(18px, 2.4vw, 22px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.5;
+
+    strong {
+      color: $nk-ink;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+    }
   }
 
-  > p {
-    margin: 0;
-    color: $nk-muted;
-    font-size: 17px;
-    line-height: 1.65;
-    max-width: 560px;
+  .nk-career-hero-headline-sep {
+    color: rgba(113, 123, 158, 0.7);
+    font-weight: 400;
   }
 }
 
@@ -6156,40 +6181,6 @@ body:has(.nk-site) {
     height: 5px;
     border-radius: 50%;
     background: rgba(113, 123, 158, 0.55);
-  }
-}
-
-.nk-career-hero-search {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 18px;
-  border: 1px solid rgba(37, 80, 235, 0.12);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 18px 40px rgba(18, 18, 36, 0.08);
-}
-
-.nk-career-search-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: $nk-soft;
-  margin: 0;
-
-  i { color: $nk-muted; }
-
-  input {
-    flex: 1;
-    border: 0;
-    outline: none;
-    background: transparent;
-    min-width: 0;
-    font-size: 15px;
-    color: $nk-ink;
   }
 }
 
@@ -6815,10 +6806,6 @@ body:has(.nk-site) {
 }
 
 @media (max-width: 991px) {
-  .nk-career-hero-inner {
-    grid-template-columns: 1fr;
-  }
-
   .nk-career-card--spotlight .nk-career-card-media {
     aspect-ratio: 16 / 10;
     min-height: 200px;
@@ -6839,10 +6826,6 @@ body:has(.nk-site) {
 
   .nk-career-hero-band {
     padding-top: 24px;
-  }
-
-  .nk-career-hero-search .nk-search-submit {
-    width: 100%;
   }
 
   .nk-career-article-panel {

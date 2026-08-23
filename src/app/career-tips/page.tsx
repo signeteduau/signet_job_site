@@ -122,46 +122,55 @@ function CareerTipsInner() {
           </div>
           <div className="nk-container nk-career-hero-inner">
             <div className="nk-career-hero-copy">
-              <p className="nk-career-kicker">
-                <i className="bi bi-lightbulb" aria-hidden /> Career Tips
-              </p>
-              <h1>Grow your career with expert advice</h1>
-              <p>
+              <h1 className="nk-career-hero-headline">
+                <strong>Grow your career with expert advice</strong>
+                <span className="nk-career-hero-headline-sep" aria-hidden> — </span>
                 Practical guides on resumes, interviews, salary, remote work, and
                 landing your next role on Signet.
-              </p>
-              {!loading && (
-                <div className="nk-career-hero-stats">
-                  <span>
-                    <strong>{articles.length}</strong> articles
-                  </span>
-                  <span className="dot" aria-hidden />
-                  <span>
-                    <strong>{tags.length}</strong> topics
-                  </span>
-                </div>
-              )}
+              </h1>
             </div>
-            <form
-              className="nk-career-hero-search"
-              onSubmit={(e) => {
-                e.preventDefault();
-                applyFilters({ q: term, tag: activeTag });
-              }}
-            >
-              <label className="nk-career-search-label">
-                <i className="bi bi-search" aria-hidden />
-                <input
-                  value={term}
-                  onChange={(e) => setTerm(e.target.value)}
-                  placeholder="Search resume, interview, salary…"
-                  aria-label="Search career tips"
-                />
-              </label>
-              <button type="submit" className="nk-search-submit">
-                Search
-              </button>
-            </form>
+
+            <div className="nk-career-hero-search-block">
+              <form
+                className="nk-search"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  applyFilters({ q: term, tag: activeTag });
+                }}
+              >
+                <div className="nk-search-wrap">
+                  <div className="nk-search-shell nk-search-shell--single">
+                    <div className="nk-search-segment nk-search-designation">
+                      <label className="nk-search-designation-label">
+                        <i className="bi bi-search" aria-hidden />
+                        <input
+                          value={term}
+                          onChange={(e) => setTerm(e.target.value)}
+                          placeholder="Search articles, topics, or keywords"
+                          aria-label="Search career tips"
+                        />
+                      </label>
+                      {term ? (
+                        <button
+                          type="button"
+                          className="nk-search-clear"
+                          aria-label="Clear search"
+                          onClick={() => {
+                            setTerm("");
+                            applyFilters({ q: "", tag: activeTag });
+                          }}
+                        >
+                          <i className="bi bi-x" />
+                        </button>
+                      ) : null}
+                    </div>
+                    <button type="submit" className="nk-search-submit">
+                      Search
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </section>
 
