@@ -44,12 +44,6 @@ function CareerTipsInner() {
     };
   }, []);
 
-  const tags = useMemo(() => {
-    const set = new Set<string>();
-    articles.forEach((a) => (a.tags || []).forEach((t) => set.add(t)));
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [articles]);
-
   const filtered = useMemo(() => {
     const q = term.trim().toLowerCase();
     const tag = activeTag.trim().toLowerCase();
@@ -72,26 +66,23 @@ function CareerTipsInner() {
     });
   }, [articles, term, activeTag]);
 
-  const spotlight = useMemo(() => {
-    if (term || activeTag) return null;
-    return filtered.find((a) => a.featured) || filtered[0] || null;
-  }, [filtered, term, activeTag]);
-
-  const gridArticles = useMemo(() => {
-    if (!spotlight) return filtered;
-    return filtered.filter((a) => a.id !== spotlight.id);
-  }, [filtered, spotlight]);
-
   const featuredGrid = useMemo(
-    () => gridArticles.filter((a) => a.featured).slice(0, 3),
-    [gridArticles]
+    () => filtered.filter((a) => a.featured).slice(0, 3),
+    [filtered]
   );
 
-  const restGrid = useMemo(
-    () =>
-      gridArticles.filter((a) => !featuredGrid.some((f) => f.id === a.id)),
-    [gridArticles, featuredGrid]
-  );
+  const latestGrid = useMemo(() => {
+    const featuredIds = new Set(featuredGrid.map((a) => a.id));
+    return filtered.filter((a) => !featuredIds.has(a.id)).slice(0, 3);
+  }, [filtered, featuredGrid]);
+
+  const restGrid = useMemo(() => {
+    const shown = new Set([
+      ...featuredGrid.map((a) => a.id),
+      ...latestGrid.map((a) => a.id),
+    ]);
+    return filtered.filter((a) => !shown.has(a.id));
+  }, [filtered, featuredGrid, latestGrid]);
 
   const applyFilters = (next: { q?: string; tag?: string }) => {
     const params = new URLSearchParams();
@@ -103,6 +94,7 @@ function CareerTipsInner() {
     router.push(qs ? `/career-tips?${qs}` : "/career-tips");
   };
 
+  const isFiltering = !!(term.trim() || activeTag.trim());
   const resultsLabel = activeTag
     ? `Articles tagged “${activeTag}”`
     : term
@@ -121,106 +113,70 @@ function CareerTipsInner() {
             <span className="nk-career-hero-blob nk-career-hero-blob-b" />
           </div>
           <div className="nk-container nk-career-hero-inner">
-            <div className="nk-career-hero-copy">
-              <h1 className="nk-career-hero-headline">
-                <strong>Grow your career with expert advice</strong>
-                <span className="nk-career-hero-headline-sep" aria-hidden> — </span>
-                Practical guides on resumes, interviews, salary, remote work, and
-                landing your next role on Signet.
-              </h1>
-            </div>
+            <h1 className="nk-career-hero-headline">
+              <strong>Grow your career with expert advice</strong>
+              <span className="nk-career-hero-headline-sep" aria-hidden> — </span>
+              Practical guides on resumes, interviews, salary, remote work, and landing your next role on Signet.
+            </h1>
 
-            <div className="nk-career-hero-search-block">
-              <form
-                className="nk-search"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  applyFilters({ q: term, tag: activeTag });
-                }}
-              >
-                <div className="nk-search-wrap">
-                  <div className="nk-search-shell nk-search-shell--single">
-                    <div className="nk-search-segment nk-search-designation">
-                      <label className="nk-search-designation-label">
-                        <i className="bi bi-search" aria-hidden />
-                        <input
-                          value={term}
-                          onChange={(e) => setTerm(e.target.value)}
-                          placeholder="Search articles, topics, or keywords"
-                          aria-label="Search career tips"
-                        />
-                      </label>
-                      {term ? (
-                        <button
-                          type="button"
-                          className="nk-search-clear"
-                          aria-label="Clear search"
-                          onClick={() => {
-                            setTerm("");
-                            applyFilters({ q: "", tag: activeTag });
-                          }}
-                        >
-                          <i className="bi bi-x" />
-                        </button>
-                      ) : null}
-                    </div>
-                    <button type="submit" className="nk-search-submit">
-                      Search
-                    </button>
+            <form
+              className="nk-search nk-career-hero-search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                applyFilters({ q: term, tag: activeTag });
+              }}
+            >
+              <div className="nk-search-wrap">
+                <div className="nk-search-shell nk-search-shell--single">
+                  <div className="nk-search-segment nk-search-designation">
+                    <label className="nk-search-designation-label">
+                      <i className="bi bi-search" aria-hidden />
+                      <input
+                        value={term}
+                        onChange={(e) => setTerm(e.target.value)}
+                        placeholder="Search articles, topics, or keywords"
+                        aria-label="Search career tips"
+                      />
+                    </label>
+                    {term ? (
+                      <button
+                        type="button"
+                        className="nk-search-clear"
+                        aria-label="Clear search"
+                        onClick={() => {
+                          setTerm("");
+                          applyFilters({ q: "", tag: activeTag });
+                        }}
+                      >
+                        <i className="bi bi-x" />
+                      </button>
+                    ) : null}
                   </div>
+                  <button type="submit" className="nk-search-submit">
+                    Search
+                  </button>
                 </div>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </section>
 
         <main className="nk-container nk-career-tips-main">
-          {!!tags.length && (
-            <div className="nk-career-tags-wrap">
-              <p className="nk-career-tags-label">Browse by topic</p>
-              <div className="nk-career-tags">
-                <button
-                  type="button"
-                  className={`nk-career-tag${!activeTag ? " active" : ""}`}
-                  onClick={() => {
-                    setActiveTag("");
-                    applyFilters({ tag: "", q: term });
-                  }}
-                >
-                  All topics
-                </button>
-                {tags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className={`nk-career-tag${
-                      activeTag.toLowerCase() === tag.toLowerCase() ? " active" : ""
-                    }`}
-                    onClick={() => {
-                      setActiveTag(tag);
-                      applyFilters({ tag, q: term });
-                    }}
-                  >
-                    {tag}
-                  </button>
-                ))}
+          {(loading || isFiltering) && (
+            <div className="nk-career-results-head">
+              <div>
+                <h2>{resultsLabel}</h2>
+                <p>
+                  {loading
+                    ? "Loading articles…"
+                    : `${filtered.length} article${filtered.length === 1 ? "" : "s"} to explore`}
+                </p>
               </div>
             </div>
           )}
 
-          <div className="nk-career-results-head">
-            <div>
-              <h2>{resultsLabel}</h2>
-              <p>
-                {loading
-                  ? "Loading articles…"
-                  : `${filtered.length} article${filtered.length === 1 ? "" : "s"} to explore`}
-              </p>
-            </div>
-          </div>
-
           {loading && (
-            <div className="nk-career-grid">
+            <div className="nk-career-grid nk-career-grid--3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <PanelShimmer key={i} rows={5} />
               ))}
@@ -233,7 +189,7 @@ function CareerTipsInner() {
                 <i className="bi bi-journal-x" />
               </span>
               <h4>No articles found</h4>
-              <p>Try another search term or browse all topics.</p>
+              <p>Try another search term.</p>
               <button
                 type="button"
                 className="signet-btn secondary mt-2"
@@ -248,13 +204,31 @@ function CareerTipsInner() {
             </div>
           )}
 
-          {!loading && spotlight && (
-            <section className="nk-career-spotlight-wrap">
-              <CareerArticleCard article={spotlight} variant="spotlight" />
+          {!loading && isFiltering && filtered.length > 0 && (
+            <section className="nk-career-section">
+              <div className="nk-career-grid nk-career-grid--3">
+                {filtered.map((article) => (
+                  <CareerArticleCard key={article.id} article={article} />
+                ))}
+              </div>
             </section>
           )}
 
-          {!loading && featuredGrid.length > 0 && (
+          {!loading && !isFiltering && latestGrid.length > 0 && (
+            <section className="nk-career-section">
+              <div className="nk-career-section-head">
+                <h3>Latest articles</h3>
+                <p>Fresh career advice from Signet</p>
+              </div>
+              <div className="nk-career-grid nk-career-grid--3">
+                {latestGrid.map((article) => (
+                  <CareerArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {!loading && !isFiltering && featuredGrid.length > 0 && (
             <section className="nk-career-section">
               <div className="nk-career-section-head">
                 <h3>Featured reads</h3>
@@ -268,10 +242,10 @@ function CareerTipsInner() {
             </section>
           )}
 
-          {!loading && restGrid.length > 0 && (
+          {!loading && !isFiltering && restGrid.length > 0 && (
             <section className="nk-career-section">
               <div className="nk-career-section-head">
-                <h3>{featuredGrid.length ? "More to read" : "All articles"}</h3>
+                <h3>More to read</h3>
                 <p>Insights for every stage of your job search</p>
               </div>
               <div className="nk-career-grid nk-career-grid--3">

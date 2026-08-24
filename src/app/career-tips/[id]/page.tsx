@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import CareerArticleCard from "@/app/components/signet/career-article-card";
 import CareerArticleImage from "@/app/components/signet/career-article-image";
+import CareerArticleShare from "@/app/components/signet/career-article-share";
 import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { PageLoader, PanelShimmer } from "@/app/components/signet/shimmer";
 import {
@@ -183,15 +184,10 @@ function CareerArticleInner() {
                     </div>
 
                     {!embed && (
-                      <footer className="nk-career-article-footer">
-                        <Link href="/career-tips" className="nk-career-article-footer-link">
-                          <i className="bi bi-journal-text" aria-hidden />
-                          More career tips
-                        </Link>
-                        <Link href="/jobs" className="nk-search-submit">
-                          Browse open jobs
-                        </Link>
-                      </footer>
+                      <CareerArticleShare
+                        title={article.title}
+                        articleId={article.id}
+                      />
                     )}
                   </div>
                 </article>

@@ -11,10 +11,6 @@ import {
 import { db } from "@/lib/firebase";
 import { normalizeArticleImage } from "@/lib/article-utils";
 import { Article } from "@/types/chat";
-import {
-  FALLBACK_CAREER_ARTICLES,
-  getFallbackArticleById,
-} from "@/content/career-tips/fallback-articles";
 
 function mapArticle(id: string, data: DocumentData): Article {
   return {
@@ -38,15 +34,13 @@ export async function fetchArticles(max = 40): Promise<Article[]> {
       limit(max)
     );
     const snap = await getDocs(q);
-    const list = snap.docs.map((d) => mapArticle(d.id, d.data()));
-    return list.length ? list : FALLBACK_CAREER_ARTICLES.slice(0, max);
+    return snap.docs.map((d) => mapArticle(d.id, d.data()));
   } catch {
     try {
       const snap = await getDocs(collection(db, "articles"));
-      const list = snap.docs.map((d) => mapArticle(d.id, d.data()));
-      return list.length ? list : FALLBACK_CAREER_ARTICLES.slice(0, max);
+      return snap.docs.map((d) => mapArticle(d.id, d.data()));
     } catch {
-      return FALLBACK_CAREER_ARTICLES.slice(0, max);
+      return [];
     }
   }
 }
@@ -56,9 +50,9 @@ export async function fetchArticleById(id: string): Promise<Article | null> {
     const snap = await getDoc(doc(db, "articles", id));
     if (snap.exists()) return mapArticle(snap.id, snap.data());
   } catch {
-    // Fall through to bundled content for demo / when rules block guests.
+    // Firestore unavailable or rules block access.
   }
-  return getFallbackArticleById(id);
+  return null;
 }
 
 export async function searchArticles(opts?: {

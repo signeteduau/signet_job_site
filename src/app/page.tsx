@@ -92,7 +92,7 @@ export default function Home() {
     (async () => {
       try {
         const [jobList, companyList] = await Promise.all([
-          fetchJobs(100),
+          fetchJobs(200),
           fetchCompanies(16),
         ]);
         if (!alive) return;
@@ -230,9 +230,13 @@ export default function Home() {
               <p className="nk-hero-sub">
                 {loading ? (
                   "Loading openings for you to explore"
+                ) : jobs.length === 0 ? (
+                  "Browse open positions on Signet"
                 ) : (
                   <>
-                    Browse <strong>{formatCount(Math.max(jobs.length, 50))}+</strong> open positions
+                    Browse{" "}
+                    <strong>{formatCount(jobs.length)}</strong> open{" "}
+                    {jobs.length === 1 ? "position" : "positions"}
                   </>
                 )}
               </p>

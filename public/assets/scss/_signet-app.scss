@@ -6106,21 +6106,44 @@ body:has(.nk-site) {
 .nk-career-hero-inner {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 28px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  align-items: stretch;
   max-width: 1180px;
 }
 
-.nk-career-hero-search-block {
-  width: 100%;
-  max-width: 760px;
+.nk-career-hero-headline {
+  margin: 0;
+  color: $nk-muted;
+  font-size: clamp(14px, 1.25vw, 19px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
 
-  .nk-search {
-    max-width: none;
-    margin: 0;
+  strong {
+    color: $nk-ink;
+    font-weight: 850;
+    letter-spacing: -0.03em;
   }
+
+  @media (max-width: 480px) {
+    white-space: normal;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+}
+
+.nk-career-hero-headline-sep {
+  color: rgba(113, 123, 158, 0.7);
+  font-weight: 400;
+}
+
+.nk-career-hero-search {
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .nk-career-kicker {
@@ -6138,29 +6161,6 @@ body:has(.nk-site) {
   text-transform: uppercase;
 
   i { font-size: 14px; }
-}
-
-.nk-career-hero-copy {
-  .nk-career-hero-headline {
-    margin: 0;
-    max-width: none;
-    color: $nk-muted;
-    font-size: clamp(18px, 2.4vw, 22px);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.5;
-
-    strong {
-      color: $nk-ink;
-      font-weight: 850;
-      letter-spacing: -0.03em;
-    }
-  }
-
-  .nk-career-hero-headline-sep {
-    color: rgba(113, 123, 158, 0.7);
-    font-weight: 400;
-  }
 }
 
 .nk-career-hero-stats {
@@ -6653,27 +6653,56 @@ body:has(.nk-site) {
   padding-top: 4px;
 }
 
-.nk-career-article-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+.nk-career-article-share {
   margin-top: 36px;
   padding-top: 24px;
   border-top: 1px solid $nk-border;
+  text-align: center;
 }
 
-.nk-career-article-footer-link {
+.nk-career-article-share-label {
+  margin: 0 0 14px;
+  color: $nk-muted;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nk-career-article-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.nk-career-share-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  color: $nk-muted !important;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid $nk-border;
+  border-radius: 999px;
+  background: #fff;
+  color: $nk-ink;
   font-size: 14px;
   font-weight: 700;
   text-decoration: none !important;
+  cursor: pointer;
+  transition: 0.2s $s-ease;
+  box-shadow: 0 4px 14px rgba(18, 18, 36, 0.04);
 
-  &:hover { color: $nk-blue !important; }
+  i { font-size: 16px; color: $nk-blue; }
+
+  &:hover {
+    border-color: rgba(37, 80, 235, 0.28);
+    color: $nk-blue;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(37, 80, 235, 0.1);
+  }
 }
 
 .nk-career-article-related-mobile {
@@ -6843,16 +6872,6 @@ body:has(.nk-site) {
 
   .nk-career-article-meta-bar {
     justify-content: flex-start;
-  }
-
-  .nk-career-article-footer {
-    flex-direction: column;
-    align-items: stretch;
-
-    .nk-search-submit {
-      width: 100%;
-      text-align: center;
-    }
   }
 
   .nk-career-card-body {
