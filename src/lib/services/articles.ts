@@ -21,7 +21,12 @@ function mapArticle(id: string, data: DocumentData): Article {
     author: data.author || "",
     tags: data.tags || [],
     featured: !!data.featured,
-    content: data.content || "",
+    content:
+      data.content ||
+      data.contentHtml ||
+      data.html ||
+      data.body ||
+      "",
     createdAt: data.createdAt,
   };
 }

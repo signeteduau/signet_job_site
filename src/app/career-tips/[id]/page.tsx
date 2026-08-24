@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import CareerArticleCard from "@/app/components/signet/career-article-card";
 import CareerArticleImage from "@/app/components/signet/career-article-image";
+import CareerArticleBody from "@/app/components/signet/career-article-body";
 import CareerArticleShare from "@/app/components/signet/career-article-share";
 import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { PageLoader, PanelShimmer } from "@/app/components/signet/shimmer";
@@ -173,15 +174,7 @@ function CareerArticleInner() {
                       </div>
                     </header>
 
-                    <div className="nk-career-article-body">
-                      {(article.content || "")
-                        .split(/\n{2,}/)
-                        .map((paragraph) => paragraph.trim())
-                        .filter(Boolean)
-                        .map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
-                        ))}
-                    </div>
+                    <CareerArticleBody content={article.content} />
 
                     {!embed && (
                       <CareerArticleShare

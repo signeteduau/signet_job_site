@@ -6781,6 +6781,78 @@ body:has(.nk-site) {
 
     &:last-child { margin-bottom: 0; }
   }
+
+  h1, h2, h3, h4 {
+    color: #1f2430;
+    line-height: 1.35;
+    margin: 28px 0 14px;
+    font-weight: 800;
+  }
+
+  h1 { font-size: 28px; }
+  h2 { font-size: 24px; }
+  h3 { font-size: 20px; }
+  h4 { font-size: 18px; }
+
+  ul, ol {
+    margin: 0 0 20px;
+    padding-left: 1.4rem;
+    color: #3f4654;
+    line-height: 1.8;
+    font-size: 17px;
+
+    li + li { margin-top: 8px; }
+  }
+
+  blockquote {
+    margin: 0 0 20px;
+    padding: 16px 20px;
+    border-left: 4px solid rgba(37, 80, 235, 0.35);
+    background: rgba(37, 80, 235, 0.05);
+    border-radius: 0 12px 12px 0;
+    color: #2f3642;
+    font-size: 17px;
+    line-height: 1.8;
+  }
+
+  pre, code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+  }
+
+  pre {
+    margin: 0 0 20px;
+    padding: 16px;
+    overflow-x: auto;
+    border-radius: 12px;
+    background: #f4f6fb;
+    border: 1px solid $nk-border;
+  }
+
+  code {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #f4f6fb;
+  }
+
+  a {
+    color: $nk-blue;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 20px 0;
+    border-radius: 16px;
+    border: 1px solid $nk-border;
+  }
+
+  strong, b { font-weight: 800; }
+  em, i { font-style: italic; }
 }
 
 .nk-career-article-sidebar {

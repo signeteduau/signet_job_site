@@ -7,6 +7,7 @@ import CareerArticleCard from "@/app/components/signet/career-article-card";
 import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { PageLoader, PanelShimmer } from "@/app/components/signet/shimmer";
 import { fetchArticles } from "@/lib/services/articles";
+import { stripHtml } from "@/lib/article-utils";
 import { Article } from "@/types/chat";
 import Wrapper from "@/layouts/wrapper";
 
@@ -57,7 +58,7 @@ function CareerTipsInner() {
         article.subtitle,
         article.author,
         (article.tags || []).join(" "),
-        article.content,
+        stripHtml(article.content),
       ]
         .filter(Boolean)
         .join(" ")
