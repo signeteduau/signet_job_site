@@ -45,7 +45,7 @@ export default function CareerArticleShare({ title, articleId }: Props) {
 
   return (
     <footer className="nk-career-article-share">
-      <p className="nk-career-article-share-label">Share this article</p>
+      <p className="nk-career-article-share-label">Share this tip</p>
       <div className="nk-career-article-share-actions">
         <button type="button" className="nk-career-share-btn" onClick={nativeShare}>
           <i className="bi bi-share" aria-hidden />

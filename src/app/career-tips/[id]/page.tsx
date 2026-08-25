@@ -189,20 +189,16 @@ function CareerArticleInner() {
                   <aside className="nk-career-article-sidebar">
                     <div className="nk-career-sidebar-card">
                       <div className="nk-career-section-head">
-                        <h3>Related reads</h3>
+                        <h3>Related Tips</h3>
                         <p>More guides you might like</p>
                       </div>
                       <div className="nk-career-sidebar-list">
                         {related.map((item) => (
-                          <CareerArticleCard
-                            key={item.id}
-                            article={item}
-                            variant="compact"
-                          />
+                          <CareerArticleCard key={item.id} article={item} />
                         ))}
                       </div>
                       <Link href="/career-tips" className="nk-career-sidebar-link">
-                        View all articles
+                        View all tips
                       </Link>
                     </div>
                   </aside>
@@ -212,7 +208,7 @@ function CareerArticleInner() {
               {related.length > 0 && !embed && (
                 <section className="nk-container nk-career-article-related-mobile">
                   <div className="nk-career-section-head">
-                    <h3>Related reads</h3>
+                    <h3>Related Tips</h3>
                     <p>More guides you might like</p>
                   </div>
                   <div className="nk-career-grid nk-career-grid--3">

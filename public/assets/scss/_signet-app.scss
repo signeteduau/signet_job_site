@@ -6058,7 +6058,7 @@ body:has(.nk-site) {
   overflow-x: clip;
 
   .nk-career-tips-main {
-    padding: 0 0 64px;
+    padding: 12px 0 64px;
     max-width: 1180px;
   }
 }
@@ -6067,7 +6067,7 @@ body:has(.nk-site) {
   position: relative;
   overflow: hidden;
   padding: 34px 0 42px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .nk-career-hero-bg {
@@ -6119,7 +6119,8 @@ body:has(.nk-site) {
   font-size: clamp(14px, 1.25vw, 19px);
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.4;
+  line-height: 1.45;
+  text-align: left;
   white-space: nowrap;
 
   strong {
@@ -6128,9 +6129,9 @@ body:has(.nk-site) {
     letter-spacing: -0.03em;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 991px) {
     white-space: normal;
-    font-size: 15px;
+    font-size: clamp(15px, 3.8vw, 18px);
     line-height: 1.55;
   }
 }
@@ -6245,6 +6246,11 @@ body:has(.nk-site) {
 
 .nk-career-section {
   margin-bottom: 34px;
+
+  &:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+  }
 }
 
 .nk-career-spotlight-wrap {
@@ -6512,6 +6518,10 @@ body:has(.nk-site) {
   justify-content: space-between;
   gap: 20px;
 
+  .nk-career-kicker {
+    margin-bottom: 16px;
+  }
+
   h3 {
     margin: 0 0 8px;
     color: $nk-ink;
@@ -6551,7 +6561,7 @@ body:has(.nk-site) {
 
 .nk-career-article-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 24px;
   align-items: start;
   max-width: 1180px;
@@ -6590,15 +6600,15 @@ body:has(.nk-site) {
 }
 
 .nk-career-article-header {
-  max-width: 760px;
-  margin: 0 auto 28px;
-  text-align: center;
+  max-width: none;
+  margin: 0 0 28px;
+  text-align: left;
 }
 
 .nk-career-article-labels {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   margin-bottom: 16px;
 }
@@ -6631,25 +6641,25 @@ body:has(.nk-site) {
 }
 
 .nk-career-article-header h1 {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   color: $nk-ink;
-  font-size: clamp(28px, 4.2vw, 40px);
+  font-size: clamp(24px, 3vw, 32px);
   font-weight: 850;
   letter-spacing: -0.04em;
-  line-height: 1.12;
+  line-height: 1.2;
 }
 
 .nk-career-article-lead {
-  margin: 0 auto 22px;
-  max-width: 640px;
+  margin: 0 0 20px;
+  max-width: none;
   color: $nk-muted;
-  font-size: clamp(17px, 2.2vw, 20px);
+  font-size: clamp(16px, 2vw, 18px);
   line-height: 1.6;
 }
 
 .nk-career-article-meta-bar {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   padding-top: 4px;
 }
 
@@ -6764,8 +6774,8 @@ body:has(.nk-site) {
 }
 
 .nk-career-article-body {
-  max-width: 680px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 
   p {
     color: #3f4654;
@@ -6875,7 +6885,24 @@ body:has(.nk-site) {
 .nk-career-sidebar-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+
+  .nk-career-card {
+    .nk-career-card-body h3 {
+      font-size: 16px;
+      -webkit-line-clamp: 2;
+    }
+
+    .nk-career-card-body > p {
+      -webkit-line-clamp: 2;
+      font-size: 13px;
+    }
+
+    .nk-career-card-cta {
+      padding-top: 12px;
+      font-size: 13px;
+    }
+  }
 }
 
 .nk-career-sidebar-link {
@@ -6927,6 +6954,21 @@ body:has(.nk-site) {
 
   .nk-career-hero-band {
     padding-top: 24px;
+    margin-bottom: 8px;
+  }
+
+  .nk-career-hero-headline {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .nk-career-tips-main {
+    padding-top: 8px;
+  }
+
+  .nk-career-section:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
   }
 
   .nk-career-article-panel {
@@ -6944,6 +6986,10 @@ body:has(.nk-site) {
 
   .nk-career-article-meta-bar {
     justify-content: flex-start;
+  }
+
+  .nk-career-article-header h1 {
+    font-size: clamp(22px, 5.5vw, 28px);
   }
 
   .nk-career-card-body {

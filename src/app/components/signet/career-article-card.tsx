@@ -87,7 +87,7 @@ export default function CareerArticleCard({
 
         {variant !== "compact" && (
           <span className="nk-career-card-cta">
-            Read article <i className="bi bi-arrow-right" aria-hidden />
+            Read tip <i className="bi bi-arrow-right" aria-hidden />
           </span>
         )}
       </div>

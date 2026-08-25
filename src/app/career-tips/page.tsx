@@ -100,7 +100,7 @@ function CareerTipsInner() {
     ? `Articles tagged “${activeTag}”`
     : term
     ? `Results for “${term}”`
-    : "Latest articles";
+    : "Latest Tips";
 
   return (
     <Wrapper>
@@ -135,7 +135,7 @@ function CareerTipsInner() {
                       <input
                         value={term}
                         onChange={(e) => setTerm(e.target.value)}
-                        placeholder="Search articles, topics, or keywords"
+                        placeholder="Search tips, topics, or keywords"
                         aria-label="Search career tips"
                       />
                     </label>
@@ -169,8 +169,8 @@ function CareerTipsInner() {
                 <h2>{resultsLabel}</h2>
                 <p>
                   {loading
-                    ? "Loading articles…"
-                    : `${filtered.length} article${filtered.length === 1 ? "" : "s"} to explore`}
+                    ? "Loading tips…"
+                    : `${filtered.length} tip${filtered.length === 1 ? "" : "s"} to explore`}
                 </p>
               </div>
             </div>
@@ -189,7 +189,7 @@ function CareerTipsInner() {
               <span className="nk-career-empty-icon" aria-hidden>
                 <i className="bi bi-journal-x" />
               </span>
-              <h4>No articles found</h4>
+              <h4>No tips found</h4>
               <p>Try another search term.</p>
               <button
                 type="button"
@@ -200,7 +200,7 @@ function CareerTipsInner() {
                   router.push("/career-tips");
                 }}
               >
-                View all articles
+                View all tips
               </button>
             </div>
           )}
@@ -218,7 +218,7 @@ function CareerTipsInner() {
           {!loading && !isFiltering && latestGrid.length > 0 && (
             <section className="nk-career-section">
               <div className="nk-career-section-head">
-                <h3>Latest articles</h3>
+                <h3>Latest Tips</h3>
                 <p>Fresh career advice from Signet</p>
               </div>
               <div className="nk-career-grid nk-career-grid--3">
@@ -232,7 +232,7 @@ function CareerTipsInner() {
           {!loading && !isFiltering && featuredGrid.length > 0 && (
             <section className="nk-career-section">
               <div className="nk-career-section-head">
-                <h3>Featured reads</h3>
+                <h3>Featured Tips</h3>
                 <p>Hand-picked guides to help you stand out</p>
               </div>
               <div className="nk-career-grid nk-career-grid--3">
@@ -246,7 +246,7 @@ function CareerTipsInner() {
           {!loading && !isFiltering && restGrid.length > 0 && (
             <section className="nk-career-section">
               <div className="nk-career-section-head">
-                <h3>More to read</h3>
+                <h3>More tips</h3>
                 <p>Insights for every stage of your job search</p>
               </div>
               <div className="nk-career-grid nk-career-grid--3">
