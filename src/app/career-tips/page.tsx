@@ -116,8 +116,10 @@ function CareerTipsInner() {
           <div className="nk-container nk-career-hero-inner">
             <h1 className="nk-career-hero-headline">
               <strong>Grow your career with expert advice</strong>
-              <span className="nk-career-hero-headline-sep" aria-hidden> — </span>
-              Practical guides on resumes, interviews, salary, remote work, and landing your next role on Signet.
+              <span className="nk-career-hero-headline-sub">
+                <span className="nk-career-hero-headline-sep" aria-hidden> — </span>
+                Practical guides on resumes, interviews, salary, remote work, and landing your next role on Signet.
+              </span>
             </h1>
 
             <form
