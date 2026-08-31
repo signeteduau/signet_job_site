@@ -12,7 +12,9 @@ import {
   companyNewApplicationEmail,
   interviewScheduledEmail,
   jobCancelledEmail,
+  jobClosedCompanyEmail,
   welcomeEmail,
+  type EmailContent,
 } from "./templates";
 
 admin.initializeApp();
@@ -25,6 +27,22 @@ function asString(value: unknown, fallback = ""): string {
 
 function isClosedStatus(status: unknown): boolean {
   return CLOSED_STATUSES.has(asString(status).trim().toLowerCase());
+}
+
+async function dispatchEmail(
+  to: string,
+  tpl: EmailContent,
+  smtpPass: string,
+  meta: Record<string, string>
+) {
+  await sendEmail({
+    to,
+    subject: tpl.subject,
+    html: tpl.html,
+    text: tpl.text,
+    smtpPass,
+    meta,
+  });
 }
 
 /** Welcome email when a user profile is created. */
@@ -41,14 +59,17 @@ export const sendWelcomeEmail = onDocumentCreated(
     if (!email) return;
 
     const name = asString(data.fullName || data.companyName, "there");
-    const tpl = welcomeEmail(name, APP_URL.value());
+    const userType = asString(data.userType);
+    const tpl = welcomeEmail({
+      name,
+      userType,
+      appUrl: APP_URL.value(),
+    });
 
-    await sendEmail({
-      to: email,
-      subject: tpl.subject,
-      html: tpl.html,
-      smtpPass: SMTP_PASS.value(),
-      meta: { type: "welcome", userId: event.params.userId },
+    await dispatchEmail(email, tpl, SMTP_PASS.value(), {
+      type: "welcome",
+      userId: event.params.userId,
+      userType,
     });
   }
 );
@@ -68,6 +89,7 @@ export const sendApplicationEmails = onDocumentCreated(
     const companyName = asString(data.companyName, "Company");
     const companyId = asString(data.companyId);
     const appUrl = APP_URL.value();
+    const smtpPass = SMTP_PASS.value();
 
     const candidate = await getUserEmail(applicantId);
     if (candidate?.email) {
@@ -77,16 +99,10 @@ export const sendApplicationEmails = onDocumentCreated(
         companyName,
         appUrl,
       });
-      await sendEmail({
-        to: candidate.email,
-        subject: tpl.subject,
-        html: tpl.html,
-        smtpPass: SMTP_PASS.value(),
-        meta: {
-          type: "application_submitted_candidate",
-          jobId: event.params.jobId,
-          applicantId,
-        },
+      await dispatchEmail(candidate.email, tpl, smtpPass, {
+        type: "application_submitted_candidate",
+        jobId: event.params.jobId,
+        applicantId,
       });
     }
 
@@ -98,18 +114,11 @@ export const sendApplicationEmails = onDocumentCreated(
           candidateName: candidate?.fullName || "A candidate",
           jobTitle,
           appUrl,
-          jobId: event.params.jobId,
         });
-        await sendEmail({
-          to: company.email,
-          subject: tpl.subject,
-          html: tpl.html,
-          smtpPass: SMTP_PASS.value(),
-          meta: {
-            type: "application_submitted_company",
-            jobId: event.params.jobId,
-            applicantId,
-          },
+        await dispatchEmail(company.email, tpl, smtpPass, {
+          type: "application_submitted_company",
+          jobId: event.params.jobId,
+          applicantId,
         });
       }
     }
@@ -149,16 +158,10 @@ export const sendApplicationStatusEmail = onDocumentUpdated(
         interviewTime: asString(after.interviewTime),
         appUrl,
       });
-      await sendEmail({
-        to: candidate.email,
-        subject: tpl.subject,
-        html: tpl.html,
-        smtpPass,
-        meta: {
-          type: "interview_scheduled",
-          jobId: event.params.jobId,
-          applicantId,
-        },
+      await dispatchEmail(candidate.email, tpl, smtpPass, {
+        type: "interview_scheduled",
+        jobId: event.params.jobId,
+        applicantId,
       });
       return;
     }
@@ -170,16 +173,10 @@ export const sendApplicationStatusEmail = onDocumentUpdated(
         companyName,
         appUrl,
       });
-      await sendEmail({
-        to: candidate.email,
-        subject: tpl.subject,
-        html: tpl.html,
-        smtpPass,
-        meta: {
-          type: "application_accepted",
-          jobId: event.params.jobId,
-          applicantId,
-        },
+      await dispatchEmail(candidate.email, tpl, smtpPass, {
+        type: "application_accepted",
+        jobId: event.params.jobId,
+        applicantId,
       });
       return;
     }
@@ -192,22 +189,16 @@ export const sendApplicationStatusEmail = onDocumentUpdated(
         rejectionReason: asString(after.rejectionReason),
         appUrl,
       });
-      await sendEmail({
-        to: candidate.email,
-        subject: tpl.subject,
-        html: tpl.html,
-        smtpPass,
-        meta: {
-          type: "application_rejected",
-          jobId: event.params.jobId,
-          applicantId,
-        },
+      await dispatchEmail(candidate.email, tpl, smtpPass, {
+        type: "application_rejected",
+        jobId: event.params.jobId,
+        applicantId,
       });
     }
   }
 );
 
-/** Notify applicants when a job is closed/cancelled. */
+/** Notify applicants and employer when a job is closed/cancelled. */
 export const sendJobClosedEmails = onDocumentUpdated(
   {
     document: "jobs/{jobId}",
@@ -225,8 +216,24 @@ export const sendJobClosedEmails = onDocumentUpdated(
     const jobId = event.params.jobId;
     const jobTitle = asString(after.title, "Job");
     const companyName = asString(after.companyName, "Company");
+    const companyId = asString(after.companyId);
     const appUrl = APP_URL.value();
     const smtpPass = SMTP_PASS.value();
+
+    if (companyId) {
+      const company = await getUserEmail(companyId);
+      if (company?.email) {
+        const tpl = jobClosedCompanyEmail({
+          companyName: company.fullName,
+          jobTitle,
+          appUrl,
+        });
+        await dispatchEmail(company.email, tpl, smtpPass, {
+          type: "job_closed_company",
+          jobId,
+        });
+      }
+    }
 
     const appsSnap = await admin
       .firestore()
@@ -250,12 +257,10 @@ export const sendJobClosedEmails = onDocumentUpdated(
           appUrl,
         });
 
-        await sendEmail({
-          to: candidate.email,
-          subject: tpl.subject,
-          html: tpl.html,
-          smtpPass,
-          meta: { type: "job_cancelled", jobId, applicantId },
+        await dispatchEmail(candidate.email, tpl, smtpPass, {
+          type: "job_cancelled_candidate",
+          jobId,
+          applicantId,
         });
       })
     );

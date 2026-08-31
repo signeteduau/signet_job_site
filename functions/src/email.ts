@@ -1,13 +1,15 @@
 import nodemailer from "nodemailer";
 import * as admin from "firebase-admin";
-import { EMAIL_FROM, SMTP_USER } from "./config";
+import { EMAIL_FROM, SMTP_USER, SUPPORT_EMAIL } from "./config";
 
 let transporter: nodemailer.Transporter | null = null;
 
 function getTransporter(smtpPass: string) {
   if (!transporter) {
     transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: SMTP_USER.value(),
         pass: smtpPass,
@@ -21,16 +23,22 @@ export async function sendEmail(opts: {
   to: string;
   subject: string;
   html: string;
+  text: string;
   smtpPass: string;
   meta?: Record<string, string>;
 }): Promise<void> {
   const to = opts.to.trim().toLowerCase();
   if (!to) return;
 
+  const replyTo = SUPPORT_EMAIL.value();
+  const from = EMAIL_FROM.value();
+
   await getTransporter(opts.smtpPass).sendMail({
-    from: EMAIL_FROM.value(),
+    from,
     to,
+    replyTo,
     subject: opts.subject,
+    text: opts.text,
     html: opts.html,
   });
 
