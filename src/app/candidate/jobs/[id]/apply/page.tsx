@@ -13,7 +13,7 @@ import {
 } from "@/lib/phone-country-codes";
 import { fetchJobById } from "@/lib/services/jobs";
 import { applyToJob, hasApplied } from "@/lib/services/applications";
-import { uploadResume } from "@/lib/services/storage";
+import { uploadResume, getStorageErrorMessage, validateResumeFile } from "@/lib/services/storage";
 import { Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
@@ -61,17 +61,35 @@ function ApplyInner() {
       toast.error("Please upload a resume.");
       return;
     }
+    if (file) {
+      const fileError = validateResumeFile(file);
+      if (fileError) {
+        toast.error(fileError);
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       let resumeUrl = profile?.resumeUrl || "";
       let resumeFile = profile?.resumeFileName || "resume.pdf";
       if (file) {
         setUploading(true);
-        const uploaded = await uploadResume(user.uid, job.id, file);
-        resumeUrl = uploaded.url;
-        resumeFile = uploaded.fileName;
+        try {
+          const uploaded = await uploadResume(user.uid, job.id, file);
+          resumeUrl = uploaded.url;
+          resumeFile = uploaded.fileName;
+        } catch (err) {
+          console.error(err);
+          const msg =
+            err instanceof Error && !("code" in err)
+              ? err.message
+              : getStorageErrorMessage(err);
+          toast.error(msg);
+          return;
+        } finally {
+          setUploading(false);
+        }
         await saveProfile({ resumeUrl, resumeFileName: resumeFile });
-        setUploading(false);
       }
       await saveProfile({ phone, phoneCountryCode });
       await applyToJob({
@@ -85,7 +103,7 @@ function ApplyInner() {
       router.push("/candidate/my-jobs");
     } catch (err) {
       console.error(err);
-      toast.error("Could not submit application. Check Storage rules / login.");
+      toast.error("Could not submit application. Please try again.");
     } finally {
       setUploading(false);
       setSubmitting(false);

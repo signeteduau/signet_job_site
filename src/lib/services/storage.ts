@@ -5,6 +5,32 @@ import { storage } from "@/lib/firebase";
 /** Profile uploads must use profile_images/{uid}.jpg — Firebase Storage rules match the mobile app. */
 const PROFILE_IMAGE_PATH = (uid: string) => `profile_images/${uid}.jpg`;
 
+const MAX_RESUME_BYTES = 10 * 1024 * 1024;
+
+export function validateResumeFile(file: File): string | null {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  if (!["pdf", "doc", "docx"].includes(ext)) {
+    return "Please upload a PDF, DOC, or DOCX file.";
+  }
+  if (file.size > MAX_RESUME_BYTES) {
+    return "Resume must be under 10 MB.";
+  }
+  if (file.size === 0) {
+    return "That file appears to be empty.";
+  }
+  return null;
+}
+
+function resumeContentType(file: File): string {
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") return "application/pdf";
+  if (ext === "doc") return "application/msword";
+  if (ext === "docx") {
+    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  }
+  return file.type || "application/octet-stream";
+}
+
 export function getStorageErrorMessage(err: unknown): string {
   const code = err instanceof FirebaseError ? err.code : "";
   switch (code) {
@@ -47,11 +73,16 @@ export async function uploadResume(
   jobId: string,
   file: File
 ): Promise<{ url: string; fileName: string }> {
+  const validationError = validateResumeFile(file);
+  if (validationError) {
+    throw new Error(validationError);
+  }
+
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const path = `resumes/${uid}/${jobId}_${Date.now()}_${safeName}`;
   const storageRef = ref(storage, path);
   await uploadBytes(storageRef, file, {
-    contentType: file.type || "application/pdf",
+    contentType: resumeContentType(file),
   });
   const url = await getDownloadURL(storageRef);
   return { url, fileName: file.name };
@@ -62,11 +93,16 @@ export async function uploadProfileResume(
   uid: string,
   file: File
 ): Promise<{ url: string; fileName: string }> {
+  const validationError = validateResumeFile(file);
+  if (validationError) {
+    throw new Error(validationError);
+  }
+
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const path = `resumes/${uid}/profile_${Date.now()}_${safeName}`;
   const storageRef = ref(storage, path);
   await uploadBytes(storageRef, file, {
-    contentType: file.type || "application/pdf",
+    contentType: resumeContentType(file),
   });
   const url = await getDownloadURL(storageRef);
   return { url, fileName: file.name };

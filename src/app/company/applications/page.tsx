@@ -205,29 +205,31 @@ function ApplicationsInner() {
             const appliedOn = formatAppliedDate(app.appliedAt);
             return (
               <article key={app.id} className="signet-company-app-card">
-                <div className="signet-company-app-main">
-                  <span className="signet-company-app-avatar" aria-hidden>
-                    {applicantInitials(name)}
-                  </span>
-                  <div className="signet-company-app-meta">
-                    <strong>{name}</strong>
-                    <span className="signet-company-app-sub">
-                      {app.phone || "No phone on file"}
-                      {appliedOn ? ` · Applied ${appliedOn}` : ""}
+                <div className="signet-company-app-header">
+                  <div className="signet-company-app-main">
+                    <span className="signet-company-app-avatar" aria-hidden>
+                      {applicantInitials(name)}
                     </span>
-                    <span className={`signet-status ${statusClass(app.status)}`}>
-                      {app.status || "Under Review"}
-                    </span>
+                    <div className="signet-company-app-meta">
+                      <strong>{name}</strong>
+                      <span className="signet-company-app-sub">
+                        {app.phone || "No phone on file"}
+                        {appliedOn ? ` · Applied ${appliedOn}` : ""}
+                      </span>
+                      <span className={`signet-status ${statusClass(app.status)}`}>
+                        {app.status || "Under Review"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="signet-company-app-actions">
                   <Link
                     href={`/company/applications/${jobId}/${applicantId}`}
-                    className="signet-btn signet-btn-compact"
+                    className="signet-btn signet-btn-compact signet-company-app-profile"
                   >
                     View profile
                   </Link>
+                </div>
+
+                <div className="signet-company-app-actions">
                   {app.resumeUrl && (
                     <a
                       href={app.resumeUrl}

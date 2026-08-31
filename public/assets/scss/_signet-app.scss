@@ -2930,11 +2930,25 @@ $signet-page-pad: 16px;
   box-shadow: 0 8px 20px rgba(11, 18, 32, 0.04);
 }
 
+.signet-company-app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
 .signet-company-app-main {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  margin-bottom: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.signet-company-app-profile {
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .signet-company-app-avatar {
@@ -2977,7 +2991,7 @@ $signet-page-pad: 16px;
 .signet-company-app-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 12px;

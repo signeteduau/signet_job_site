@@ -19,7 +19,7 @@ export default function PublicSiteNav({
   variant = "default",
   searchTerm,
 }: Props) {
-  const { user, profile, loading, homePath } = useAuth();
+  const { user, profile, loading, homePath, logout } = useAuth();
   const pathname = usePathname();
   const loggedIn = !loading && !!user;
   const isCompany = profile?.userType === "company";
@@ -67,15 +67,13 @@ export default function PublicSiteNav({
               <Link href={homePath} className="nk-btn nk-btn-ghost">
                 {isCompany ? "Company dashboard" : "Dashboard"}
               </Link>
-              {isCompany ? (
-                <Link href="/company/jobs/new" className="nk-btn nk-btn-register">
-                  Post a job <i className="bi bi-arrow-right" />
-                </Link>
-              ) : (
-                <Link href="/jobs" className="nk-btn nk-btn-register">
-                  Browse jobs <i className="bi bi-arrow-right" />
-                </Link>
-              )}
+              <button
+                type="button"
+                className="nk-btn nk-btn-register"
+                onClick={() => logout()}
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>
