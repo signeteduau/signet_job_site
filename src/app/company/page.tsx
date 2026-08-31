@@ -12,6 +12,7 @@ import {
   fetchCompanyDashboard,
 } from "@/lib/services/company-dashboard";
 import { formatAppliedDate } from "@/lib/job-utils";
+import { getUserProfile } from "@/lib/services/users";
 import Wrapper from "@/layouts/wrapper";
 
 const QUICK_ACTIONS = [
@@ -55,6 +56,7 @@ function statusClass(status?: string) {
 function CompanyHomeInner() {
   const { user, profile } = useAuth();
   const [stats, setStats] = useState<CompanyDashboardStats | null>(null);
+  const [applicantNames, setApplicantNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   const companyName = profile?.companyName || "there";
@@ -63,7 +65,16 @@ function CompanyHomeInner() {
     (async () => {
       if (!user) return;
       try {
-        setStats(await fetchCompanyDashboard(user.uid));
+        const data = await fetchCompanyDashboard(user.uid);
+        setStats(data);
+        const entries = await Promise.all(
+          data.recentApplicants.map(async (app) => {
+            const id = app.userId || app.id;
+            const p = await getUserProfile(id);
+            return [id, p?.fullName || "Applicant"] as const;
+          })
+        );
+        setApplicantNames(Object.fromEntries(entries));
       } catch {
         toast.error("Could not load company dashboard.");
       } finally {
@@ -126,6 +137,7 @@ function CompanyHomeInner() {
           stats?.recentApplicants.map((app) => {
             const applicantId = app.userId || app.id;
             const appliedOn = formatAppliedDate(app.appliedAt);
+            const applicantName = applicantNames[applicantId] || "Applicant";
             return (
               <Link
                 key={`${app.jobId}-${applicantId}`}
@@ -134,9 +146,9 @@ function CompanyHomeInner() {
               >
                 <div className="signet-application-head">
                   <div className="signet-application-meta">
-                    <strong>{app.jobTitle}</strong>
+                    <strong>{applicantName}</strong>
                     <span className="signet-application-date">
-                      Applicant {applicantId.slice(0, 8)}…
+                      {app.jobTitle}
                       {appliedOn ? ` · Applied ${appliedOn}` : ""}
                     </span>
                   </div>
@@ -187,7 +199,7 @@ function CompanyHomeInner() {
                   </span>
                   <Link
                     href={`/company/jobs/${job.id}/edit`}
-                    className="signet-btn secondary signet-btn-sm signet-application-withdraw"
+                    className="signet-btn secondary signet-btn-sm signet-btn-compact"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Edit

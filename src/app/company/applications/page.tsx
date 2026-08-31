@@ -6,6 +6,7 @@ import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { formatAppliedDate } from "@/lib/job-utils";
 import { fetchCompanyJobs } from "@/lib/services/jobs";
 import {
   fetchJobApplications,
@@ -17,6 +18,21 @@ import { Application, Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+function statusClass(status?: string) {
+  if (status === "Rejected") return "rejected";
+  if (status === "Interview Scheduled") return "interview";
+  if (status === "Hired") return "hired";
+  return "";
+}
+
+function applicantInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
 
 function ApplicationsInner() {
   const { user, profile } = useAuth();
@@ -44,31 +60,38 @@ function ApplicationsInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  const reloadApps = async (nextJobId: string) => {
+    const list = await fetchJobApplications(nextJobId);
+    setApps(list);
+    const entries = await Promise.all(
+      list.map(async (a) => {
+        const id = a.userId || a.id;
+        const p = await getUserProfile(id);
+        return [id, p?.fullName || id] as const;
+      })
+    );
+    setNames(Object.fromEntries(entries));
+  };
+
   useEffect(() => {
     (async () => {
       if (!jobId) {
         setApps([]);
+        setNames({});
         setLoading(false);
         return;
       }
       setLoading(true);
+      setApps([]);
       try {
-        const list = await fetchJobApplications(jobId);
-        setApps(list);
-        const entries = await Promise.all(
-          list.map(async (a) => {
-            const id = a.userId || a.id;
-            const p = await getUserProfile(id);
-            return [id, p?.fullName || id] as const;
-          })
-        );
-        setNames(Object.fromEntries(entries));
+        await reloadApps(jobId);
       } catch {
         toast.error("Could not load applications.");
       } finally {
         setLoading(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const selectedJob = useMemo(
@@ -79,13 +102,42 @@ function ApplicationsInner() {
   const filteredApps = useMemo(() => {
     if (!statusFilter) return apps;
     return apps.filter(
-      (a) => (a.status || "").toLowerCase() === statusFilter.toLowerCase()
+      (a) => (a.status || "Under Review").toLowerCase() === statusFilter.toLowerCase()
     );
   }, [apps, statusFilter]);
 
+  const updateStatus = async (
+    applicantId: string,
+    status: Application["status"],
+    rejectionReason?: string
+  ) => {
+    if (!user || !jobId) return;
+    try {
+      await updateApplicationStatus({
+        jobId,
+        companyId: user.uid,
+        applicantId,
+        status: status!,
+        rejectionReason,
+      });
+      toast.success("Application updated.");
+      await reloadApps(jobId);
+    } catch {
+      toast.error("Update failed.");
+    }
+  };
+
   return (
-    <AppShell role="company" title="Applications">
-      <div className="row">
+    <AppShell
+      role="company"
+      title="Applications"
+      subtitle={
+        selectedJob
+          ? `${filteredApps.length} applicant${filteredApps.length === 1 ? "" : "s"} for ${selectedJob.title}`
+          : "Review candidates who applied to your roles"
+      }
+    >
+      <div className="row g-3 mb-3">
         <div className="col-md-6">
           <div className="signet-field">
             <label>Job</label>
@@ -107,7 +159,6 @@ function ApplicationsInner() {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="">All statuses</option>
-              <option value="Applied">Applied</option>
               <option value="Under Review">Under Review</option>
               <option value="Interview Scheduled">Interview Scheduled</option>
               <option value="Hired">Hired</option>
@@ -118,15 +169,16 @@ function ApplicationsInner() {
       </div>
 
       {loading && (
-        <div className="signet-panel" aria-busy="true">
+        <div className="signet-company-apps" aria-busy="true">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="mb-3">
+            <div key={i} className="signet-company-app-card">
               <span className="signet-shimmer sk-line sk-w-40 d-block mb-2" style={{ height: 16 }} />
               <span className="signet-shimmer sk-line sk-w-70 d-block" />
             </div>
           ))}
         </div>
       )}
+
       {!loading && apps.length === 0 && (
         <div className="signet-empty">
           <h4>No applications</h4>
@@ -137,6 +189,7 @@ function ApplicationsInner() {
           </p>
         </div>
       )}
+
       {!loading && apps.length > 0 && filteredApps.length === 0 && (
         <div className="signet-empty">
           <h4>No matches</h4>
@@ -144,130 +197,100 @@ function ApplicationsInner() {
         </div>
       )}
 
-      {filteredApps.map((app) => {
-        const applicantId = app.userId || app.id;
-        return (
-          <div key={app.id} className="signet-panel">
-            <div className="d-flex justify-content-between gap-2 flex-wrap">
-              <div>
-                <div style={{ color: "#12141A", fontWeight: 700 }}>
-                  {names[applicantId] || applicantId}
+      {!loading && filteredApps.length > 0 && (
+        <div className="signet-company-apps">
+          {filteredApps.map((app) => {
+            const applicantId = app.userId || app.id;
+            const name = names[applicantId] || "Applicant";
+            const appliedOn = formatAppliedDate(app.appliedAt);
+            return (
+              <article key={app.id} className="signet-company-app-card">
+                <div className="signet-company-app-main">
+                  <span className="signet-company-app-avatar" aria-hidden>
+                    {applicantInitials(name)}
+                  </span>
+                  <div className="signet-company-app-meta">
+                    <strong>{name}</strong>
+                    <span className="signet-company-app-sub">
+                      {app.phone || "No phone on file"}
+                      {appliedOn ? ` · Applied ${appliedOn}` : ""}
+                    </span>
+                    <span className={`signet-status ${statusClass(app.status)}`}>
+                      {app.status || "Under Review"}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ color: "#6B7280", fontSize: 13 }}>
-                  {app.phone || "No phone"} · {app.resumeFile || "Resume"}
-                </div>
-                <span
-                  className={`signet-status mt-2 ${
-                    app.status === "Rejected"
-                      ? "rejected"
-                      : app.status === "Interview Scheduled"
-                      ? "interview"
-                      : ""
-                  }`}
-                >
-                  {app.status}
-                </span>
-              </div>
-              <div className="d-flex flex-column gap-2">
-                <Link
-                  href={`/company/applications/${jobId}/${applicantId}`}
-                  className="signet-btn"
-                >
-                  Details
-                </Link>
-                {app.resumeUrl && (
-                  <a
-                    href={app.resumeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="signet-btn secondary"
+
+                <div className="signet-company-app-actions">
+                  <Link
+                    href={`/company/applications/${jobId}/${applicantId}`}
+                    className="signet-btn signet-btn-compact"
                   >
-                    View resume
-                  </a>
-                )}
-                <button
-                  className="signet-btn secondary"
-                  onClick={async () => {
-                    if (!user || !profile) return;
-                    try {
-                      const chatId = await openOrCreateChat({
-                        currentUser: profile,
-                        otherUserId: applicantId,
-                      });
-                      router.push(`/company/chat/${chatId}`);
-                    } catch {
-                      toast.error("Could not open chat.");
-                    }
-                  }}
-                >
-                  Message
-                </button>
-                <button
-                  className="signet-btn secondary"
-                  onClick={async () => {
-                    if (!user || !jobId) return;
-                    try {
-                      await updateApplicationStatus({
-                        jobId,
-                        companyId: user.uid,
-                        applicantId,
-                        status: "Interview Scheduled",
-                      });
-                      toast.success("Interview scheduled.");
-                      setApps(await fetchJobApplications(jobId));
-                    } catch {
-                      toast.error("Update failed.");
-                    }
-                  }}
-                >
-                  Schedule interview
-                </button>
-                <button
-                  className="signet-btn"
-                  onClick={async () => {
-                    if (!user || !jobId) return;
-                    try {
-                      await updateApplicationStatus({
-                        jobId,
-                        companyId: user.uid,
-                        applicantId,
-                        status: "Hired",
-                      });
-                      toast.success("Marked as hired.");
-                      setApps(await fetchJobApplications(jobId));
-                    } catch {
-                      toast.error("Update failed.");
-                    }
-                  }}
-                >
-                  Hire
-                </button>
-                <button
-                  className="signet-btn danger"
-                  onClick={async () => {
-                    if (!user || !jobId) return;
-                    try {
-                      await updateApplicationStatus({
-                        jobId,
-                        companyId: user.uid,
-                        applicantId,
-                        status: "Rejected",
-                        rejectionReason: "Not a fit at this time",
-                      });
-                      toast.success("Application rejected.");
-                      setApps(await fetchJobApplications(jobId));
-                    } catch {
-                      toast.error("Update failed.");
-                    }
-                  }}
-                >
-                  Reject
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+                    View profile
+                  </Link>
+                  {app.resumeUrl && (
+                    <a
+                      href={app.resumeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="signet-btn secondary signet-btn-compact"
+                    >
+                      Resume
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    className="signet-btn secondary signet-btn-compact"
+                    onClick={async () => {
+                      if (!user || !profile) return;
+                      try {
+                        const chatId = await openOrCreateChat({
+                          currentUser: profile,
+                          otherUserId: applicantId,
+                        });
+                        router.push(`/company/chat/${chatId}`);
+                      } catch {
+                        toast.error("Could not open chat.");
+                      }
+                    }}
+                  >
+                    Message
+                  </button>
+                  {app.status !== "Interview Scheduled" && app.status !== "Hired" && (
+                    <button
+                      type="button"
+                      className="signet-btn secondary signet-btn-compact"
+                      onClick={() => updateStatus(applicantId, "Interview Scheduled")}
+                    >
+                      Interview
+                    </button>
+                  )}
+                  {app.status !== "Hired" && (
+                    <button
+                      type="button"
+                      className="signet-btn signet-btn-compact"
+                      onClick={() => updateStatus(applicantId, "Hired")}
+                    >
+                      Hire
+                    </button>
+                  )}
+                  {app.status !== "Rejected" && (
+                    <button
+                      type="button"
+                      className="signet-btn danger signet-btn-compact"
+                      onClick={() =>
+                        updateStatus(applicantId, "Rejected", "Not a fit at this time")
+                      }
+                    >
+                      Reject
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </AppShell>
   );
 }

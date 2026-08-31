@@ -4,8 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Wrapper from "@/layouts/wrapper";
+import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { NkScrollRail } from "@/app/components/signet/nk-scroll-rail";
 import SearchSuggestions from "@/app/components/signet/search-suggestions";
+import { useAuth } from "@/context/auth-context";
 import { jobMatchesSearchTerm } from "@/lib/job-utils";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
 import { Job } from "@/types/firestore";
@@ -78,6 +80,9 @@ function companyLogo(c: CompanyRow) {
 
 export default function Home() {
   const router = useRouter();
+  const { user, profile, loading: authLoading, homePath } = useAuth();
+  const loggedIn = !authLoading && !!user;
+  const isCompany = profile?.userType === "company";
   const designationInputRef = useRef<HTMLInputElement>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [companies, setCompanies] = useState<CompanyRow[]>([]);
@@ -180,42 +185,7 @@ export default function Home() {
   return (
     <Wrapper>
       <div className="nk-site">
-        <header className="nk-nav">
-          <div className="nk-container nk-nav-inner">
-            <div className="nk-nav-left">
-              <Link href="/" className="nk-brand">
-                <span className="nk-brand-mark">
-                  <Image
-                    src={signetLogo}
-                    alt={SIGNET_LOGO_ALT}
-                    width={36}
-                    height={36}
-                    sizes="36px"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    priority
-                  />
-                </span>
-              </Link>
-              <nav className="nk-nav-links" aria-label="Primary">
-                <Link href="/"><i className="bi bi-house" /> Home</Link>
-                <Link href="/jobs"><i className="bi bi-briefcase" /> Jobs</Link>
-                <Link href="/companies"><i className="bi bi-building" /> Companies</Link>
-                <Link href="/career-tips"><i className="bi bi-journal-text" /> Career Tips</Link>
-              </nav>
-            </div>
-            <div className="nk-nav-right">
-              {/* <Link href="/register?type=company" className="nk-nav-employer">
-                For employers <i className="bi bi-chevron-down" />
-              </Link> */}
-              <Link href="/login" className="nk-btn nk-btn-ghost">
-                Login
-              </Link>
-              <Link href="/register" className="nk-btn nk-btn-register">
-                Register <i className="bi bi-arrow-right" />
-              </Link>
-            </div>
-          </div>
-        </header>
+        <PublicSiteNav />
 
         <main>
           <section className="nk-hero">
@@ -521,9 +491,15 @@ export default function Home() {
                   <Link href="/jobs" className="nk-btn nk-btn-on-dark">
                     Browse all jobs
                   </Link>
-                  <Link href="/register" className="nk-btn nk-btn-banner-ghost">
-                    Register for free
-                  </Link>
+                  {loggedIn ? (
+                    <Link href={homePath} className="nk-btn nk-btn-banner-ghost">
+                      {isCompany ? "Open company dashboard" : "Go to dashboard"}
+                    </Link>
+                  ) : (
+                    <Link href="/register" className="nk-btn nk-btn-banner-ghost">
+                      Register for free
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

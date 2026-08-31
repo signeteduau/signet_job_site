@@ -10,6 +10,7 @@ import JobFiltersSidebar, {
 import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { JobListShimmer, PageLoader } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useAuth } from "@/context/auth-context";
 import { searchJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
 import { Job } from "@/types/firestore";
@@ -20,6 +21,9 @@ function PublicJobsInner() {
   const initialQ = search?.get("q") || "";
   const initialLoc = search?.get("location") || "";
   const { user, isCandidateReady, requireAuth } = useRequireAuth();
+  const { profile, homePath, loading: authLoading } = useAuth();
+  const loggedIn = !authLoading && !!user;
+  const isCompany = profile?.userType === "company";
 
   const [filters, setFilters] = useState<JobFilters>({
     term: initialQ,
@@ -128,7 +132,9 @@ function PublicJobsInner() {
                   {loading
                     ? "Searching…"
                     : `${jobs.length} active jobs`}
-                  {!isCandidateReady && " · Sign in to apply or save roles"}
+                  {!loggedIn && " · Sign in to apply or save roles"}
+                  {loggedIn && isCompany && " · Browsing as employer"}
+                  {loggedIn && isCandidate && !isCandidateReady && " · Complete your profile to apply"}
                 </p>
               </div>
             </div>
@@ -177,7 +183,7 @@ function PublicJobsInner() {
                         }
                       }}
                     />
-                    {index === 2 && !isCandidateReady && (
+                    {index === 2 && !loggedIn && (
                       <div className="nk-browse-register-banner">
                         <div>
                           <strong>
@@ -200,24 +206,71 @@ function PublicJobsInner() {
           </div>
 
           <aside className="nk-browse-promo">
-            <div className="nk-browse-promo-card">
-              <span className="nk-browse-promo-tag">For job seekers</span>
-              <h4>Build your profile</h4>
-              <p>
-                Complete your profile to apply faster and stand out to
-                recruiters.
-              </p>
-              <Link href="/register" className="nk-search-submit">
-                Get started
-              </Link>
-            </div>
-            <div className="nk-browse-promo-card muted">
-              <h4>Are you hiring?</h4>
-              <p>Post a Jobs and manage applicants from your company dashboard.</p>
-              <Link href="/register?type=company" className="nk-search-submit">
-                Post a job
-              </Link>
-            </div>
+            {!loggedIn ? (
+              <>
+                <div className="nk-browse-promo-card">
+                  <span className="nk-browse-promo-tag">For job seekers</span>
+                  <h4>Build your profile</h4>
+                  <p>
+                    Complete your profile to apply faster and stand out to
+                    recruiters.
+                  </p>
+                  <Link href="/register" className="nk-search-submit">
+                    Get started
+                  </Link>
+                </div>
+                <div className="nk-browse-promo-card muted">
+                  <h4>Are you hiring?</h4>
+                  <p>Post a job and manage applicants from your company dashboard.</p>
+                  <Link href="/register?type=company" className="nk-search-submit">
+                    Post a job
+                  </Link>
+                </div>
+              </>
+            ) : isCompany ? (
+              <>
+                <div className="nk-browse-promo-card">
+                  <span className="nk-browse-promo-tag">Employer</span>
+                  <h4>Manage your hiring</h4>
+                  <p>
+                    Review applications, message candidates, and post new roles
+                    from your dashboard.
+                  </p>
+                  <Link href="/company" className="nk-search-submit">
+                    Company dashboard
+                  </Link>
+                </div>
+                <div className="nk-browse-promo-card muted">
+                  <h4>Need more talent?</h4>
+                  <p>Publish a new vacancy to reach candidates on Signet.</p>
+                  <Link href="/company/jobs/new" className="nk-search-submit">
+                    Post a job
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="nk-browse-promo-card">
+                  <span className="nk-browse-promo-tag">For job seekers</span>
+                  <h4>{isCandidateReady ? "Your dashboard" : "Complete your profile"}</h4>
+                  <p>
+                    {isCandidateReady
+                      ? "Apply to roles, track applications, and message employers."
+                      : "Finish your profile so you can apply and save jobs."}
+                  </p>
+                  <Link href={homePath} className="nk-search-submit">
+                    {isCandidateReady ? "Open dashboard" : "Complete profile"}
+                  </Link>
+                </div>
+                <div className="nk-browse-promo-card muted">
+                  <h4>Saved jobs</h4>
+                  <p>View roles you bookmarked while browsing.</p>
+                  <Link href="/candidate/my-jobs" className="nk-search-submit">
+                    My applications
+                  </Link>
+                </div>
+              </>
+            )}
           </aside>
         </main>
       </div>

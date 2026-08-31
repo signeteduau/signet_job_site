@@ -2916,6 +2916,74 @@ $signet-page-pad: 16px;
   }
 }
 
+.signet-company-apps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signet-company-app-card {
+  background: #fff;
+  border: 1px solid $s-border;
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 20px rgba(11, 18, 32, 0.04);
+}
+
+.signet-company-app-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.signet-company-app-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0, 76, 240, 0.12), rgba(0, 76, 240, 0.04));
+  color: $s-blue;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.signet-company-app-meta {
+  min-width: 0;
+  flex: 1;
+  strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 750;
+    color: $s-ink;
+    margin-bottom: 4px;
+  }
+  .signet-status {
+    margin-top: 8px;
+  }
+}
+
+.signet-company-app-sub {
+  display: block;
+  color: $s-muted;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.signet-company-app-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid $s-border;
+}
+
 .signet-company-rail {
   display: flex;
   gap: 12px;
