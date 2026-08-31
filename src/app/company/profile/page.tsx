@@ -108,7 +108,6 @@ function CompanyProfileInner() {
               }}
             />
             <div className="signet-profile-copy">
-              <p className="signet-eyebrow">Company brand</p>
               <h2>{companyName || "Your company"}</h2>
               <p>{industry || user?.email}</p>
             </div>

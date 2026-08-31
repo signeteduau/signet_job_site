@@ -61,7 +61,7 @@ export function welcomeEmail(opts: {
           "Schedule interviews and update hiring status",
           "Message applicants directly",
         ])}
-        <p style="margin-top:16px;">Complete your company profile so candidates can learn more about your business.</p>`,
+        <p style="margin-top:16px;">Complete your company profile and start managing your hiring needs.</p>`,
       ctaLabel: "Go to employer dashboard",
       ctaUrl: `${opts.appUrl}/company`,
     });
