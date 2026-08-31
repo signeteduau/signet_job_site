@@ -27,10 +27,34 @@ service cloud.firestore {
       }
     }
 
+    // Public account-deletion requests (guests who cannot sign in)
+    match /accountDeletionRequests/{requestId} {
+      allow create: if request.resource.data.keys().hasAll([
+          "fullName",
+          "accountEmail",
+          "contactEmail",
+          "status",
+          "source",
+          "createdAt"
+        ])
+        && request.resource.data.fullName is string
+        && request.resource.data.accountEmail is string
+        && request.resource.data.contactEmail is string
+        && request.resource.data.status == "pending"
+        && request.resource.data.source == "web";
+      allow read, update, delete: if false;
+    }
+
     // Career tips / blog articles — public read for web + app webviews
     match /articles/{articleId} {
       allow read: if true;
       allow write: if request.auth != null;
+    }
+
+    // Email delivery logs (written by Cloud Functions only)
+    match /emailLogs/{logId} {
+      allow read: if request.auth != null;
+      allow write: if false;
     }
 
     // Everything else stays signed-in only (matches mobile app)

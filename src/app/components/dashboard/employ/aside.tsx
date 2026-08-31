@@ -176,15 +176,13 @@ const EmployAside = ({isOpenSidebar,setIsOpenSidebar}:IProps) => {
               );
             })}
             <li>
-              <a
-                href="#"
+              <Link
+                href="/delete-account"
                 className="d-flex w-100 align-items-center"
-                data-bs-toggle="modal"
-                data-bs-target="#deleteModal"
               >
                 <Image src={nav_8} alt="icon" className="lazy-img" />
                 <span>Delete Account</span>
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>

@@ -2094,6 +2094,76 @@ $signet-page-pad: 16px;
   }
 }
 
+// Delete account page
+.signet-delete-account-list {
+  margin: 0 0 20px;
+  padding-left: 1.2rem;
+  color: $s-muted;
+  line-height: 1.7;
+  font-size: 14px;
+
+  a {
+    color: $s-blue;
+    font-weight: 600;
+  }
+}
+
+.signet-delete-account-panel {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid $s-border;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 800;
+    color: $s-ink;
+  }
+}
+
+.signet-delete-account-signed-in {
+  margin: 0 0 16px;
+  color: $s-muted;
+  font-size: 14px;
+
+  strong { color: $s-ink; }
+}
+
+.signet-delete-account-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 16px;
+  color: $s-ink;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+
+  input {
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+}
+
+.signet-delete-account-alt,
+.signet-delete-account-links {
+  color: $s-muted;
+  font-size: 14px;
+
+  a {
+    color: $s-blue;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+}
+
+.signet-delete-account-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 // Compact auth toasts (sign in prompts)
 .signet-toast {
   min-height: unset !important;

@@ -12,8 +12,8 @@ export const privacyPolicy: LegalDocument = {
       "abn": "94 684 960 521",
       "address": "64 Barnes Ave, Magill SA 5072, Australia",
       "website": "https://signetemploymenthub.com",
-      "privacyEmail": "privacy@jobportal.com",
-      "supportEmail": "support@jobportal.com",
+      "privacyEmail": "signeteduau@gmail.com",
+      "supportEmail": "signeteduau@gmail.com",
       "deleteAccountUrl": "https://signetemploymenthub.com/delete-account"
     },
     "notice": "Prepared for publication and app-store submission. Review this policy whenever the app, SDKs, permissions or data practices change."
@@ -57,8 +57,8 @@ export const privacyPolicy: LegalDocument = {
             ["ABN", "94 684 960 521"],
             ["Principal place of business", "64 Barnes Ave, Magill SA 5072, Australia"],
             ["Website", "https://signetemploymenthub.com"],
-            ["Privacy email", "privacy@jobportal.com"],
-            ["Support email", "support@jobportal.com"]
+            ["Privacy email", "signeteduau@gmail.com"],
+            ["Support email", "signeteduau@gmail.com"]
           ]
         },
         {
@@ -808,7 +808,7 @@ export const privacyPolicy: LegalDocument = {
           "blocks": [
             {
               "type": "p",
-              "text": "You may initiate deletion through the account settings in the app. If you cannot access the app, you may submit a deletion request through https://signetemploymenthub.com/delete-account or email privacy@jobportal.com with the subject \u201cAccount Deletion Request\u201d."
+              "text": "You may initiate deletion through the account settings in the app. If you cannot access the app, you may submit a deletion request through https://signetemploymenthub.com/delete-account or email signeteduau@gmail.com with the subject \u201cAccount Deletion Request\u201d."
             }
           ]
         },
@@ -866,7 +866,7 @@ export const privacyPolicy: LegalDocument = {
         },
         {
           "type": "p",
-          "text": "Requests may be sent to privacy@jobportal.com with the subject \u201cPrivacy Access Request\u201d or \u201cPrivacy Correction Request\u201d. We may ask you to verify your identity. We will respond within a reasonable period and may refuse access where permitted or required by law. Where appropriate, we will explain the reason for refusal and any available complaint options."
+          "text": "Requests may be sent to signeteduau@gmail.com with the subject \u201cPrivacy Access Request\u201d or \u201cPrivacy Correction Request\u201d. We may ask you to verify your identity. We will respond within a reasonable period and may refuse access where permitted or required by law. Where appropriate, we will explain the reason for refusal and any available complaint options."
         }
       ]
     },
@@ -1051,7 +1051,7 @@ export const privacyPolicy: LegalDocument = {
             ],
             [
               "Privacy email",
-              "privacy@jobportal.com"
+              "signeteduau@gmail.com"
             ],
             [
               "Website",
@@ -1063,7 +1063,7 @@ export const privacyPolicy: LegalDocument = {
             ],
             [
               "Support email",
-              "support@jobportal.com"
+              "signeteduau@gmail.com"
             ]
           ]
         }

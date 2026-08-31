@@ -12,8 +12,8 @@ export const termsAndConditions: LegalDocument = {
       abn: "94 684 960 521",
       address: "64 Barnes Ave, Magill SA 5072, Australia",
       website: "https://signetemploymenthub.com",
-      privacyEmail: "privacy@jobportal.com",
-      supportEmail: "support@jobportal.com",
+      privacyEmail: "signeteduau@gmail.com",
+      supportEmail: "signeteduau@gmail.com",
       deleteAccountUrl: "https://signetemploymenthub.com/delete-account",
     },
     notice:
@@ -264,7 +264,7 @@ export const termsAndConditions: LegalDocument = {
       blocks: [
         {
           type: "p",
-          text: "You may stop using the Services at any time and may request deletion of your account through account settings in the app or by contacting privacy@jobportal.com.",
+          text: "You may stop using the Services at any time and may request deletion of your account through account settings in the app or by contacting signeteduau@gmail.com.",
         },
         {
           type: "p",
@@ -360,8 +360,8 @@ export const termsAndConditions: LegalDocument = {
             ["Legal entity", "JLMG PTY LTD trading as Signet Employment Hub"],
             ["ABN", "94 684 960 521"],
             ["Address", "64 Barnes Ave, Magill SA 5072, Australia"],
-            ["Support email", "support@jobportal.com"],
-            ["Privacy email", "privacy@jobportal.com"],
+            ["Support email", "signeteduau@gmail.com"],
+            ["Privacy email", "signeteduau@gmail.com"],
             ["Website", "https://signetemploymenthub.com"],
             ["Account deletion", "https://signetemploymenthub.com/delete-account"],
           ],
