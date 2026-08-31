@@ -14,7 +14,6 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   signOut as fbSignOut,
-  sendEmailVerification,
   sendPasswordResetEmail,
   updatePassword,
   EmailAuthProvider,
@@ -39,6 +38,7 @@ import {
   completeProfileSetup,
   updateUserProfile,
 } from "@/lib/services/users";
+import { requestVerificationEmail } from "@/lib/services/verification-email";
 import { AppUser, UserType } from "@/types/firestore";
 
 type AuthContextType = {
@@ -248,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           userType,
           companyName,
         });
-        await sendEmailVerification(cred.user);
+        await requestVerificationEmail();
         await refreshProfile();
         return cred.user;
       },
@@ -288,9 +288,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(null);
       },
       sendVerification: async () => {
-        if (auth.currentUser) {
-          await sendEmailVerification(auth.currentUser);
-        }
+        await requestVerificationEmail();
       },
       resetPassword: async (email) => {
         await sendPasswordResetEmail(auth, email);

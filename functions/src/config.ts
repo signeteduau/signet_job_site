@@ -7,7 +7,7 @@ export const SMTP_USER = defineString("SMTP_USER", {
 });
 
 export const EMAIL_FROM = defineString("EMAIL_FROM", {
-  default: "Signet Employment Hub <signeteduau@gmail.com>",
+  default: "Signet Employment Hub <noreply@signetemploymenthub.com>",
 });
 
 export const APP_URL = defineString("APP_URL", {

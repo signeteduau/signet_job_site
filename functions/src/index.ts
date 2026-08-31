@@ -3,6 +3,7 @@ import {
   onDocumentCreated,
   onDocumentUpdated,
 } from "firebase-functions/v2/firestore";
+import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { APP_URL, SMTP_PASS } from "./config";
 import { getUserEmail, sendEmail } from "./email";
 import {
@@ -13,6 +14,7 @@ import {
   interviewScheduledEmail,
   jobCancelledEmail,
   jobClosedCompanyEmail,
+  verificationEmail,
   welcomeEmail,
   type EmailContent,
 } from "./templates";
@@ -264,5 +266,56 @@ export const sendJobClosedEmails = onDocumentUpdated(
         });
       })
     );
+  }
+);
+
+/** Branded verification email (replaces default Firebase template). */
+export const sendVerificationEmail = onCall(
+  { secrets: [SMTP_PASS], cors: true },
+  async (request) => {
+    if (!request.auth?.token.email) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const uid = request.auth.uid;
+    const user = await admin.auth().getUser(uid);
+
+    if (user.emailVerified) {
+      return { ok: true, alreadyVerified: true };
+    }
+
+    if (!user.email) {
+      throw new HttpsError("failed-precondition", "No email on account.");
+    }
+
+    const isPasswordAccount = user.providerData.some(
+      (p) => p.providerId === "password"
+    );
+    if (!isPasswordAccount) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Verification email is only for email/password accounts."
+      );
+    }
+
+    const appUrl = APP_URL.value();
+    const verifyLink = await admin.auth().generateEmailVerificationLink(
+      user.email,
+      { url: `${appUrl}/verify-email`, handleCodeInApp: false }
+    );
+
+    const name = user.displayName || "there";
+    const tpl = verificationEmail({
+      name,
+      verifyLink,
+      appUrl,
+    });
+
+    await dispatchEmail(user.email, tpl, SMTP_PASS.value(), {
+      type: "email_verification",
+      userId: uid,
+    });
+
+    return { ok: true };
   }
 );
