@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   orderBy,
   query,
   serverTimestamp,
@@ -92,25 +93,32 @@ export async function applyToJob(opts: {
     status: "Under Review" as ApplicationStatus,
   };
 
-  // Triple-write to match Flutter + Cloud Functions triggers
+  // Critical writes — candidate + job application records
   await setDoc(doc(db, "applications", userId, "userApplications", job.id), payload);
   await setDoc(doc(db, "jobs", job.id, "applications", userId), payload);
+
+  // Best-effort: mobile app mirror + applicant counts (must not fail the apply flow)
+  const secondary: Promise<unknown>[] = [
+    updateDoc(doc(db, "jobs", job.id), { applicantsCount: increment(1) }).catch(
+      () => undefined
+    ),
+  ];
+
   if (job.companyId) {
-    await setDoc(
-      doc(db, "companies", job.companyId, "jobs", job.id, "applications", userId),
-      payload
+    secondary.push(
+      setDoc(
+        doc(db, "companies", job.companyId, "jobs", job.id, "applications", userId),
+        payload
+      ).catch(() => undefined),
+      setDoc(
+        doc(db, "companies", job.companyId, "jobs", job.id),
+        { applicantsCount: increment(1) },
+        { merge: true }
+      ).catch(() => undefined)
     );
   }
 
-  const jobRef = doc(db, "jobs", job.id);
-  const jobSnap = await getDoc(jobRef);
-  const count = (jobSnap.data()?.applicantsCount || 0) + 1;
-  await updateDoc(jobRef, { applicantsCount: count });
-  if (job.companyId) {
-    await updateDoc(doc(db, "companies", job.companyId, "jobs", job.id), {
-      applicantsCount: count,
-    });
-  }
+  await Promise.all(secondary);
 }
 
 export async function withdrawApplication(

@@ -103,6 +103,15 @@ function ApplyInner() {
       router.push("/candidate/my-jobs");
     } catch (err) {
       console.error(err);
+      try {
+        if (user && job && (await hasApplied(user.uid, job.id))) {
+          toast.success("Application submitted!");
+          router.push("/candidate/my-jobs");
+          return;
+        }
+      } catch {
+        /* ignore recovery check errors */
+      }
       toast.error("Could not submit application. Please try again.");
     } finally {
       setUploading(false);
