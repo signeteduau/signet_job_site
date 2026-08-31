@@ -24,6 +24,7 @@ function PublicJobsInner() {
   const { profile, homePath, loading: authLoading } = useAuth();
   const loggedIn = !authLoading && !!user;
   const isCompany = profile?.userType === "company";
+  const isCandidate = profile?.userType === "candidate";
 
   const [filters, setFilters] = useState<JobFilters>({
     term: initialQ,
