@@ -68,8 +68,49 @@ export async function fetchJobs(max = 50, opts?: { activeOnly?: boolean }): Prom
 export async function fetchJobById(jobId: string): Promise<Job | null> {
   const snap = await getDoc(doc(db, "jobs", jobId));
   if (!snap.exists()) return null;
-  const [job] = await enrichJobLogos([mapJob(snap.id, snap.data())]);
-  return job;
+  const job = mapJob(snap.id, snap.data());
+  if (resolveLogoFromRecord(job as Record<string, unknown>)) return job;
+  const [enriched] = await enrichJobLogos([job]);
+  return enriched;
+}
+
+/** Lightweight related jobs for detail page (avoids fetching the full job board). */
+export async function fetchRelatedJobs(current: Job, max = 5): Promise<Job[]> {
+  const q = query(
+    collection(db, "jobs"),
+    orderBy("createdAt", "desc"),
+    limit(24)
+  );
+  const snap = await getDocs(q);
+  const list = onlyActive(snap.docs.map((d) => mapJob(d.id, d.data())));
+  const others = list.filter((j) => j.id !== current.id);
+
+  const scored = others
+    .map((j) => {
+      let score = 0;
+      if (j.companyId && j.companyId === current.companyId) score += 4;
+      if (
+        j.companyName &&
+        current.companyName &&
+        j.companyName.toLowerCase() === current.companyName.toLowerCase()
+      ) {
+        score += 3;
+      }
+      if (j.category && j.category === current.category) score += 2;
+      if (j.type && j.type === current.type) score += 1;
+      return { j, score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const matched = scored.filter((x) => x.score > 0).map((x) => x.j);
+  const fallback = scored.map((x) => x.j);
+  const merged = [...matched];
+  fallback.forEach((j) => {
+    if (merged.length >= max) return;
+    if (!merged.some((m) => m.id === j.id)) merged.push(j);
+  });
+
+  return enrichJobLogos(merged.slice(0, max));
 }
 
 export async function fetchCompanyJobs(companyId: string): Promise<Job[]> {

@@ -9,40 +9,11 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 import { applyUrl } from "@/lib/auth-flow";
 import { normalizeJobType, salarySuffix, splitJobTextToPoints } from "@/lib/job-utils";
 import { hasApplied } from "@/lib/services/applications";
-import { fetchJobById, fetchJobs } from "@/lib/services/jobs";
+import { fetchJobById, fetchRelatedJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
 import { openOrCreateChat } from "@/lib/services/chat";
 import { Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
-
-function pickRelatedJobs(current: Job, all: Job[], limit = 6) {
-  const others = all.filter((j) => j.id !== current.id);
-  const scored = others
-    .map((j) => {
-      let score = 0;
-      if (j.companyId && j.companyId === current.companyId) score += 4;
-      if (
-        j.companyName &&
-        current.companyName &&
-        j.companyName.toLowerCase() === current.companyName.toLowerCase()
-      ) {
-        score += 3;
-      }
-      if (j.category && j.category === current.category) score += 2;
-      if (j.type && j.type === current.type) score += 1;
-      return { j, score };
-    })
-    .sort((a, b) => b.score - a.score);
-
-  const matched = scored.filter((x) => x.score > 0).map((x) => x.j);
-  const fallback = scored.map((x) => x.j);
-  const merged = [...matched];
-  fallback.forEach((j) => {
-    if (merged.length >= limit) return;
-    if (!merged.some((m) => m.id === j.id)) merged.push(j);
-  });
-  return merged.slice(0, limit);
-}
 
 function relatedJobTypeLabel(type?: string) {
   const normalized = normalizeJobType(type);
@@ -98,34 +69,64 @@ export default function PublicJobDetailPage() {
   const [saved, setSaved] = useState(false);
   const [applied, setApplied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [relatedLoading, setRelatedLoading] = useState(false);
 
   useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setJob(null);
     (async () => {
       try {
-        const [j, allJobs] = await Promise.all([
-          fetchJobById(id),
-          fetchJobs(50),
-        ]);
-        setJob(j);
-        if (j) {
-          setRelatedJobs(pickRelatedJobs(j, allJobs));
-        } else {
-          setRelatedJobs([]);
-        }
-        if (user && j) {
-          if (isCandidateReady) {
-            setSaved(await isJobSaved(user.uid, j.id));
-            setApplied(await hasApplied(user.uid, j.id));
-          }
-        } else {
-          setSaved(false);
-          setApplied(false);
-        }
+        const j = await fetchJobById(id);
+        if (alive) setJob(j);
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
     })();
-  }, [id, user, isCandidateReady]);
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!job) {
+      setRelatedJobs([]);
+      setRelatedLoading(false);
+      return;
+    }
+    let alive = true;
+    setRelatedLoading(true);
+    fetchRelatedJobs(job, 5)
+      .then((list) => {
+        if (alive) setRelatedJobs(list);
+      })
+      .finally(() => {
+        if (alive) setRelatedLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [job]);
+
+  useEffect(() => {
+    if (!user || !job || !isCandidateReady) {
+      setSaved(false);
+      setApplied(false);
+      return;
+    }
+    let alive = true;
+    Promise.all([isJobSaved(user.uid, job.id), hasApplied(user.uid, job.id)]).then(
+      ([isSaved, hasApp]) => {
+        if (alive) {
+          setSaved(isSaved);
+          setApplied(hasApp);
+        }
+      }
+    );
+    return () => {
+      alive = false;
+    };
+  }, [user, job, isCandidateReady]);
 
   const salaryLabel = useMemo(() => {
     if (!job?.salary) return "Salary TBD";
@@ -325,7 +326,10 @@ export default function PublicJobDetailPage() {
                       <p>{relatedJobs.length} similar role{relatedJobs.length === 1 ? "" : "s"}</p>
                     )}
                   </div>
-                  {relatedJobs.length === 0 && (
+                  {relatedLoading && (
+                    <p className="signet-related-jobs-empty">Loading similar roles…</p>
+                  )}
+                  {!relatedLoading && relatedJobs.length === 0 && (
                     <p className="signet-related-jobs-empty">
                       No similar roles right now.
                     </p>

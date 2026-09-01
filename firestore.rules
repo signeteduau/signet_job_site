@@ -1,6 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userType == 'admin';
+    }
+
     // Public company cards (home / companies browse)
     match /users/{userId} {
       allow read: if request.auth != null || resource.data.userType == 'company';
@@ -48,7 +58,25 @@ service cloud.firestore {
     // Career tips / blog articles — public read for web + app webviews
     match /articles/{articleId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Article categories (admin panel)
+    match /blogCategories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // FAQs (admin panel + public site)
+    match /faqs/{faqId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Legal content (privacy, terms)
+    match /legal/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Email delivery logs (written by Cloud Functions only)

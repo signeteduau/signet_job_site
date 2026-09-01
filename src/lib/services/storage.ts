@@ -1,5 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { compressImageForUpload } from "@/lib/image-utils";
 import { storage } from "@/lib/firebase";
 
 /** Profile uploads must use profile_images/{uid}.jpg — Firebase Storage rules match the mobile app. */
@@ -61,9 +62,10 @@ export async function uploadProfileImage(
   uid: string,
   file: File
 ): Promise<string> {
+  const prepared = await compressImageForUpload(file);
   const storageRef = ref(storage, PROFILE_IMAGE_PATH(uid));
-  await uploadBytes(storageRef, file, {
-    contentType: file.type || "image/jpeg",
+  await uploadBytes(storageRef, prepared, {
+    contentType: prepared.type || "image/jpeg",
   });
   return getDownloadURL(storageRef);
 }

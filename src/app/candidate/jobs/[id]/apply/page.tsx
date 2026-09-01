@@ -28,6 +28,11 @@ function ApplyInner() {
   );
   const [phone, setPhone] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [uploadedResume, setUploadedResume] = useState<{
+    url: string;
+    fileName: string;
+    key: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -54,44 +59,76 @@ function ApplyInner() {
     })();
   }, [id, user, router]);
 
+  const uploadSelectedResume = async (selected: File) => {
+    if (!user || !job) return;
+    const fileError = validateResumeFile(selected);
+    if (fileError) {
+      toast.error(fileError);
+      return;
+    }
+    setUploading(true);
+    try {
+      const uploaded = await uploadResume(user.uid, job.id, selected);
+      setUploadedResume({
+        url: uploaded.url,
+        fileName: uploaded.fileName,
+        key: `${selected.name}:${selected.size}:${selected.lastModified}`,
+      });
+    } catch (err) {
+      console.error(err);
+      const msg =
+        err instanceof Error && !("code" in err)
+          ? err.message
+          : getStorageErrorMessage(err);
+      toast.error(msg);
+      setUploadedResume(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !job) return;
-    if (!file && !profile?.resumeUrl) {
+    if (!file && !profile?.resumeUrl && !uploadedResume) {
       toast.error("Please upload a resume.");
       return;
-    }
-    if (file) {
-      const fileError = validateResumeFile(file);
-      if (fileError) {
-        toast.error(fileError);
-        return;
-      }
     }
     setSubmitting(true);
     try {
       let resumeUrl = profile?.resumeUrl || "";
       let resumeFile = profile?.resumeFileName || "resume.pdf";
+
       if (file) {
-        setUploading(true);
-        try {
-          const uploaded = await uploadResume(user.uid, job.id, file);
-          resumeUrl = uploaded.url;
-          resumeFile = uploaded.fileName;
-        } catch (err) {
-          console.error(err);
-          const msg =
-            err instanceof Error && !("code" in err)
-              ? err.message
-              : getStorageErrorMessage(err);
-          toast.error(msg);
-          return;
-        } finally {
-          setUploading(false);
+        const fileKey = `${file.name}:${file.size}:${file.lastModified}`;
+        if (uploadedResume?.key === fileKey) {
+          resumeUrl = uploadedResume.url;
+          resumeFile = uploadedResume.fileName;
+        } else {
+          setUploading(true);
+          try {
+            const uploaded = await uploadResume(user.uid, job.id, file);
+            resumeUrl = uploaded.url;
+            resumeFile = uploaded.fileName;
+          } catch (err) {
+            console.error(err);
+            const msg =
+              err instanceof Error && !("code" in err)
+                ? err.message
+                : getStorageErrorMessage(err);
+            toast.error(msg);
+            return;
+          } finally {
+            setUploading(false);
+          }
         }
-        await saveProfile({ resumeUrl, resumeFileName: resumeFile });
       }
-      await saveProfile({ phone, phoneCountryCode });
+
+      await saveProfile({
+        phone,
+        phoneCountryCode,
+        ...(resumeUrl ? { resumeUrl, resumeFileName: resumeFile } : {}),
+      });
       await applyToJob({
         userId: user.uid,
         job,
@@ -164,13 +201,21 @@ function ApplyInner() {
           uploading={uploading}
           uploadLabel="Uploading resume…"
           hint={
-            file
-              ? `Selected: ${file.name}`
+            uploading
+              ? "Uploading resume…"
+              : file
+              ? uploadedResume
+                ? `Ready: ${file.name}`
+                : `Selected: ${file.name}`
               : profile?.resumeUrl
               ? `Or reuse saved resume: ${profile.resumeFileName || "resume"}`
               : "Upload a resume to continue"
           }
-          onFile={async (f) => setFile(f)}
+          onFile={async (f) => {
+            setFile(f);
+            setUploadedResume(null);
+            await uploadSelectedResume(f);
+          }}
         />
         <button
           className="signet-btn w-100"
