@@ -1683,12 +1683,36 @@ $signet-page-pad: 16px;
 .signet-auth-wrap {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px 16px 32px;
-  overflow: hidden;
+  overflow-x: hidden;
   background: $s-page;
+  @media (max-width: 991.98px) {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0 16px max(24px, env(safe-area-inset-bottom));
+  }
+}
+
+.signet-auth-layout {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  @media (min-width: 992px) {
+    position: static;
+    max-width: min(880px, 100%);
+    gap: 0;
+    padding-top: 0;
+  }
 }
 
 .signet-auth-ambient {
@@ -1712,16 +1736,15 @@ $signet-page-pad: 16px;
 }
 
 .signet-auth-back {
-  position: absolute;
-  top: 20px;
-  left: 20px;
+  position: static;
   z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
   padding: 10px 14px;
   border-radius: 50px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid $s-border;
   color: $s-ink !important;
   font-weight: 700;
@@ -1729,17 +1752,31 @@ $signet-page-pad: 16px;
   text-decoration: none !important;
   box-shadow: 0 8px 20px rgba(11, 18, 32, 0.06);
   transition: 0.2s $s-ease;
+  align-self: flex-start;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  @media (min-width: 992px) {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    align-self: auto;
+  }
   &:hover {
     border-color: rgba(0, 76, 240, 0.35);
     color: $s-blue !important;
     transform: translateX(-2px);
+  }
+  @media (max-width: 991.98px) {
+    &:active {
+      transform: scale(0.98);
+    }
   }
 }
 
 .signet-auth-stage {
   position: relative;
   z-index: 1;
-  width: min(880px, 100%);
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
@@ -1821,16 +1858,14 @@ $signet-page-pad: 16px;
 
 .signet-auth-card {
   width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid $s-border;
   border-radius: 16px;
   padding: 22px 20px 20px;
   box-shadow: 0 12px 32px rgba(11, 18, 32, 0.08);
   @media (min-width: 992px) {
-    max-width: none;
-    margin: 0;
     border: none;
     border-radius: 0;
     box-shadow: none;

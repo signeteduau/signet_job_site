@@ -28,12 +28,13 @@ export default function AuthShell({
     <div className="signet-auth-wrap">
       <div className="signet-auth-ambient" aria-hidden />
 
-      <Link href="/" className="signet-auth-back">
-        <i className="bi bi-arrow-left" />
-        <span>Back to site</span>
-      </Link>
+      <div className="signet-auth-layout">
+        <Link href="/" className="signet-auth-back">
+          <i className="bi bi-arrow-left" aria-hidden />
+          <span>Back to site</span>
+        </Link>
 
-      <div className="signet-auth-stage">
+        <div className="signet-auth-stage">
         <aside className="signet-auth-aside d-none d-lg-flex">
           <div className="signet-auth-aside-inner">
             <div className="signet-brand-mark lg">
@@ -117,6 +118,7 @@ export default function AuthShell({
           {children}
 
           {footer && <div className="signet-auth-footer">{footer}</div>}
+        </div>
         </div>
       </div>
     </div>
