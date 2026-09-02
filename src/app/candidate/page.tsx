@@ -5,8 +5,10 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import JobCard from "@/app/components/signet/job-card";
+import ProfileCompletionCard from "@/app/components/signet/profile-completion-card";
 import { JobListShimmer } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { getProfileCompletion } from "@/lib/profile-completion";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
 import { fetchArticles } from "@/lib/services/articles";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
@@ -148,6 +150,9 @@ function CandidateHomeInner() {
       title={`Welcome back, ${firstName}`}
       subtitle="Explore new roles, track applications, and stay connected with employers."
     >
+      {getProfileCompletion(profile).percent < 100 && (
+        <ProfileCompletionCard profile={profile} compact />
+      )}
       <div className="signet-dash-actions">
         {QUICK_ACTIONS.map((action) => (
           <Link

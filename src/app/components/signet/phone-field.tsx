@@ -27,7 +27,10 @@ export default function PhoneField({
 }: PhoneFieldProps) {
   return (
     <div className="signet-field">
-      <label>{label}</label>
+      <label>
+        {label}
+        {required ? <span aria-hidden> *</span> : null}
+      </label>
       <div className="signet-phone-field">
         <select
           value={countryCode || DEFAULT_PHONE_COUNTRY_CODE}

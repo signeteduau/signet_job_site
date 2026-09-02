@@ -7,6 +7,7 @@ import AppShell from "@/app/components/signet/app-shell";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
 import AddressFields from "@/app/components/signet/address-fields";
+import ProfileCompletionCard from "@/app/components/signet/profile-completion-card";
 import { useAuth } from "@/context/auth-context";
 import { addressFromProfile, formatAddress } from "@/lib/address";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
@@ -54,6 +55,7 @@ function CompanyProfileInner() {
 
   return (
     <AppShell role="company" title="Company profile">
+      <ProfileCompletionCard profile={profile} />
       <form
         className="signet-panel"
         onSubmit={async (e) => {

@@ -6,11 +6,13 @@ import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { FileUploadField, PanelShimmer } from "@/app/components/signet/shimmer";
 import PhoneField from "@/app/components/signet/phone-field";
+import ApplyRequirementsPanel from "@/app/components/signet/apply-requirements-panel";
 import { useAuth } from "@/context/auth-context";
 import {
   DEFAULT_PHONE_COUNTRY_CODE,
   formatFullPhone,
 } from "@/lib/phone-country-codes";
+import { applyBlockMessage } from "@/lib/profile-completion";
 import { fetchJobById } from "@/lib/services/jobs";
 import { applyToJob, hasApplied } from "@/lib/services/applications";
 import { uploadResume, getStorageErrorMessage, validateResumeFile } from "@/lib/services/storage";
@@ -90,6 +92,12 @@ function ApplyInner() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !job) return;
+    const block = applyBlockMessage(profile);
+    if (block) {
+      toast.info(block, { toastId: "apply-profile" });
+      router.push("/candidate/profile");
+      return;
+    }
     if (!file && !profile?.resumeUrl && !uploadedResume) {
       toast.error("Please upload a resume.");
       return;
@@ -181,8 +189,13 @@ function ApplyInner() {
     );
   }
 
+  const applyBlock = applyBlockMessage(profile);
+
   return (
     <AppShell role="candidate" title={`Apply — ${job.title}`}>
+      {applyBlock ? (
+        <ApplyRequirementsPanel profile={profile} />
+      ) : (
       <form className="signet-panel" onSubmit={onSubmit}>
         <p style={{ color: "#6B7280" }}>
           Applying to{" "}
@@ -232,6 +245,7 @@ function ApplyInner() {
           )}
         </button>
       </form>
+      )}
     </AppShell>
   );
 }

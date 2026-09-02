@@ -7,6 +7,7 @@ import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { PanelShimmer } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { applyUrl } from "@/lib/auth-flow";
+import { formatMissingList, getProfileCompletion } from "@/lib/profile-completion";
 import { normalizeJobType, salarySuffix, splitJobTextToPoints } from "@/lib/job-utils";
 import { hasApplied } from "@/lib/services/applications";
 import { fetchJobById, fetchRelatedJobs } from "@/lib/services/jobs";
@@ -128,6 +129,7 @@ export default function PublicJobDetailPage() {
     };
   }, [user, job, isCandidateReady]);
 
+  const applyMissing = getProfileCompletion(profile).applyMissing;
   const salaryLabel = useMemo(() => {
     if (!job?.salary) return "Salary TBD";
     const suffix = salarySuffix(job.salary);
@@ -309,11 +311,15 @@ export default function PublicJobDetailPage() {
                     Message company
                   </button>
                 </div>
-                {!isCandidateReady && (
+                {profile?.userType === "candidate" && applyMissing.length > 0 ? (
+                  <p className="signet-job-detail-note">
+                    To apply, add {formatMissingList(applyMissing)} to your profile.
+                  </p>
+                ) : !isCandidateReady ? (
                   <p className="signet-job-detail-note">
                     Browse freely — sign in only when you apply, save, or message.
                   </p>
-                )}
+                ) : null}
               </article>
 
               <aside className="signet-job-detail-sidebar">

@@ -13,6 +13,7 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useAuth } from "@/context/auth-context";
 import { searchJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
+import { applyBlockMessage } from "@/lib/profile-completion";
 import { Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
@@ -136,6 +137,7 @@ function PublicJobsInner() {
                   {!loggedIn && " · Sign in to apply or save roles"}
                   {loggedIn && isCompany && " · Browsing as employer"}
                   {loggedIn && isCandidate && !isCandidateReady && " · Complete your profile to apply"}
+                  {loggedIn && isCandidate && isCandidateReady && applyBlockMessage(profile) && " · Add phone, address, and resume to apply"}
                 </p>
               </div>
             </div>

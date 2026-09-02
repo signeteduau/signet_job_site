@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import { useAuth } from "@/context/auth-context";
+import { getProfileCompletion } from "@/lib/profile-completion";
 import { subscribeToChats } from "@/lib/services/chat";
 import { subscribeToNotifications } from "@/lib/services/notifications";
 
@@ -67,6 +68,9 @@ export default function AppShell({
         ? { ...item, badge: chatCount }
         : { ...item }
   );
+  const completion = getProfileCompletion(profile);
+  const completeTone =
+    completion.percent >= 100 ? "done" : completion.percent >= 70 ? "mid" : "low";
 
   return (
     <div className="signet-app">
@@ -124,7 +128,7 @@ export default function AppShell({
                 role === "company" ? "/company/profile" : "/candidate/profile"
               }
               className="signet-user-chip"
-              title="Profile"
+              title={`Profile ${completion.percent}% complete`}
             >
               <ProfileAvatar
                 src={profile?.logoUrl || profile?.profileImage}
@@ -132,6 +136,14 @@ export default function AppShell({
                 size="md"
                 rounded={role === "company" ? "tile" : "circle"}
               />
+              {profile && (
+                <span
+                  className={`signet-complete-badge ${completeTone}`}
+                  aria-label={`Profile ${completion.percent}% complete`}
+                >
+                  {completion.percent}%
+                </span>
+              )}
               <span className="d-none d-md-inline text-truncate">
                 {profile?.fullName || profile?.companyName || user?.email}
               </span>

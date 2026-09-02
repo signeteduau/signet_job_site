@@ -5,8 +5,10 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import JobCard from "@/app/components/signet/job-card";
+import ProfileCompletionCard from "@/app/components/signet/profile-completion-card";
 import { JobListShimmer, PanelShimmer } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { getProfileCompletion } from "@/lib/profile-completion";
 import {
   CompanyDashboardStats,
   fetchCompanyDashboard,
@@ -91,6 +93,9 @@ function CompanyHomeInner() {
       title={`Welcome back, ${companyName}`}
       subtitle="Manage vacancies, review applicants, and stay connected with candidates."
     >
+      {getProfileCompletion(profile).percent < 100 && (
+        <ProfileCompletionCard profile={profile} compact />
+      )}
       <div className="signet-dash-actions">
         {QUICK_ACTIONS.map((action) => (
           <Link

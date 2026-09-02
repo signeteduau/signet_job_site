@@ -6,6 +6,7 @@ import AppShell from "@/app/components/signet/app-shell";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
 import AddressFields from "@/app/components/signet/address-fields";
+import ProfileCompletionCard from "@/app/components/signet/profile-completion-card";
 import { useAuth } from "@/context/auth-context";
 import { addressFromProfile, formatAddress } from "@/lib/address";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
@@ -53,6 +54,7 @@ function ProfileInner() {
 
   return (
     <AppShell role="candidate" title="Profile">
+      <ProfileCompletionCard profile={profile} />
       <form
         className="signet-panel"
         onSubmit={async (e) => {
@@ -128,10 +130,12 @@ function ProfileInner() {
           <input value={user?.email || ""} disabled />
         </div>
         <PhoneField
+          label="Phone (required to apply)"
           countryCode={phoneCountryCode}
           phone={phone}
           onCountryCodeChange={setPhoneCountryCode}
           onPhoneChange={setPhone}
+          required
         />
         <div className="signet-field">
           <label>Occupation</label>
@@ -145,13 +149,16 @@ function ProfileInner() {
           <label>Skills (comma separated)</label>
           <input value={skills} onChange={(e) => setSkills(e.target.value)} />
         </div>
+        <p className="signet-complete-hint">
+          Address, phone, and resume are required before you can apply for jobs.
+        </p>
         <AddressFields value={addressValue} onChange={setAddressValue} />
         <div className="signet-field">
           <label>About me</label>
           <textarea value={aboutMe} onChange={(e) => setAboutMe(e.target.value)} />
         </div>
         <FileUploadField
-          label="Resume"
+          label="Resume (required to apply)"
           accept=".pdf,.doc,.docx"
           uploading={resumeUploading}
           uploadLabel="Uploading resume…"
