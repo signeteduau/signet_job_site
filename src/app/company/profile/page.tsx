@@ -6,7 +6,9 @@ import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
+import AddressFields from "@/app/components/signet/address-fields";
 import { useAuth } from "@/context/auth-context";
+import { addressFromProfile, formatAddress } from "@/lib/address";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
 import {
   getStorageErrorMessage,
@@ -26,8 +28,8 @@ function CompanyProfileInner() {
     profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE
   );
   const [phone, setPhone] = useState(profile?.phone || "");
-  const [companyLocation, setCompanyLocation] = useState(
-    profile?.companyLocation || profile?.address || ""
+  const [addressValue, setAddressValue] = useState(() =>
+    addressFromProfile(profile)
   );
   const [about, setAbout] = useState(profile?.about || "");
   const [logoUrl, setLogoUrl] = useState(
@@ -45,7 +47,7 @@ function CompanyProfileInner() {
     setFoundedYear(profile?.foundedYear || "");
     setPhoneCountryCode(profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE);
     setPhone(profile?.phone || "");
-    setCompanyLocation(profile?.companyLocation || profile?.address || "");
+    setAddressValue(addressFromProfile(profile));
     setAbout(profile?.about || "");
     setLogoUrl(profile?.logoUrl || profile?.profileImage || "");
   }, [profile]);
@@ -67,8 +69,13 @@ function CompanyProfileInner() {
               foundedYear,
               phone,
               phoneCountryCode,
-              companyLocation,
-              address: companyLocation,
+              street: addressValue.street || "",
+              city: addressValue.city || "",
+              state: addressValue.state || "",
+              postcode: addressValue.postcode || "",
+              country: addressValue.country || "",
+              address: formatAddress(addressValue),
+              companyLocation: formatAddress(addressValue),
               about,
               logoUrl: logoUrl || profile?.logoUrl,
               profileImage: logoUrl || profile?.profileImage,
@@ -150,10 +157,7 @@ function CompanyProfileInner() {
           onCountryCodeChange={setPhoneCountryCode}
           onPhoneChange={setPhone}
         />
-        <div className="signet-field">
-          <label>Location</label>
-          <input value={companyLocation} onChange={(e) => setCompanyLocation(e.target.value)} />
-        </div>
+        <AddressFields value={addressValue} onChange={setAddressValue} />
         <div className="signet-field">
           <label>About</label>
           <textarea value={about} onChange={(e) => setAbout(e.target.value)} />

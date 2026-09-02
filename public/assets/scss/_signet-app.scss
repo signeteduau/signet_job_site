@@ -1655,6 +1655,18 @@ $signet-page-pad: 16px;
   }
 }
 
+.signet-address-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+  .signet-address-wide {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 575.98px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 .signet-phone-field {
   display: flex;
   align-items: stretch;
@@ -2036,6 +2048,57 @@ $signet-page-pad: 16px;
     padding: 8px 18px;
     border-radius: 50px;
     font-size: 14px;
+  }
+}
+
+.signet-student-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+}
+
+.signet-student-box {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1.5px solid rgba(11, 18, 32, 0.18);
+  background: #fff;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  i { opacity: 0; }
+}
+
+.signet-student-check input:checked + .signet-student-box {
+  background: $s-blue;
+  border-color: $s-blue;
+  i { opacity: 1; }
+}
+
+.signet-student-copy {
+  min-width: 0;
+  strong {
+    font-size: 13px;
+    font-weight: 700;
+    color: $s-ink;
+    letter-spacing: -0.01em;
   }
 }
 
@@ -3649,6 +3712,27 @@ body:has(.nk-site) {
   @media (min-width: 576px) { display: flex; }
 }
 
+.nk-brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.15;
+  strong {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: $nk-ink;
+  }
+  em {
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 650;
+    color: $nk-muted;
+    white-space: nowrap;
+  }
+}
+
 .nk-nav-links {
   display: none;
   gap: 22px;
@@ -4202,12 +4286,180 @@ body:has(.nk-site) {
   z-index: 1;
   animation: nk-fade-up 0.45s ease both;
   h1 {
-    margin: 0 0 10px;
-    font-size: clamp(34px, 5vw, 46px);
+    margin: 0;
+    font-size: clamp(38px, 5.4vw, 56px);
     font-weight: 800;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.048em;
     color: $nk-ink !important;
-    line-height: 1.08;
+    line-height: 1.12;
+  }
+}
+
+.nk-hero-headline {
+  position: relative;
+  max-width: 920px;
+  margin: 0 auto 28px;
+  padding: 52px 8px 8px;
+}
+
+.nk-hero-plane {
+  position: absolute;
+  left: 6%;
+  top: 8px;
+  width: 52px;
+  height: 26px;
+  z-index: 4;
+  pointer-events: none;
+  animation: nk-hero-plane-fly 6.5s linear infinite;
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 8px 10px rgba(37, 80, 235, 0.18));
+  }
+  @media (max-width: 767.98px) {
+    width: 38px;
+    height: 19px;
+    left: 4%;
+    animation-name: nk-hero-plane-fly-mobile;
+  }
+}
+
+.nk-hero-lead {
+  position: relative;
+  display: block;
+  margin-bottom: 2px;
+  font-size: clamp(22px, 3vw, 30px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.04em !important;
+  color: $nk-ink !important;
+}
+
+.nk-hero-stage {
+  position: relative;
+  display: inline-block;
+  padding: 0 78px 4px 0;
+  @media (max-width: 767.98px) {
+    padding-right: 58px;
+  }
+}
+
+.nk-hero-line-text {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  background: linear-gradient(105deg, #121824 12%, #2550eb 62%, #6d7cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+.nk-hero-underline {
+  display: block;
+  width: 58%;
+  max-width: 280px;
+  height: 3px;
+  margin: 8px 0 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #2550eb, #c9a227);
+  animation: nk-hero-draw 0.8s 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.nk-hero-hanger {
+  position: absolute;
+  right: 0;
+  top: -10px;
+  width: 70px;
+  height: 112px;
+  z-index: 3;
+  pointer-events: none;
+  @media (max-width: 767.98px) {
+    width: 52px;
+    height: 86px;
+    top: -4px;
+  }
+}
+
+.nk-hero-hanger-swing {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 0;
+  animation: nk-hero-swing 3.8s ease-in-out infinite;
+  svg {
+    position: absolute;
+    left: 6px;
+    top: 20px;
+    width: 58px;
+    height: 86px;
+    overflow: visible;
+    filter: drop-shadow(0 10px 12px rgba(18, 24, 36, 0.14));
+    @media (max-width: 767.98px) {
+      width: 44px;
+      height: 66px;
+      top: 16px;
+    }
+  }
+}
+
+.nk-hero-rope {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 22px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: linear-gradient(#e8c547, #c9a227);
+}
+
+@keyframes nk-hero-plane-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 8px) rotate(-8deg);
+  }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(520px, 2px) rotate(-6deg);
+  }
+}
+
+@keyframes nk-hero-plane-fly-mobile {
+  0% {
+    opacity: 0;
+    transform: translate(0, 6px) rotate(-8deg);
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(210px, 2px) rotate(-6deg);
+  }
+}
+
+@keyframes nk-hero-draw {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes nk-hero-swing {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+}
+
+@keyframes nk-hero-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-hero-underline,
+  .nk-hero-hanger-swing,
+  .nk-hero-plane {
+    animation: none;
   }
 }
 

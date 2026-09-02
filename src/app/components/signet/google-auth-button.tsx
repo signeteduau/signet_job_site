@@ -13,6 +13,8 @@ type Props = {
   mode: "login" | "signup";
   userType?: UserType;
   companyName?: string;
+  isStudent?: boolean;
+  usid?: string;
   returnUrl?: string | null;
   onSuccess: () => void | Promise<void>;
   onBeforeSignIn?: () => boolean;
@@ -23,6 +25,8 @@ export default function GoogleAuthButton({
   mode,
   userType,
   companyName,
+  isStudent,
+  usid,
   returnUrl,
   onSuccess,
   onBeforeSignIn,
@@ -55,6 +59,8 @@ export default function GoogleAuthButton({
           await loginWithGoogle({
             userType: mode === "signup" ? userType : undefined,
             companyName: mode === "signup" ? companyName : undefined,
+            isStudent: mode === "signup" ? isStudent : undefined,
+            usid: mode === "signup" ? usid : undefined,
             returnUrl,
           });
           if (mode === "signup") {

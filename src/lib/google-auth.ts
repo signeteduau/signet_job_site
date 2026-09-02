@@ -36,3 +36,5 @@ export function getGoogleAuthErrorMessage(err: unknown): string {
 export const GOOGLE_AUTH_USER_TYPE_KEY = "signet.googleAuth.userType";
 export const GOOGLE_AUTH_COMPANY_KEY = "signet.googleAuth.companyName";
 export const GOOGLE_AUTH_RETURN_URL_KEY = "signet.googleAuth.returnUrl";
+export const GOOGLE_AUTH_IS_STUDENT_KEY = "signet.googleAuth.isStudent";
+export const GOOGLE_AUTH_USID_KEY = "signet.googleAuth.usid";

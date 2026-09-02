@@ -20,6 +20,8 @@ export async function createUserProfile(input: {
   fullName: string;
   userType: UserType;
   companyName?: string;
+  isStudent?: boolean;
+  usid?: string;
 }): Promise<void> {
   await setDoc(doc(db, "users", input.uid), {
     fullName: input.fullName,
@@ -28,6 +30,14 @@ export async function createUserProfile(input: {
     profileCompleted: false,
     ...(input.userType === "company" && input.companyName
       ? { companyName: input.companyName }
+      : {}),
+    ...(input.userType === "candidate"
+      ? {
+          isStudent: Boolean(input.isStudent),
+          ...(input.isStudent && input.usid?.trim()
+            ? { usid: input.usid.trim() }
+            : {}),
+        }
       : {}),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

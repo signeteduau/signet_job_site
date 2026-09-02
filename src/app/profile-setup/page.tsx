@@ -6,8 +6,10 @@ import AuthShell from "@/app/components/signet/auth-shell";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
+import AddressFields from "@/app/components/signet/address-fields";
 import { useAuth } from "@/context/auth-context";
 import { resolvePostLoginPath } from "@/lib/auth-flow";
+import { addressFromProfile, formatAddress } from "@/lib/address";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
 import { uploadProfileImage } from "@/lib/services/storage";
 import Wrapper from "@/layouts/wrapper";
@@ -23,7 +25,9 @@ function ProfileSetupInner() {
     profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE
   );
   const [phone, setPhone] = useState(profile?.phone || "");
-  const [address, setAddress] = useState("");
+  const [addressValue, setAddressValue] = useState(() =>
+    addressFromProfile(profile)
+  );
   const [occupation, setOccupation] = useState("");
   const [companyName, setCompanyName] = useState(profile?.companyName || "");
   const [industry, setIndustry] = useState("");
@@ -52,6 +56,16 @@ function ProfileSetupInner() {
         setUploading(false);
       }
 
+      const formattedAddress = formatAddress(addressValue);
+      const locationFields = {
+        street: addressValue.street || "",
+        city: addressValue.city || "",
+        state: addressValue.state || "",
+        postcode: addressValue.postcode || "",
+        country: addressValue.country || "",
+        address: formattedAddress,
+      };
+
       if (isCompany) {
         await finishProfileSetup({
           fullName: fullName || companyName,
@@ -60,8 +74,8 @@ function ProfileSetupInner() {
           website,
           phone,
           phoneCountryCode,
-          address,
-          companyLocation: address,
+          ...locationFields,
+          companyLocation: formattedAddress,
           logoUrl: imageUrl || "",
           profileImage: imageUrl || "",
         });
@@ -73,7 +87,7 @@ function ProfileSetupInner() {
           fullName,
           phone,
           phoneCountryCode,
-          address,
+          ...locationFields,
           occupation,
           profileImage: imageUrl || "",
         });
@@ -177,13 +191,7 @@ function ProfileSetupInner() {
             onCountryCodeChange={setPhoneCountryCode}
             onPhoneChange={setPhone}
           />
-          <div className="signet-field">
-            <label>Address / Location</label>
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-          </div>
+          <AddressFields value={addressValue} onChange={setAddressValue} />
           <button
             className="signet-btn w-100"
             disabled={saving || uploading}

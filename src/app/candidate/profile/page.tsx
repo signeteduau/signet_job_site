@@ -5,7 +5,9 @@ import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import PhoneField from "@/app/components/signet/phone-field";
+import AddressFields from "@/app/components/signet/address-fields";
 import { useAuth } from "@/context/auth-context";
+import { addressFromProfile, formatAddress } from "@/lib/address";
 import { DEFAULT_PHONE_COUNTRY_CODE } from "@/lib/phone-country-codes";
 import {
   getStorageErrorMessage,
@@ -23,7 +25,9 @@ function ProfileInner() {
     profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE
   );
   const [phone, setPhone] = useState(profile?.phone || "");
-  const [address, setAddress] = useState(profile?.address || "");
+  const [addressValue, setAddressValue] = useState(() =>
+    addressFromProfile(profile)
+  );
   const [occupation, setOccupation] = useState(profile?.occupation || "");
   const [aboutMe, setAboutMe] = useState(profile?.aboutMe || "");
   const [skills, setSkills] = useState((profile?.skills || []).join(", "));
@@ -39,7 +43,7 @@ function ProfileInner() {
     setFullName(profile?.fullName || "");
     setPhoneCountryCode(profile?.phoneCountryCode || DEFAULT_PHONE_COUNTRY_CODE);
     setPhone(profile?.phone || "");
-    setAddress(profile?.address || "");
+    setAddressValue(addressFromProfile(profile));
     setOccupation(profile?.occupation || "");
     setAboutMe(profile?.aboutMe || "");
     setSkills((profile?.skills || []).join(", "));
@@ -60,7 +64,12 @@ function ProfileInner() {
               fullName,
               phone,
               phoneCountryCode,
-              address,
+              street: addressValue.street || "",
+              city: addressValue.city || "",
+              state: addressValue.state || "",
+              postcode: addressValue.postcode || "",
+              country: addressValue.country || "",
+              address: formatAddress(addressValue),
               occupation,
               aboutMe,
               skills: skills
@@ -136,10 +145,7 @@ function ProfileInner() {
           <label>Skills (comma separated)</label>
           <input value={skills} onChange={(e) => setSkills(e.target.value)} />
         </div>
-        <div className="signet-field">
-          <label>Address</label>
-          <input value={address} onChange={(e) => setAddress(e.target.value)} />
-        </div>
+        <AddressFields value={addressValue} onChange={setAddressValue} />
         <div className="signet-field">
           <label>About me</label>
           <textarea value={aboutMe} onChange={(e) => setAboutMe(e.target.value)} />

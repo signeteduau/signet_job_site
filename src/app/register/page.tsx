@@ -14,6 +14,8 @@ import { getUserProfile } from "@/lib/services/users";
 import { UserType } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
+const STUDENT_CHECK_LABEL = "I am Signet student";
+
 function RegisterInner() {
   const { register } = useAuth();
   const router = useRouter();
@@ -28,6 +30,8 @@ function RegisterInner() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isStudent, setIsStudent] = useState(false);
+  const [usid, setUsid] = useState("");
 
   const goNext = async () => {
     const u = auth.currentUser;
@@ -46,6 +50,8 @@ function RegisterInner() {
         password,
         userType,
         companyName: userType === "company" ? companyName || name : undefined,
+        isStudent: userType === "candidate" ? isStudent : undefined,
+        usid: userType === "candidate" && isStudent ? usid : undefined,
       });
       toast.success("Account created! Please verify your email.");
       router.push(withReturnUrl("/verify-email", returnUrl));
@@ -76,10 +82,16 @@ function RegisterInner() {
           mode="signup"
           userType={userType}
           companyName={companyName}
+          isStudent={userType === "candidate" ? isStudent : undefined}
+          usid={userType === "candidate" && isStudent ? usid : undefined}
           returnUrl={returnUrl}
           onBeforeSignIn={() => {
             if (userType === "company" && !companyName.trim()) {
               toast.error("Enter your company name first.");
+              return false;
+            }
+            if (userType === "candidate" && isStudent && !usid.trim()) {
+              toast.error("Enter your Unique Student Identifier.");
               return false;
             }
             return true;
@@ -146,6 +158,38 @@ function RegisterInner() {
               </button>
             </div>
           </div>
+          {userType === "candidate" ? (
+            <>
+              <label className="signet-student-check">
+                <input
+                  type="checkbox"
+                  checked={isStudent}
+                  onChange={(e) => {
+                    setIsStudent(e.target.checked);
+                    if (!e.target.checked) setUsid("");
+                  }}
+                />
+                <span className="signet-student-box" aria-hidden>
+                  <i className="bi bi-check2" />
+                </span>
+                <span className="signet-student-copy">
+                  <strong>{STUDENT_CHECK_LABEL}</strong>
+                </span>
+              </label>
+              {isStudent ? (
+                <div className="signet-field">
+                  <label>Unique Student Identifier</label>
+                  <input
+                    required
+                    value={usid}
+                    onChange={(e) => setUsid(e.target.value)}
+                    placeholder="Enter your Unique Student Identifier"
+                    autoComplete="off"
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : null}
           <button className="signet-btn w-100" disabled={loading} type="submit">
             {loading ? "Creating…" : "Create account"}
           </button>

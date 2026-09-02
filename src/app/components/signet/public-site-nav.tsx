@@ -40,6 +40,10 @@ export default function PublicSiteNav({
                 priority
               />
             </span>
+            <span className="nk-brand-wordmark">
+              <strong>Signet</strong>
+              <em>Employment Hub</em>
+            </span>
           </Link>
           <nav className="nk-nav-links" aria-label="Primary">
             <Link href="/" className={pathname === "/" ? "active" : ""}>

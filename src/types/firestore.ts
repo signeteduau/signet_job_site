@@ -13,6 +13,12 @@ export type AppUser = {
   dob?: string;
   occupation?: string;
   country?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+  isStudent?: boolean;
+  usid?: string;
   // candidate
   aboutMe?: string;
   skills?: string[];

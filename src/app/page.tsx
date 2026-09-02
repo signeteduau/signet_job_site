@@ -28,16 +28,25 @@ const JOB_SEARCH_BANNER_IMAGE =
   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1800&q=85";
 
 const CATEGORY_PILLS = [
-  { label: "Remote", icon: "bi-house-door", term: "Remote" },
-  { label: "MNC", icon: "bi-buildings", term: "MNC" },
-  { label: "HR", icon: "bi-people", term: "HR" },
-  { label: "Startup", icon: "bi-rocket-takeoff", term: "Startup" },
-  { label: "Sales", icon: "bi-graph-up", term: "Sales" },
-  { label: "Marketing", icon: "bi-megaphone", term: "Marketing" },
-  { label: "Engineering", icon: "bi-gear", term: "Engineering" },
-  { label: "Software & IT", icon: "bi-code-slash", term: "Software" },
-  { label: "Data Science", icon: "bi-bar-chart-line", term: "Data" },
-  { label: "Fresher", icon: "bi-mortarboard", term: "Fresher" },
+  { label: "Automotive", icon: "bi-car-front-fill", term: "Automotive" },
+  { label: "Business", icon: "bi-briefcase-fill", term: "Business" },
+  {
+    label: "Building & Construction",
+    icon: "bi-bricks",
+    term: "Building & Construction",
+  },
+  {
+    label: "Community Service",
+    icon: "bi-heart-fill",
+    term: "Community Service",
+  },
+  {
+    label: "Fabrication and Manufacturing",
+    icon: "bi-gear-wide-connected",
+    term: "Fabrication and Manufacturing",
+  },
+  { label: "GE", icon: "bi-mortarboard-fill", term: "GE" },
+  { label: "Health", icon: "bi-heart-pulse-fill", term: "Health" },
 ];
 
 const TOP_HIRING_BUCKETS = [
@@ -196,20 +205,46 @@ export default function Home() {
               <span className="nk-hero-grid" />
             </div>
             <div className="nk-container nk-hero-inner">
-              <h1>Discover Your Next Great Opportunity</h1>
-              <p className="nk-hero-sub">
-                {loading ? (
-                  "Loading openings for you to explore"
-                ) : jobs.length === 0 ? (
-                  "Browse open positions on Signet"
-                ) : (
-                  <>
-                    Browse{" "}
-                    <strong>{formatCount(jobs.length)}</strong> open{" "}
-                    {jobs.length === 1 ? "position" : "positions"}
-                  </>
-                )}
-              </p>
+              <div className="nk-hero-headline">
+                <span className="nk-hero-plane" aria-hidden>
+                  <svg viewBox="0 0 64 32" fill="none">
+                    <path d="M62 16 L2 4 L36 16 L2 28 Z" fill="#2550eb" />
+                    <path d="M36 16 L46 26 L42 16 Z" fill="#1d3fc4" />
+                    <path d="M36 16 L2 4 L30 16 Z" fill="#6d8cff" />
+                  </svg>
+                </span>
+                <h1>
+                  <span className="nk-hero-lead">Discover Your Next</span>
+                  <span className="nk-hero-stage">
+                    <span className="nk-hero-line-text">Great Opportunity</span>
+                    <span className="nk-hero-hanger" aria-hidden>
+                      <span className="nk-hero-hanger-swing">
+                        <span className="nk-hero-rope" />
+                        <svg viewBox="0 0 88 128" fill="none">
+                          <circle cx="42" cy="34" r="14" fill="#F6C9A8" />
+                          <ellipse cx="36" cy="38" rx="3.2" ry="2" fill="#E8A48A" opacity="0.55" />
+                          <path d="M30 30c3-12 24-14 26 1-8-4-18-3-26-1Z" fill="#1c2740" />
+                          <circle cx="37" cy="33" r="1.8" fill="#1c2740" />
+                          <circle cx="47" cy="33" r="1.8" fill="#1c2740" />
+                          <circle cx="37.6" cy="32.4" r="0.55" fill="#fff" />
+                          <path d="M38 40c2.4 2.6 6.6 2.6 9 0" stroke="#C47A62" strokeWidth="1.6" strokeLinecap="round" />
+                          <path d="M28 52c0-7 6-12 14-12s14 5 14 12v26c0 5-5 9-14 9s-14-4-14-9V52Z" fill="#2550eb" />
+                          <path d="M38 50h8l-4 7-4-7Z" fill="#fff" />
+                          <path d="M28 56c-8-10-5-18 6-22" stroke="#2550eb" strokeWidth="6" strokeLinecap="round" />
+                          <path d="M56 58c11 1 14 12 9 20" stroke="#2550eb" strokeWidth="6" strokeLinecap="round" />
+                          <rect x="60" y="74" width="20" height="14" rx="3" fill="#1c2740" stroke="#c9a227" strokeWidth="1.5" />
+                          <path d="M67 74v-2.2a4 4 0 0 1 8 0V74" stroke="#c9a227" strokeWidth="1.6" />
+                          <path d="M34 86v22" stroke="#1c2740" strokeWidth="6" strokeLinecap="round" />
+                          <path d="M50 86v18" stroke="#1c2740" strokeWidth="6" strokeLinecap="round" />
+                          <path d="M28 108h14" stroke="#1c2740" strokeWidth="5" strokeLinecap="round" />
+                          <path d="M46 104h14" stroke="#1c2740" strokeWidth="5" strokeLinecap="round" />
+                        </svg>
+                      </span>
+                    </span>
+                    <span className="nk-hero-underline" aria-hidden />
+                  </span>
+                </h1>
+              </div>
 
               <form
                 className="nk-search"

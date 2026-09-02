@@ -28,7 +28,9 @@ import { resolvePostLoginPath } from "@/lib/auth-flow";
 import { auth } from "@/lib/firebase";
 import {
   GOOGLE_AUTH_COMPANY_KEY,
+  GOOGLE_AUTH_IS_STUDENT_KEY,
   GOOGLE_AUTH_RETURN_URL_KEY,
+  GOOGLE_AUTH_USID_KEY,
   GOOGLE_AUTH_USER_TYPE_KEY,
   GoogleRedirectInProgress,
 } from "@/lib/google-auth";
@@ -52,10 +54,14 @@ type AuthContextType = {
     password: string;
     userType: UserType;
     companyName?: string;
+    isStudent?: boolean;
+    usid?: string;
   }) => Promise<User>;
   loginWithGoogle: (opts?: {
     userType?: UserType;
     companyName?: string;
+    isStudent?: boolean;
+    usid?: string;
     returnUrl?: string | null;
   }) => Promise<User>;
   logout: () => Promise<void>;
@@ -81,7 +87,9 @@ function resolveHomePath(profile: AppUser | null, user: User | null): string {
 async function ensureGoogleUserProfile(
   firebaseUser: User,
   userType?: UserType,
-  companyName?: string
+  companyName?: string,
+  isStudent?: boolean,
+  usid?: string
 ): Promise<AppUser | null> {
   let profile = await getUserProfile(firebaseUser.uid);
   if (profile || !userType) {
@@ -102,6 +110,8 @@ async function ensureGoogleUserProfile(
       userType === "company"
         ? companyName?.trim() || firebaseUser.displayName || "Company"
         : undefined,
+    isStudent: userType === "candidate" ? Boolean(isStudent) : undefined,
+    usid: userType === "candidate" && isStudent ? usid : undefined,
   });
   profile = await getUserProfile(firebaseUser.uid);
   return profile;
@@ -118,7 +128,9 @@ function buildGoogleProvider() {
 function storeGoogleAuthIntent(
   userType?: UserType,
   companyName?: string,
-  returnUrl?: string | null
+  returnUrl?: string | null,
+  isStudent?: boolean,
+  usid?: string
 ) {
   if (typeof window === "undefined") return;
   if (userType) {
@@ -136,12 +148,25 @@ function storeGoogleAuthIntent(
   } else {
     sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
   }
+  if (userType === "candidate") {
+    sessionStorage.setItem(GOOGLE_AUTH_IS_STUDENT_KEY, isStudent ? "1" : "0");
+    if (isStudent && usid?.trim()) {
+      sessionStorage.setItem(GOOGLE_AUTH_USID_KEY, usid.trim());
+    } else {
+      sessionStorage.removeItem(GOOGLE_AUTH_USID_KEY);
+    }
+  } else {
+    sessionStorage.removeItem(GOOGLE_AUTH_IS_STUDENT_KEY);
+    sessionStorage.removeItem(GOOGLE_AUTH_USID_KEY);
+  }
 }
 
 function readGoogleAuthIntent(): {
   userType?: UserType;
   companyName?: string;
   returnUrl?: string | null;
+  isStudent?: boolean;
+  usid?: string;
 } {
   if (typeof window === "undefined") {
     return {};
@@ -151,13 +176,19 @@ function readGoogleAuthIntent(): {
     | null;
   const companyName = sessionStorage.getItem(GOOGLE_AUTH_COMPANY_KEY);
   const returnUrl = sessionStorage.getItem(GOOGLE_AUTH_RETURN_URL_KEY);
+  const isStudent = sessionStorage.getItem(GOOGLE_AUTH_IS_STUDENT_KEY);
+  const usid = sessionStorage.getItem(GOOGLE_AUTH_USID_KEY);
   sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
   sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
   sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+  sessionStorage.removeItem(GOOGLE_AUTH_IS_STUDENT_KEY);
+  sessionStorage.removeItem(GOOGLE_AUTH_USID_KEY);
   return {
     userType: userType === "company" || userType === "candidate" ? userType : undefined,
     companyName: companyName || undefined,
     returnUrl,
+    isStudent: isStudent === "1",
+    usid: usid || undefined,
   };
 }
 
@@ -188,7 +219,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const p = await ensureGoogleUserProfile(
           redirectResult.user,
           intent.userType,
-          intent.companyName
+          intent.companyName,
+          intent.isStudent,
+          intent.usid
         );
         setUser(redirectResult.user);
         setProfile(p);
@@ -236,7 +269,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await refreshProfile();
         return cred.user;
       },
-      register: async ({ name, email, password, userType, companyName }) => {
+      register: async ({ name, email, password, userType, companyName, isStudent, usid }) => {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         if (name) {
           await updateProfile(cred.user, { displayName: name });
@@ -247,14 +280,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: name,
           userType,
           companyName,
+          isStudent: userType === "candidate" ? Boolean(isStudent) : undefined,
+          usid: userType === "candidate" && isStudent ? usid : undefined,
         });
         await requestVerificationEmail();
         await refreshProfile();
         return cred.user;
       },
-      loginWithGoogle: async ({ userType, companyName, returnUrl } = {}) => {
+      loginWithGoogle: async ({ userType, companyName, isStudent, usid, returnUrl } = {}) => {
         const provider = buildGoogleProvider();
-        storeGoogleAuthIntent(userType, companyName, returnUrl);
+        storeGoogleAuthIntent(userType, companyName, returnUrl, isStudent, usid);
 
         let cred;
         try {
@@ -268,17 +303,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
           sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
           sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+          sessionStorage.removeItem(GOOGLE_AUTH_IS_STUDENT_KEY);
+          sessionStorage.removeItem(GOOGLE_AUTH_USID_KEY);
           throw err;
         }
 
         sessionStorage.removeItem(GOOGLE_AUTH_USER_TYPE_KEY);
         sessionStorage.removeItem(GOOGLE_AUTH_COMPANY_KEY);
         sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
+        sessionStorage.removeItem(GOOGLE_AUTH_IS_STUDENT_KEY);
+        sessionStorage.removeItem(GOOGLE_AUTH_USID_KEY);
 
         const p = await ensureGoogleUserProfile(
           cred.user,
           userType,
-          companyName
+          companyName,
+          isStudent,
+          usid
         );
         setProfile(p);
         return cred.user;
