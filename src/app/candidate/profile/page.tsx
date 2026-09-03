@@ -16,7 +16,7 @@ import {
   uploadProfileResume,
 } from "@/lib/services/storage";
 import { FileUploadField } from "@/app/components/signet/shimmer";
-import Link from "next/link";
+import ProfileSocialLinks from "@/app/components/signet/profile-social-links";
 import Wrapper from "@/layouts/wrapper";
 
 function ProfileInner() {
@@ -117,6 +117,7 @@ function ProfileInner() {
             <div className="signet-profile-copy">
               <h2>{fullName || "Your profile"}</h2>
               <p>{occupation || user?.email}</p>
+              <ProfileSocialLinks profile={profile} />
             </div>
           </div>
         </div>
@@ -204,9 +205,6 @@ function ProfileInner() {
             "Save changes"
           )}
         </button>
-        <Link href="/candidate/settings" className="signet-btn secondary w-100 mt-2">
-          Account settings
-        </Link>
       </form>
     </AppShell>
   );

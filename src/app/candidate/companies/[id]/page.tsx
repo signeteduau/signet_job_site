@@ -18,6 +18,7 @@ import { fetchCompanyJobs } from "@/lib/services/jobs";
 import { openOrCreateChat } from "@/lib/services/chat";
 import { AppUser, Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
+import ProfileSocialLinks from "@/app/components/signet/profile-social-links";
 
 function Inner() {
   const params = useParams();
@@ -89,6 +90,7 @@ function Inner() {
                 {company.website}
               </a>
             )}
+            <ProfileSocialLinks profile={company} />
             <p className="mt-2" style={{ color: "#6B7280" }}>
               {company.about || "No company description yet."}
             </p>

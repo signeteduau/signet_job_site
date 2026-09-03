@@ -30,6 +30,11 @@ function mapJob(id: string, data: DocumentData): Job {
     title: data.title || "",
     salary: data.salary || "",
     location: data.location || "",
+    street: data.street || "",
+    city: data.city || "",
+    state: data.state || "",
+    postcode: data.postcode || "",
+    country: data.country || "",
     type: data.type || "",
     priority: data.priority || "",
     category: data.category || "",
@@ -174,6 +179,11 @@ export type CreateJobInput = {
   title: string;
   salary: string;
   location: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
   type: string;
   priority?: string;
   category?: string;
@@ -253,7 +263,7 @@ export async function fetchCompanies(max = 20) {
     limit(max)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+  return snap.docs.map((d) => ({ ...d.data(), uid: d.id }));
 }
 
 export async function assertJobOwnedByCompany(

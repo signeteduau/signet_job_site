@@ -27,6 +27,10 @@ service cloud.firestore {
       }
     }
 
+    match /companyConnections/{connectionId} {
+      allow read, write: if isSignedIn();
+    }
+
     // Public job board (landing + /jobs) — guests can browse; apply still needs auth
     match /jobs/{jobId} {
       allow read: if true;

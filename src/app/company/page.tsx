@@ -5,10 +5,18 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import JobCard from "@/app/components/signet/job-card";
+import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import ProfileCompletionCard from "@/app/components/signet/profile-completion-card";
 import { JobListShimmer, PanelShimmer } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { withActingParam } from "@/lib/acting-company";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { getProfileCompletion } from "@/lib/profile-completion";
+import {
+  subCompanyId,
+  subCompanyLogo,
+  subCompanyName,
+} from "@/lib/services/company-connections";
 import {
   CompanyDashboardStats,
   fetchCompanyDashboard,
@@ -57,6 +65,7 @@ function statusClass(status?: string) {
 
 function CompanyHomeInner() {
   const { user, profile } = useAuth();
+  const { acting, setActing, children, companyId, isActing } = useActingCompany();
   const [stats, setStats] = useState<CompanyDashboardStats | null>(null);
   const [applicantNames, setApplicantNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -65,9 +74,10 @@ function CompanyHomeInner() {
 
   useEffect(() => {
     (async () => {
-      if (!user) return;
+      if (!user || !companyId) return;
+      setLoading(true);
       try {
-        const data = await fetchCompanyDashboard(user.uid);
+        const data = await fetchCompanyDashboard(companyId);
         setStats(data);
         const entries = await Promise.all(
           data.recentApplicants.map(async (app) => {
@@ -83,7 +93,7 @@ function CompanyHomeInner() {
         setLoading(false);
       }
     })();
-  }, [user]);
+  }, [user, companyId]);
 
   const jobs = stats?.jobs || [];
 
@@ -96,11 +106,61 @@ function CompanyHomeInner() {
       {getProfileCompletion(profile).percent < 100 && (
         <ProfileCompletionCard profile={profile} compact />
       )}
+      {children.length > 0 && (
+        <section className="signet-connected-section">
+          <div className="signet-section-head">
+            <div>
+              <h3>Child companies</h3>
+              <p>Tap a company, then choose an action below</p>
+            </div>
+            <Link href="/company/network" className="signet-section-link">
+              Manage
+            </Link>
+          </div>
+          <div className="signet-dash-actions is-companies">
+            {children.map((item) => {
+              const id = subCompanyId(item);
+              const name = subCompanyName(item);
+              const selected = acting?.id === id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`signet-dash-action${selected ? " is-selected" : ""}`}
+                  onClick={() =>
+                    setActing(
+                      selected
+                        ? null
+                        : {
+                            id,
+                            name,
+                            logo: subCompanyLogo(item),
+                          }
+                    )
+                  }
+                >
+                  <span className="signet-dash-action-icon signet-dash-action-logo">
+                    <ProfileAvatar
+                      src={subCompanyLogo(item)}
+                      name={name}
+                      size="md"
+                      rounded="tile"
+                    />
+                  </span>
+                  <span className="signet-dash-action-body">
+                    <strong>{name}</strong>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
       <div className="signet-dash-actions">
         {QUICK_ACTIONS.map((action) => (
           <Link
             key={action.href}
-            href={action.href}
+            href={withActingParam(action.href, acting)}
             className={`signet-dash-action tone-${action.tone}`}
           >
             <span className="signet-dash-action-icon">
@@ -119,9 +179,16 @@ function CompanyHomeInner() {
         <div className="signet-section-head">
           <div>
             <h3>Recent applicants</h3>
-            <p>Latest candidates who applied to your roles</p>
+            <p>
+              {isActing
+                ? `Latest candidates who applied to ${acting?.name}`
+                : "Latest candidates who applied to your roles"}
+            </p>
           </div>
-          <Link href="/company/applications" className="signet-section-link">
+          <Link
+            href={withActingParam("/company/applications", acting)}
+            className="signet-section-link"
+          >
             See all
           </Link>
         </div>
@@ -132,7 +199,10 @@ function CompanyHomeInner() {
           <div className="signet-empty signet-panel">
             <h4>No applicants yet</h4>
             <p>When candidates apply, they&apos;ll show up here.</p>
-            <Link href="/company/jobs/new" className="signet-btn mt-2">
+            <Link
+              href={withActingParam("/company/jobs/new", acting)}
+              className="signet-btn mt-2"
+            >
               Create your first vacancy
             </Link>
           </div>
@@ -146,7 +216,10 @@ function CompanyHomeInner() {
             return (
               <Link
                 key={`${app.jobId}-${applicantId}`}
-                href={`/company/applications/${app.jobId}/${applicantId}`}
+                href={withActingParam(
+                  `/company/applications/${app.jobId}/${applicantId}`,
+                  acting
+                )}
                 className="signet-applicant-row text-decoration-none"
               >
                 <div className="signet-application-head">
@@ -170,9 +243,16 @@ function CompanyHomeInner() {
         <div className="signet-section-head">
           <div>
             <h3>Recent postings</h3>
-            <p>Your active and recent job listings</p>
+            <p>
+              {isActing
+                ? `Active and recent listings for ${acting?.name}`
+                : "Your active and recent job listings"}
+            </p>
           </div>
-          <Link href="/company/jobs" className="signet-section-link">
+          <Link
+            href={withActingParam("/company/jobs", acting)}
+            className="signet-section-link"
+          >
             See all
           </Link>
         </div>
@@ -183,7 +263,10 @@ function CompanyHomeInner() {
           <div className="signet-empty signet-panel">
             <h4>No jobs posted yet</h4>
             <p>Create your first vacancy to start receiving applications.</p>
-            <Link href="/company/jobs/new" className="signet-btn mt-2">
+            <Link
+              href={withActingParam("/company/jobs/new", acting)}
+              className="signet-btn mt-2"
+            >
               Post a job
             </Link>
           </div>
@@ -193,7 +276,7 @@ function CompanyHomeInner() {
           <JobCard
             key={job.id}
             job={job}
-            href={`/company/applications?jobId=${job.id}`}
+            href={withActingParam(`/company/applications?jobId=${job.id}`, acting)}
             showDescription={false}
             expandable={false}
             footer={
@@ -203,7 +286,7 @@ function CompanyHomeInner() {
                     {job.applicantsCount || 0} applicants · {job.status || "Active"}
                   </span>
                   <Link
-                    href={`/company/jobs/${job.id}/edit`}
+                    href={withActingParam(`/company/jobs/${job.id}/edit`, acting)}
                     className="signet-btn secondary signet-btn-sm signet-btn-compact"
                     onClick={(e) => e.stopPropagation()}
                   >

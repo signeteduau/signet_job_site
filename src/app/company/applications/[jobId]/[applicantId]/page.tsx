@@ -7,6 +7,7 @@ import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { PanelShimmer } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { getUserProfile } from "@/lib/services/users";
 import {
   fetchJobApplications,
@@ -16,12 +17,14 @@ import { assertJobOwnedByCompany } from "@/lib/services/jobs";
 import { openOrCreateChat } from "@/lib/services/chat";
 import { Application, AppUser } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
+import ProfileSocialLinks from "@/app/components/signet/profile-social-links";
 
 function Inner() {
   const params = useParams();
   const jobId = String(params?.jobId || "");
   const applicantId = String(params?.applicantId || "");
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const { companyId, actingProfile } = useActingCompany();
   const router = useRouter();
   const [applicant, setApplicant] = useState<AppUser | null>(null);
   const [application, setApplication] = useState<Application | null>(null);
@@ -41,9 +44,9 @@ function Inner() {
 
   useEffect(() => {
     (async () => {
-      if (!user) return;
+      if (!user || !companyId) return;
       try {
-        const owned = await assertJobOwnedByCompany(jobId, user.uid);
+        const owned = await assertJobOwnedByCompany(jobId, companyId);
         if (!owned) {
           toast.error("Job not found or you don’t have access.");
           router.replace("/company/applications");
@@ -56,7 +59,7 @@ function Inner() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobId, applicantId, user]);
+  }, [jobId, applicantId, user, companyId]);
 
   if (loading) {
     return (
@@ -104,6 +107,7 @@ function Inner() {
             {applicant?.aboutMe && (
               <p className="mt-3" style={{ color: "#6B7280" }}>{applicant.aboutMe}</p>
             )}
+            <ProfileSocialLinks profile={applicant} />
           </div>
         </div>
       </div>
@@ -148,11 +152,11 @@ function Inner() {
           <button
             className="signet-btn"
             onClick={async () => {
-              if (!user) return;
+              if (!user || !companyId) return;
               try {
                 await updateApplicationStatus({
                   jobId,
-                  companyId: user.uid,
+                  companyId,
                   applicantId,
                   status: "Interview Scheduled",
                   interviewDate,
@@ -170,11 +174,11 @@ function Inner() {
           <button
             className="signet-btn secondary"
             onClick={async () => {
-              if (!user) return;
+              if (!user || !companyId) return;
               try {
                 await updateApplicationStatus({
                   jobId,
-                  companyId: user.uid,
+                  companyId,
                   applicantId,
                   status: "Hired",
                 });
@@ -190,11 +194,11 @@ function Inner() {
           <button
             className="signet-btn danger"
             onClick={async () => {
-              if (!user) return;
+              if (!user || !companyId) return;
               try {
                 await updateApplicationStatus({
                   jobId,
-                  companyId: user.uid,
+                  companyId,
                   applicantId,
                   status: "Rejected",
                   rejectionReason: rejectionReason || "Not a fit at this time",
@@ -211,10 +215,10 @@ function Inner() {
           <button
             className="signet-btn secondary"
             onClick={async () => {
-              if (!user || !profile) return;
+              if (!user || !actingProfile) return;
               try {
                 const chatId = await openOrCreateChat({
-                  currentUser: profile,
+                  currentUser: actingProfile,
                   otherUserId: applicantId,
                 });
                 router.push(`/company/chat/${chatId}`);

@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
@@ -16,6 +15,7 @@ import {
   uploadProfileImage,
 } from "@/lib/services/storage";
 import Wrapper from "@/layouts/wrapper";
+import ProfileSocialLinks from "@/app/components/signet/profile-social-links";
 
 function CompanyProfileInner() {
   const { user, profile, saveProfile } = useAuth();
@@ -119,6 +119,7 @@ function CompanyProfileInner() {
             <div className="signet-profile-copy">
               <h2>{companyName || "Your company"}</h2>
               <p>{industry || user?.email}</p>
+              <ProfileSocialLinks profile={profile} />
             </div>
           </div>
         </div>
@@ -178,9 +179,6 @@ function CompanyProfileInner() {
             "Save changes"
           )}
         </button>
-        <Link href="/company/settings" className="signet-btn secondary w-100 mt-2">
-          Account settings
-        </Link>
       </form>
     </AppShell>
   );

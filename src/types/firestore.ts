@@ -25,6 +25,10 @@ export type AppUser = {
   experienceYears?: string;
   resumeUrl?: string;
   resumeFileName?: string;
+  linkedinUrl?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
   // company
   companyName?: string;
   industry?: string;
@@ -39,6 +43,28 @@ export type AppUser = {
   updatedAt?: unknown;
 };
 
+export type CompanyConnectionStatus =
+  | "pending"
+  | "accepted"
+  | "declined"
+  | "cancelled";
+
+export type CompanyConnection = {
+  id: string;
+  requesterId: string;
+  requesterName: string;
+  requesterLogo?: string;
+  headId: string;
+  headName: string;
+  headLogo?: string;
+  subId: string;
+  subName: string;
+  subLogo?: string;
+  status: CompanyConnectionStatus;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
+
 export type Job = {
   id: string;
   jobId?: string;
@@ -48,6 +74,11 @@ export type Job = {
   title: string;
   salary: string;
   location: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
   type: string;
   priority?: string;
   category?: string;

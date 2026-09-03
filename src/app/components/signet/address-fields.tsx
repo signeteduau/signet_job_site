@@ -13,9 +13,10 @@ import {
 type Props = {
   value: AddressValue;
   onChange: (next: AddressValue) => void;
+  required?: boolean;
 };
 
-export default function AddressFields({ value, onChange }: Props) {
+export default function AddressFields({ value, onChange, required }: Props) {
   const states = useMemo(() => statesForCountry(value.country), [value.country]);
   const cities = useMemo(
     () => citiesForState(value.country, value.state),
@@ -95,6 +96,7 @@ export default function AddressFields({ value, onChange }: Props) {
         <label>City</label>
         {cityOptions.length ? (
           <select
+            required={required}
             value={value.city || ""}
             onChange={(e) => patch({ city: e.target.value })}
             autoComplete="address-level2"
@@ -108,6 +110,7 @@ export default function AddressFields({ value, onChange }: Props) {
           </select>
         ) : (
           <input
+            required={required}
             value={value.city || ""}
             onChange={(e) => patch({ city: e.target.value })}
             placeholder="City"

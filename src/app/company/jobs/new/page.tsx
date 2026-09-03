@@ -5,19 +5,23 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { useAuth } from "@/context/auth-context";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
+import { emptyAddress, formatAddress } from "@/lib/address";
 import { JOB_TYPES } from "@/lib/job-utils";
 import { createJob, updateJob } from "@/lib/services/jobs";
 import { uploadJobAttachment } from "@/lib/services/storage";
+import AddressFields from "@/app/components/signet/address-fields";
 import SignetTextEditorField from "@/app/components/signet/text-editor-field";
 import { FileUploadField } from "@/app/components/signet/shimmer";
 import Wrapper from "@/layouts/wrapper";
 
 function NewJobInner() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const { companyId, companyName, companyLogo, isActing } = useActingCompany();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [salary, setSalary] = useState("");
-  const [location, setLocation] = useState("");
+  const [addressValue, setAddressValue] = useState(emptyAddress);
   const [type, setType] = useState<string>(JOB_TYPES[0]);
   const [priority, setPriority] = useState("Low");
   const [category, setCategory] = useState("");
@@ -30,21 +34,36 @@ function NewJobInner() {
   const [uploading, setUploading] = useState(false);
 
   return (
-    <AppShell role="company" title="Create vacancy">
+    <AppShell
+      role="company"
+      title="Create vacancy"
+      subtitle={isActing ? `This job will be posted as ${companyName}` : undefined}
+    >
       <form
         className="signet-panel"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!user) return;
+          if (!user || !companyId) return;
           setSaving(true);
           try {
+            const location = formatAddress(addressValue);
+            if (!addressValue.city?.trim()) {
+              toast.error("Add a city for this job.");
+              setSaving(false);
+              return;
+            }
             const jobId = await createJob({
-              companyId: user.uid,
-              companyName: profile?.companyName || profile?.fullName || "Company",
-              logoUrl: profile?.logoUrl || profile?.profileImage || "",
+              companyId,
+              companyName,
+              logoUrl: companyLogo,
               title,
               salary,
               location,
+              street: addressValue.street || "",
+              city: addressValue.city || "",
+              state: addressValue.state || "",
+              postcode: addressValue.postcode || "",
+              country: addressValue.country || "",
               type,
               category,
               experience,
@@ -59,8 +78,8 @@ function NewJobInner() {
             });
             if (attachment) {
               setUploading(true);
-              const url = await uploadJobAttachment(user.uid, jobId, attachment);
-              await updateJob(jobId, user.uid, { attachmentUrl: url });
+              const url = await uploadJobAttachment(companyId, jobId, attachment);
+              await updateJob(jobId, companyId, { attachmentUrl: url });
               setUploading(false);
             }
             toast.success("Job posted!");
@@ -78,25 +97,16 @@ function NewJobInner() {
           <label>Job title</label>
           <input required value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="signet-field">
-              <label>Salary</label>
-              <input
-                required
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
-                placeholder="$80k – $100k / month"
-              />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="signet-field">
-              <label>Location</label>
-              <input required value={location} onChange={(e) => setLocation(e.target.value)} />
-            </div>
-          </div>
+        <div className="signet-field">
+          <label>Salary</label>
+          <input
+            required
+            value={salary}
+            onChange={(e) => setSalary(e.target.value)}
+            placeholder="$80k – $100k / month"
+          />
         </div>
+        <AddressFields required value={addressValue} onChange={setAddressValue} />
         <div className="row">
           <div className="col-md-4">
             <div className="signet-field">

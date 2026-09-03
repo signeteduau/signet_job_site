@@ -6,11 +6,22 @@ import { usePathname, useRouter } from "next/navigation";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import ProfileAvatar from "@/app/components/signet/profile-avatar";
 import { useAuth } from "@/context/auth-context";
+import { withActingParam } from "@/lib/acting-company";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { getProfileCompletion } from "@/lib/profile-completion";
 import { subscribeToChats } from "@/lib/services/chat";
+import {
+  incomingPendingCount,
+  subscribeCompanyConnections,
+} from "@/lib/services/company-connections";
 import { subscribeToNotifications } from "@/lib/services/notifications";
 
 type NavItem = { href: string; label: string; icon: string; badge?: number };
+
+function isAppNavActive(pathname: string, href: string, role: "candidate" | "company") {
+  if (href === `/${role}` || href === "/jobs") return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 const candidateNavBase: Omit<NavItem, "badge">[] = [
   { href: "/candidate", label: "Home", icon: "bi-house" },
@@ -18,6 +29,7 @@ const candidateNavBase: Omit<NavItem, "badge">[] = [
   { href: "/candidate/chat", label: "Chat", icon: "bi-chat-dots" },
   { href: "/candidate/my-jobs", label: "My Jobs", icon: "bi-bookmark" },
   { href: "/candidate/profile", label: "Profile", icon: "bi-person" },
+  { href: "/candidate/settings", label: "Settings", icon: "bi-gear" },
 ];
 
 const companyNavBase: Omit<NavItem, "badge">[] = [
@@ -26,6 +38,8 @@ const companyNavBase: Omit<NavItem, "badge">[] = [
   { href: "/company/chat", label: "Chat", icon: "bi-chat-dots" },
   { href: "/company/jobs", label: "Posted", icon: "bi-briefcase" },
   { href: "/company/profile", label: "Profile", icon: "bi-person" },
+  { href: "/company/network", label: "Companies", icon: "bi-building-add" },
+  { href: "/company/settings", label: "Settings", icon: "bi-gear" },
 ];
 
 export default function AppShell({
@@ -42,31 +56,42 @@ export default function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const { profile, logout, user } = useAuth();
+  const { acting, setActing, isActing, companyId } = useActingCompany();
   const [notifCount, setNotifCount] = useState(0);
   const [chatCount, setChatCount] = useState(0);
+  const [networkCount, setNetworkCount] = useState(0);
+  const inboxId = role === "company" ? companyId || user?.uid : user?.uid;
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !inboxId) return;
     const unsubN = subscribeToNotifications(user.uid, (items) => {
       setNotifCount(items.filter((n) => !n.read).length);
     });
-    const unsubC = subscribeToChats(user.uid, (chats) => {
+    const unsubC = subscribeToChats(inboxId, (chats) => {
       const unread = chats.filter((c) =>
         role === "company" ? c.unreadByCompany : c.unreadByCandidate
       ).length;
       setChatCount(unread);
     });
+    const unsubNet =
+      role === "company"
+        ? subscribeCompanyConnections(user.uid, (items) => {
+            setNetworkCount(incomingPendingCount(items, user.uid));
+          })
+        : () => undefined;
     return () => {
       unsubN();
       unsubC();
+      unsubNet();
     };
-  }, [user, role]);
+  }, [user, role, inboxId]);
 
   const nav: NavItem[] = (role === "company" ? companyNavBase : candidateNavBase).map(
-    (item) =>
-      item.href.endsWith("/chat")
-        ? { ...item, badge: chatCount }
-        : { ...item }
+    (item) => {
+      if (item.href.endsWith("/chat")) return { ...item, badge: chatCount };
+      if (item.href === "/company/network") return { ...item, badge: networkCount };
+      return { ...item };
+    }
   );
   const completion = getProfileCompletion(profile);
   const completeTone =
@@ -166,9 +191,7 @@ export default function AppShell({
         <aside className="signet-sidebar">
           <nav>
             {nav.map((item) => {
-              const active =
-                pathname === item.href ||
-                (item.href !== `/${role}` && pathname.startsWith(item.href));
+              const active = isAppNavActive(pathname, item.href, role);
               return (
                 <Link
                   key={item.href}
@@ -187,7 +210,10 @@ export default function AppShell({
               );
             })}
             {role === "company" && (
-              <Link href="/company/jobs/new" className="signet-cta-nav">
+              <Link
+                href={withActingParam("/company/jobs/new", acting)}
+                className="signet-cta-nav"
+              >
                 <i className="bi bi-plus-lg" /> Post a Job
               </Link>
             )}
@@ -203,15 +229,28 @@ export default function AppShell({
               </div>
             </header>
           )}
+          {role === "company" &&
+            isActing &&
+            acting &&
+            pathname !== "/company/profile" &&
+            pathname !== "/company/network" &&
+            pathname !== "/company/settings" && (
+            <div className="signet-acting-banner">
+              <span>
+                Managing <strong>{acting.name}</strong>
+              </span>
+              <button type="button" onClick={() => setActing(null)}>
+                Done
+              </button>
+            </div>
+          )}
           {children}
         </main>
       </div>
 
-      <nav className="signet-bottom-nav d-lg-none">
+      <nav className={`signet-bottom-nav d-lg-none${nav.length > 6 ? " is-dense" : ""}`}>
         {nav.map((item) => {
-          const active =
-            pathname === item.href ||
-            (item.href !== `/${role}` && pathname.startsWith(item.href));
+          const active = isAppNavActive(pathname, item.href, role);
           return (
             <Link
               key={item.href}

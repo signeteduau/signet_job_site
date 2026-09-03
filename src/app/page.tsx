@@ -49,25 +49,28 @@ const CATEGORY_PILLS = [
   { label: "Health", icon: "bi-heart-pulse-fill", term: "Health" },
 ];
 
-const TOP_HIRING_BUCKETS = [
-  { label: "MNCs", match: /mnc|corporate|consulting|it services/i },
-  { label: "Product", match: /product|saas|software/i },
-  { label: "Banking & Finance", match: /bank|finance|fintech/i },
-  { label: "Healthcare", match: /health|pharma|medical/i },
-  { label: "Edtech", match: /edtech|education|learning/i },
-  { label: "Startup", match: /startup|early stage/i },
-];
-
-const POPULAR_ROLES = [
-  "Software Engineer",
-  "Data Analyst",
-  "Product Manager",
-  "Digital Marketing",
-  "HR Executive",
-  "Sales Manager",
-  "UI/UX Designer",
-  "Business Analyst",
-];
+const HIRE_STEPS = [
+  {
+    title: "Post a job",
+    desc: "Describe the role, location, and what success looks like",
+    icon: "bi-briefcase-fill",
+  },
+  {
+    title: "Review applications",
+    desc: "Browse candidate profiles, resumes, and experience in one place",
+    icon: "bi-file-earmark-person-fill",
+  },
+  {
+    title: "Message & interview",
+    desc: "Chat with applicants and schedule interviews inside Signet",
+    icon: "bi-chat-dots-fill",
+  },
+  {
+    title: "Hire",
+    desc: "Choose the right person and keep the conversation going",
+    icon: "bi-award-fill",
+  },
+] as const;
 
 function formatCount(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "")}K+`;
@@ -147,40 +150,15 @@ export default function Home() {
     return map;
   }, [jobs]);
 
-  const topHiringBuckets = useMemo(() => {
-    return TOP_HIRING_BUCKETS.map((bucket) => {
-      const matchedJobs = jobs.filter((j) => {
-        const hay = `${j.category} ${j.type} ${j.companyName} ${j.title}`.toLowerCase();
-        return bucket.match.test(hay);
-      });
-      const matchedCompanies = companies.filter((c) => {
-        const hay = `${c.industry} ${companyName(c)}`.toLowerCase();
-        return bucket.match.test(hay);
-      });
-      const pool = matchedCompanies.length ? matchedCompanies : companies;
-      const count = Math.max(
-        matchedJobs.length,
-        matchedCompanies.length,
-        Math.ceil(jobs.length / 6)
-      );
-      return {
-        label: bucket.label,
-        count,
-        logos: pool.slice(0, 4),
-      };
-    });
-  }, [jobs, companies]);
-
   const roleCounts = useMemo(() => {
-    return POPULAR_ROLES.map((role) => ({
-      role,
-      count: jobs.filter((j) => jobMatchesSearchTerm(j, role)).length,
+    return CATEGORY_PILLS.map((item) => ({
+      role: item.label,
+      count: jobs.filter((j) => jobMatchesSearchTerm(j, item.term)).length,
     }));
   }, [jobs]);
 
   const roleSuggestions = useMemo(() => {
     const pool = new Set<string>([
-      ...POPULAR_ROLES,
       ...CATEGORY_PILLS.map((item) => item.label),
       ...jobs.map((j) => j.title).filter((v): v is string => Boolean(v)),
       ...jobs.map((j) => j.category).filter((v): v is string => Boolean(v)),
@@ -358,44 +336,6 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="nk-section">
-            <div className="nk-container">
-              <h2 className="nk-section-title">Explore Top Employers</h2>
-              <NkScrollRail railClassName="nk-top-hire-rail" ariaLabel="Explore Top Employers">
-                {topHiringBuckets.map((bucket) => (
-                  <button
-                    key={bucket.label}
-                    type="button"
-                    className="nk-top-hire-card"
-                    onClick={() => goSearch({ term: bucket.label })}
-                  >
-                    <div className="nk-top-hire-head">
-                      <strong>{bucket.label}</strong>
-                      <i className="bi bi-chevron-right" aria-hidden />
-                    </div>
-                    <p>{formatCount(bucket.count)} are actively hiring</p>
-                    <div className="nk-top-hire-logos">
-                      {bucket.logos.map((c) => {
-                        const name = companyName(c);
-                        const logo = companyLogo(c);
-                        return (
-                          <span key={c.uid} className="nk-top-hire-logo" title={name}>
-                            {logo ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={logo} alt="" />
-                            ) : (
-                              name.slice(0, 1).toUpperCase()
-                            )}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </button>
-                ))}
-              </NkScrollRail>
-            </div>
-          </section>
-
           <section className="nk-section nk-section-soft">
             <div className="nk-container">
               <h2 className="nk-section-title">Employers Ready to Hire</h2>
@@ -477,6 +417,46 @@ export default function Home() {
             </div>
           </section>
 
+          <section className="nk-steps-band">
+            <div className="nk-container">
+              <header className="nk-steps-head">
+                <p className="nk-steps-kicker">How hiring works</p>
+                <h2 className="nk-steps-title">Hire talent in 4 simple steps</h2>
+                <p className="nk-steps-lead">
+                  From posting a vacancy to making an offer — all inside Signet.
+                </p>
+              </header>
+              <ol className="nk-steps-track">
+                {HIRE_STEPS.map((step, index) => (
+                  <li key={step.title} className="nk-step">
+                    <div className="nk-step-marker">
+                      <span className="nk-step-num">{index + 1}</span>
+                    </div>
+                    <article className="nk-step-card">
+                      <span className="nk-step-icon" aria-hidden>
+                        <i className={`bi ${step.icon}`} />
+                      </span>
+                      <strong>{step.title}</strong>
+                      <p>{step.desc}</p>
+                    </article>
+                  </li>
+                ))}
+              </ol>
+              <div className="nk-steps-cta">
+                <Link
+                  href={
+                    loggedIn && isCompany
+                      ? "/company/jobs/new"
+                      : "/register?type=company"
+                  }
+                  className="nk-btn nk-btn-on-dark"
+                >
+                  {loggedIn && isCompany ? "Post a job" : "Start hiring"}
+                </Link>
+              </div>
+            </div>
+          </section>
+
           <section className="nk-section">
             <div className="nk-container">
               <div className="nk-roles-panel">
@@ -544,7 +524,7 @@ export default function Home() {
         <footer className="nk-footer">
           <div className="nk-container nk-footer-grid">
             <div className="nk-footer-brand-col">
-              <div className="nk-brand nk-footer-brand">
+              <Link href="/" className="nk-brand nk-footer-brand">
                 <span className="nk-brand-mark">
                   <Image
                     src={signetLogo}
@@ -554,8 +534,58 @@ export default function Home() {
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 </span>
+                <span className="nk-brand-wordmark">
+                  <strong>Signet</strong>
+                  <em>Employment Hub</em>
+                </span>
+              </Link>
+              <p className="nk-footer-brand-intro">
+                Connecting candidates and employers across trades and professions.
+              </p>
+              <p className="nk-footer-connect">We&apos;re Social!</p>
+              <div className="nk-footer-social">
+                <a
+                  href="https://www.facebook.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="is-facebook"
+                >
+                  <i className="bi bi-facebook" />
+                </a>
+                <a
+                  href="https://www.instagram.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="is-instagram"
+                >
+                  <i className="bi bi-instagram" />
+                </a>
+                <a
+                  href="https://x.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X"
+                  className="is-x"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="currentColor"
+                      d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.59l-5.16-6.74L4.9 22H1.64l8.02-9.16L1.5 2h6.76l4.66 6.17L18.244 2Zm-1.16 18.08h1.83L7.01 3.83H5.05l12.03 16.25Z"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/signet-employment-hub/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="is-linkedin"
+                >
+                  <i className="bi bi-linkedin" />
+                </a>
               </div>
-              <p className="nk-footer-brand-name">{SIGNET_LOGO_ALT}</p>
             </div>
             <div>
               <h4>About us</h4>
@@ -566,8 +596,9 @@ export default function Home() {
             </div>
             <div>
               <h4>Help center</h4>
+              <Link href="/faq">FAQs</Link>
               <Link href="/support">Support</Link>
-              <Link href="/support">Report issue</Link>
+              <Link href="/report">Report issue</Link>
             </div>
             <div>
               <h4>Legal</h4>

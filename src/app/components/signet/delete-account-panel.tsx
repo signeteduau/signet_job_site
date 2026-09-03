@@ -44,9 +44,9 @@ export default function DeleteAccountPanel({ embed = false }: Props) {
   }, [user]);
 
   useEffect(() => {
-    if (loading || user || done) return;
+    if (embed || loading || user || done) return;
     router.replace(buildLoginUrl("/delete-account"));
-  }, [loading, user, done, router]);
+  }, [embed, loading, user, done, router]);
 
   async function handleImmediateDelete() {
     if (!user || !confirm) return;
@@ -74,7 +74,7 @@ export default function DeleteAccountPanel({ embed = false }: Props) {
           : "";
       if (code === "auth/requires-recent-login") {
         notifyError("Please sign in again, then retry account deletion.");
-        router.push(buildLoginUrl("/delete-account"));
+        router.push(buildLoginUrl(embed ? window.location.pathname : "/delete-account"));
       } else if (code === "auth/wrong-password") {
         notifyError("Incorrect password. Please try again.");
       } else {

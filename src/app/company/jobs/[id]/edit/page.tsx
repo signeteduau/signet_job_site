@@ -5,21 +5,25 @@ import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { useAuth } from "@/context/auth-context";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
+import { addressFromJob, emptyAddress, formatAddress } from "@/lib/address";
 import { JOB_TYPES } from "@/lib/job-utils";
 import { assertJobOwnedByCompany, updateJob } from "@/lib/services/jobs";
 import { uploadJobAttachment } from "@/lib/services/storage";
+import AddressFields from "@/app/components/signet/address-fields";
 import SignetTextEditorField from "@/app/components/signet/text-editor-field";
 import { FileUploadField, PageLoader } from "@/app/components/signet/shimmer";
 import Wrapper from "@/layouts/wrapper";
 
 function Inner() {
   const { user } = useAuth();
+  const { companyId } = useActingCompany();
   const params = useParams();
   const id = String(params?.id || "");
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [salary, setSalary] = useState("");
-  const [location, setLocation] = useState("");
+  const [addressValue, setAddressValue] = useState(emptyAddress);
   const [type, setType] = useState<string>(JOB_TYPES[0]);
   const [priority, setPriority] = useState("Low");
   const [category, setCategory] = useState("");
@@ -36,9 +40,9 @@ function Inner() {
 
   useEffect(() => {
     (async () => {
-      if (!user) return;
+      if (!user || !companyId) return;
       try {
-        const job = await assertJobOwnedByCompany(id, user.uid);
+        const job = await assertJobOwnedByCompany(id, companyId);
         if (!job) {
           toast.error("Job not found or you don’t have access.");
           router.replace("/company/jobs");
@@ -46,7 +50,7 @@ function Inner() {
         }
         setTitle(job.title);
         setSalary(job.salary);
-        setLocation(job.location);
+        setAddressValue(addressFromJob(job));
         setType(job.type || JOB_TYPES[0]);
         setPriority(job.priority || "Low");
         setCategory(job.category || "");
@@ -60,7 +64,7 @@ function Inner() {
         setLoading(false);
       }
     })();
-  }, [id, user, router]);
+  }, [id, user, companyId, router]);
 
   if (loading) {
     return (
@@ -76,19 +80,29 @@ function Inner() {
         className="signet-panel"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!user) return;
+          if (!user || !companyId) return;
           setSaving(true);
           try {
+            if (!addressValue.city?.trim()) {
+              toast.error("Add a city for this job.");
+              setSaving(false);
+              return;
+            }
             let nextAttachment = attachmentUrl;
             if (attachment) {
               setUploading(true);
-              nextAttachment = await uploadJobAttachment(user.uid, id, attachment);
+              nextAttachment = await uploadJobAttachment(companyId, id, attachment);
               setUploading(false);
             }
-            await updateJob(id, user.uid, {
+            await updateJob(id, companyId, {
               title,
               salary,
-              location,
+              location: formatAddress(addressValue),
+              street: addressValue.street || "",
+              city: addressValue.city || "",
+              state: addressValue.state || "",
+              postcode: addressValue.postcode || "",
+              country: addressValue.country || "",
               type,
               priority,
               category,
@@ -116,20 +130,11 @@ function Inner() {
           <label>Job title</label>
           <input required value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="signet-field">
-              <label>Salary</label>
-              <input required value={salary} onChange={(e) => setSalary(e.target.value)} />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="signet-field">
-              <label>Location</label>
-              <input required value={location} onChange={(e) => setLocation(e.target.value)} />
-            </div>
-          </div>
+        <div className="signet-field">
+          <label>Salary</label>
+          <input required value={salary} onChange={(e) => setSalary(e.target.value)} />
         </div>
+        <AddressFields required value={addressValue} onChange={setAddressValue} />
         <div className="row">
           <div className="col-md-3">
             <div className="signet-field">

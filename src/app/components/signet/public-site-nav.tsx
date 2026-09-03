@@ -95,7 +95,7 @@ export default function PublicSiteNav({
                 href={buildRegisterUrl(searchTerm ? `/jobs?q=${searchTerm}` : undefined)}
                 className="nk-btn nk-btn-register"
               >
-                Register <i className="bi bi-arrow-right" />
+                Create free account
               </Link>
             </>
           )}

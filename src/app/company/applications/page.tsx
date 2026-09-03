@@ -6,6 +6,7 @@ import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { formatAppliedDate } from "@/lib/job-utils";
 import { fetchCompanyJobs } from "@/lib/services/jobs";
 import {
@@ -35,12 +36,18 @@ function applicantInitials(name: string) {
 }
 
 function ApplicationsInner() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const { companyId, companyName, actingProfile, isActing } = useActingCompany();
   const search = useSearchParams();
   const router = useRouter();
   const preselect = search?.get("jobId") || "";
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobId, setJobId] = useState(preselect);
+
+  useEffect(() => {
+    setJobId(preselect);
+    setJobs([]);
+  }, [companyId, preselect]);
   const [apps, setApps] = useState<Application[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [names, setNames] = useState<Record<string, string>>({});
@@ -48,9 +55,9 @@ function ApplicationsInner() {
 
   useEffect(() => {
     (async () => {
-      if (!user) return;
+      if (!user || !companyId) return;
       try {
-        const list = await fetchCompanyJobs(user.uid);
+        const list = await fetchCompanyJobs(companyId);
         setJobs(list);
         if (!jobId && list[0]) setJobId(list[0].id);
       } catch {
@@ -58,7 +65,7 @@ function ApplicationsInner() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, companyId]);
 
   const reloadApps = async (nextJobId: string) => {
     const list = await fetchJobApplications(nextJobId);
@@ -111,11 +118,11 @@ function ApplicationsInner() {
     status: Application["status"],
     rejectionReason?: string
   ) => {
-    if (!user || !jobId) return;
+    if (!user || !jobId || !companyId) return;
     try {
       await updateApplicationStatus({
         jobId,
-        companyId: user.uid,
+        companyId,
         applicantId,
         status: status!,
         rejectionReason,
@@ -134,7 +141,9 @@ function ApplicationsInner() {
       subtitle={
         selectedJob
           ? `${filteredApps.length} applicant${filteredApps.length === 1 ? "" : "s"} for ${selectedJob.title}`
-          : "Review candidates who applied to your roles"
+          : isActing
+            ? `Review candidates who applied to ${companyName}`
+            : "Review candidates who applied to your roles"
       }
     >
       <div className="row g-3 mb-3">
@@ -244,10 +253,10 @@ function ApplicationsInner() {
                     type="button"
                     className="signet-btn secondary signet-btn-compact"
                     onClick={async () => {
-                      if (!user || !profile) return;
+                      if (!user || !actingProfile) return;
                       try {
                         const chatId = await openOrCreateChat({
-                          currentUser: profile,
+                          currentUser: actingProfile,
                           otherUserId: applicantId,
                         });
                         router.push(`/company/chat/${chatId}`);

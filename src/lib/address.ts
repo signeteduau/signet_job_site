@@ -248,6 +248,27 @@ export function addressFromProfile(profile?: {
   return parseAddressString(profile.address || profile.companyLocation || "");
 }
 
+export function addressFromJob(job?: {
+  street?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+  country?: string;
+  location?: string;
+} | null): AddressValue {
+  if (!job) return emptyAddress();
+  if (job.city || job.state || job.postcode || job.street) {
+    return {
+      street: job.street || "",
+      city: job.city || "",
+      state: job.state || "",
+      postcode: job.postcode || "",
+      country: job.country || "Australia",
+    };
+  }
+  return parseAddressString(job.location || "");
+}
+
 export function parseAddressString(raw: string): AddressValue {
   const text = raw.trim();
   if (!text) return emptyAddress();

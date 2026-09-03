@@ -1,26 +1,28 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import AuthGate from "@/app/components/signet/auth-gate";
 import AppShell from "@/app/components/signet/app-shell";
 import JobCard from "@/app/components/signet/job-card";
-import { JobListShimmer } from "@/app/components/signet/shimmer";
+import { JobListShimmer, PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
+import { withActingParam } from "@/lib/acting-company";
+import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { deleteJob, fetchCompanyJobs } from "@/lib/services/jobs";
 import { Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
 function PostedJobsInner() {
   const { user } = useAuth();
+  const { acting, companyId, companyName, isActing } = useActingCompany();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    if (!user) return;
+  const load = async (id: string) => {
     setLoading(true);
     try {
-      setJobs(await fetchCompanyJobs(user.uid));
+      setJobs(await fetchCompanyJobs(id));
     } catch {
       toast.error("Could not load posted jobs.");
     } finally {
@@ -29,14 +31,22 @@ function PostedJobsInner() {
   };
 
   useEffect(() => {
-    load();
+    if (!user || !companyId) return;
+    load(companyId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, companyId]);
 
   return (
-    <AppShell role="company" title="Posted jobs">
+    <AppShell
+      role="company"
+      title="Posted jobs"
+      subtitle={isActing ? `Listings for ${companyName}` : undefined}
+    >
       <div className="mb-3">
-        <Link href="/company/jobs/new" className="signet-btn">
+        <Link
+          href={withActingParam("/company/jobs/new", acting)}
+          className="signet-btn"
+        >
           + New vacancy
         </Link>
       </div>
@@ -51,20 +61,23 @@ function PostedJobsInner() {
         <JobCard
           key={job.id}
           job={job}
-          href={`/company/applications?jobId=${job.id}`}
+          href={withActingParam(`/company/applications?jobId=${job.id}`, acting)}
           showDescription={false}
           expandable={false}
           footer={
             <div className="signet-job-manage-footer">
               <div className="signet-job-manage-actions">
                 <Link
-                  href={`/company/applications?jobId=${job.id}`}
+                  href={withActingParam(
+                    `/company/applications?jobId=${job.id}`,
+                    acting
+                  )}
                   className="signet-btn secondary signet-btn-compact"
                 >
                   Applications ({job.applicantsCount || 0})
                 </Link>
                 <Link
-                  href={`/company/jobs/${job.id}/edit`}
+                  href={withActingParam(`/company/jobs/${job.id}/edit`, acting)}
                   className="signet-btn secondary signet-btn-compact"
                 >
                   Edit
@@ -73,11 +86,11 @@ function PostedJobsInner() {
                   type="button"
                   className="signet-btn danger signet-btn-compact"
                   onClick={async () => {
-                    if (!user || !confirm("Delete this job?")) return;
+                    if (!companyId || !confirm("Delete this job?")) return;
                     try {
-                      await deleteJob(job.id, user.uid);
+                      await deleteJob(job.id, companyId);
                       toast.success("Job deleted.");
-                      load();
+                      load(companyId);
                     } catch {
                       toast.error("Could not delete job.");
                     }
@@ -98,7 +111,9 @@ export default function CompanyJobsPage() {
   return (
     <Wrapper>
       <AuthGate role="company">
-        <PostedJobsInner />
+        <Suspense fallback={<PageLoader label="Loading jobs…" />}>
+          <PostedJobsInner />
+        </Suspense>
       </AuthGate>
     </Wrapper>
   );
