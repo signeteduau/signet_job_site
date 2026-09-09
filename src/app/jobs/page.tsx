@@ -11,7 +11,7 @@ import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { JobListShimmer, PageLoader } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useAuth } from "@/context/auth-context";
-import { searchJobs } from "@/lib/services/jobs";
+import { fetchJobs, searchJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
 import { applyBlockMessage } from "@/lib/profile-completion";
 import { Job } from "@/types/firestore";
@@ -29,12 +29,13 @@ function PublicJobsInner() {
 
   const [filters, setFilters] = useState<JobFilters>({
     term: initialQ,
-    type: "",
-    location: initialLoc,
-    experience: "",
-    category: "",
-    priority: "",
+    types: [],
+    locations: initialLoc ? [initialLoc] : [],
+    experience: [],
+    categories: [],
+    priorities: [],
   });
+  const [catalog, setCatalog] = useState<Job[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -45,11 +46,11 @@ function PublicJobsInner() {
     try {
       const list = await searchJobs({
         term: merged.term,
-        type: merged.type,
-        location: merged.location,
+        type: merged.types,
+        location: merged.locations,
         experience: merged.experience,
-        category: merged.category,
-        priority: merged.priority,
+        category: merged.categories,
+        priority: merged.priorities,
       });
       setJobs(list);
       if (user && isCandidateReady) {
@@ -66,27 +67,50 @@ function PublicJobsInner() {
   };
 
   useEffect(() => {
-    setFilters((f) => ({ ...f, term: initialQ, location: initialLoc }));
-    load({ term: initialQ, location: initialLoc });
+    let alive = true;
+    (async () => {
+      try {
+        const list = await fetchJobs(200, { activeOnly: true });
+        if (alive) setCatalog(list);
+      } catch {
+        if (alive) setCatalog([]);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setFilters((f) => ({
+      ...f,
+      term: initialQ,
+      locations: initialLoc ? [initialLoc] : f.locations,
+    }));
+    load({
+      term: initialQ,
+      ...(initialLoc ? { locations: [initialLoc] } : {}),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQ, initialLoc, user, isCandidateReady]);
 
   const locations = useMemo(() => {
     const set = new Set<string>();
-    jobs.forEach((j) => {
-      const city = j.location?.split(",")[0]?.trim();
+    catalog.forEach((j) => {
+      const city =
+        j.city?.trim() || j.location?.split(",")[0]?.trim() || "";
       if (city) set.add(city);
     });
-    return Array.from(set).sort();
-  }, [jobs]);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [catalog]);
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    jobs.forEach((j) => {
+    catalog.forEach((j) => {
       if (j.category?.trim()) set.add(j.category.trim());
     });
-    return Array.from(set).sort();
-  }, [jobs]);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [catalog]);
 
   const updateFilters = (patch: Partial<JobFilters>) => {
     const next = { ...filters, ...patch };
@@ -97,11 +121,11 @@ function PublicJobsInner() {
   const clearFilters = () => {
     const cleared: JobFilters = {
       term: filters.term,
-      type: "",
-      location: "",
-      experience: "",
-      category: "",
-      priority: "",
+      types: [],
+      locations: [],
+      experience: [],
+      categories: [],
+      priorities: [],
     };
     setFilters(cleared);
     load(cleared);

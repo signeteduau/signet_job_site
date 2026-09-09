@@ -117,8 +117,18 @@ export const JOB_TYPES = [
   "Part Time",
   "Contract",
   "Internship",
+  "Trainee",
   "Remote",
 ] as const;
+
+export function jobTypesMatch(jobType?: string, filterType?: string): boolean {
+  const job = normalizeJobType(jobType);
+  const filter = normalizeJobType(filterType);
+  if (!job || !filter) return false;
+  if (job === filter) return true;
+  if (job.includes("trainee") && filter.includes("trainee")) return true;
+  return false;
+}
 
 /** Show "/mo" only when salary looks monthly and doesn't already say so. */
 export function salarySuffix(salary?: string): string | null {
@@ -184,37 +194,180 @@ export function isJobNew(value: unknown, withinDays = 7): boolean {
   }
 }
 
-/** Split job description / responsibilities text into display bullet points. */
+/** Named section titles. Keep "Supervision" out of the phrase split — it matches inside "under supervision". */
+const MULTI_HEADING =
+  "Position Purpose|Training and Duties|Training Outcomes|Roles\\s+(?:and|&)\\s+Responsibilities|Key Responsibilities|About the (?:role|job)|Candidate Requirements|What you(?:'|’)ll do|What you will do";
+
+const JOB_SECTION_HEADING = new RegExp(
+  `^(?:${MULTI_HEADING}|Supervision|Requirements|Candidate)$`,
+  "i"
+);
+
+const PROSE_HEADING =
+  /^(Position Purpose|Training Outcomes|Supervision|Candidate Requirements|Requirements)$/i;
+
+const HEADING_LABELS: { test: RegExp; label: string }[] = [
+  { test: /position purpose/i, label: "Position Purpose" },
+  { test: /training and duties/i, label: "Training and Duties" },
+  { test: /training outcomes/i, label: "Training Outcomes" },
+  { test: /roles\s+(?:and|&)\s+responsibilities/i, label: "Roles and Responsibilities" },
+  { test: /key responsibilities/i, label: "Key Responsibilities" },
+  { test: /about the role/i, label: "About the Role" },
+  { test: /about the job/i, label: "About the Job" },
+  { test: /what you(?:'|’)ll do|what you will do/i, label: "What You'll Do" },
+  { test: /candidate requirements/i, label: "Candidate Requirements" },
+  { test: /^supervision$/i, label: "Supervision" },
+  { test: /^candidate$/i, label: "Candidate" },
+  { test: /^requirements$/i, label: "Requirements" },
+];
+
+export type JobDescriptionSection = {
+  heading?: string;
+  intro?: string;
+  items: string[];
+};
+
+function titleCaseHeading(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (letter) => letter.toUpperCase())
+    .replace(/\bAnd\b/g, "and");
+}
+
+function looksLikeSectionTitle(line: string): boolean {
+  const value = line.replace(/[.]+$/, "").trim();
+  if (value.length < 3 || value.length > 42) return false;
+  if (/[,;]/.test(value) || /:\s*$/.test(value)) return false;
+  const words = value.split(/\s+/);
+  if (words.length < 2 || words.length > 5) return false;
+  return words.every(
+    (word) => /^[A-Z]/.test(word) || /^(and|&|the|of|in|for)$/i.test(word)
+  );
+}
+
+function isLeadInLine(line: string): boolean {
+  const value = line.trim();
+  if (value.length > 140) return false;
+  return (
+    /:\s*$/.test(value) ||
+    /\b(skills in|including|such as|as follows)\s*:?\s*$/i.test(value)
+  );
+}
+
+function isIntroLine(line: string, heading?: string): boolean {
+  if (isLeadInLine(line)) return true;
+  const words = line.trim().split(/\s+/).filter(Boolean).length;
+  const complete = /[.!?]\s*$/.test(line);
+  const longProse = line.length >= 110 || (complete && words >= 12);
+  if (heading && PROSE_HEADING.test(heading)) {
+    return longProse || complete || words >= 10;
+  }
+  return longProse;
+}
+
+function isolateSectionHeadings(raw: string): string {
+  const afterHeading = "(?:\\s*[.:])?(?=\\s*$|\\n|[•·▪◦]|\\s+[A-Z])";
+  const multi = new RegExp(`\\s*(${MULTI_HEADING})${afterHeading}`, "gi");
+  const single = new RegExp(
+    `(?:^|\\n|[•·▪◦]\\s*|(?<=[.!?]\\s))(Supervision|Candidate|Requirements)${afterHeading}`,
+    "gi"
+  );
+  return raw.replace(multi, "\n$1\n").replace(single, "\n$1\n");
+}
+
+export function isJobTextHeading(line?: string): boolean {
+  const value = (line || "").replace(/[.]+$/, "").trim();
+  if (!value || value.length > 48) return false;
+  if (JOB_SECTION_HEADING.test(value)) return true;
+  return looksLikeSectionTitle(value);
+}
+
+export function isMeaningfulJobPoint(line?: string): boolean {
+  return (line || "").replace(/[\s.•·▪◦,;:\-–—*]+/g, "").length >= 2;
+}
+
+export function formatJobSectionHeading(line?: string): string {
+  const value = (line || "").replace(/[.]+$/, "").trim();
+  const match = HEADING_LABELS.find((item) => item.test.test(value));
+  return match?.label || titleCaseHeading(value);
+}
+
 export function splitJobTextToPoints(text?: string): string[] {
-  const raw = (text || "").trim();
+  const raw = (text || "").replace(/\u00a0/g, " ").trim();
   if (!raw) return [];
 
   const cleanPoint = (line: string) =>
     line
       .replace(/^[\s•·▪◦\-–—*]+/, "")
       .replace(/^\d+[.)]\s*/, "")
+      .replace(/^[,.;]+\s*/, "")
+      .replace(/^[.\s]+$/, "")
       .trim();
 
-  const byNewline = raw
+  const prepared = isolateSectionHeadings(raw)
+    .replace(/((?:skills in|including|such as|as follows)\s*:)\s*/gi, "$1\n")
+    .replace(/\s*[•·▪◦]\s*/g, "\n");
+
+  const byNewline = prepared
     .split(/\r?\n+/)
     .map(cleanPoint)
-    .filter(Boolean);
+    .filter((line) => isJobTextHeading(line) || isMeaningfulJobPoint(line));
   if (byNewline.length > 1) return byNewline;
 
-  const byInlineBullet = raw
-    .split(/\s*[•·▪◦]\s+|\s+-\s+(?=[A-Za-z0-9])/)
+  const byInlineDash = raw
+    .split(/\s+-\s+(?=[A-Za-z0-9])/)
     .map(cleanPoint)
-    .filter(Boolean);
-  if (byInlineBullet.length > 1) return byInlineBullet;
+    .filter(isMeaningfulJobPoint);
+  if (byInlineDash.length > 1) return byInlineDash;
 
   const bySemicolon = raw
     .split(/\s*;\s+/)
     .map(cleanPoint)
-    .filter(Boolean);
+    .filter(isMeaningfulJobPoint);
   if (bySemicolon.length > 1) return bySemicolon;
 
   const single = cleanPoint(raw);
-  return single ? [single] : [];
+  return isMeaningfulJobPoint(single) ? [single] : [];
+}
+
+export function parseJobDescriptionSections(
+  text?: string
+): JobDescriptionSection[] {
+  const points = splitJobTextToPoints(text);
+  const sections: JobDescriptionSection[] = [];
+  let current: JobDescriptionSection = { items: [] };
+
+  const flush = () => {
+    const intro =
+      current.intro && isMeaningfulJobPoint(current.intro)
+        ? current.intro
+        : undefined;
+    const items = current.items.filter(isMeaningfulJobPoint);
+    if (!current.heading && !intro && items.length === 0) return;
+    if (current.heading && !intro && items.length === 0) return;
+    sections.push({ heading: current.heading, intro, items });
+  };
+
+  points.forEach((point) => {
+    if (isJobTextHeading(point)) {
+      if (current.heading && !current.intro && current.items.length === 0) {
+        current.heading = formatJobSectionHeading(
+          `${current.heading} ${point}`
+        );
+        return;
+      }
+      flush();
+      current = { heading: formatJobSectionHeading(point), items: [] };
+      return;
+    }
+    if (!current.items.length && isIntroLine(point, current.heading)) {
+      current.intro = current.intro ? `${current.intro} ${point}` : point;
+      return;
+    }
+    current.items.push(point);
+  });
+  flush();
+  return sections;
 }
 
 export function formatAppliedDate(value: unknown): string {

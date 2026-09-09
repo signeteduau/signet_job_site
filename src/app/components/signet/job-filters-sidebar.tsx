@@ -1,15 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { JOB_TYPES } from "@/lib/job-utils";
 
 export type JobFilters = {
   term: string;
-  type: string;
-  location: string;
-  experience: string;
-  category: string;
-  priority: string;
+  types: string[];
+  locations: string[];
+  experience: string[];
+  categories: string[];
+  priorities: string[];
 };
 
 type Props = {
@@ -30,6 +30,12 @@ const EXPERIENCE_OPTIONS = [
 
 const PRIORITY_OPTIONS = ["High", "Medium", "Low"] as const;
 
+function toggleValue(list: string[], value: string) {
+  return list.includes(value)
+    ? list.filter((item) => item !== value)
+    : [...list, value];
+}
+
 function FilterGroup({
   title,
   children,
@@ -47,6 +53,49 @@ function FilterGroup({
   );
 }
 
+function LocationChecks({
+  locations,
+  selected,
+  onToggle,
+}: {
+  locations: string[];
+  selected: string[];
+  onToggle: (loc: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return locations.filter(
+      (loc) => !q || loc.toLowerCase().includes(q) || selected.includes(loc)
+    );
+  }, [locations, query, selected]);
+
+  return (
+    <>
+      <input
+        className="nk-filter-search"
+        placeholder="Search location"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      {visible.length > 0 && (
+        <div className="nk-filter-checks nk-filter-checks-scroll mt-2">
+          {visible.map((loc) => (
+            <label key={loc} className="nk-filter-check">
+              <input
+                type="checkbox"
+                checked={selected.includes(loc)}
+                onChange={() => onToggle(loc)}
+              />
+              <span>{loc}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function JobFiltersSidebar({
   filters,
   locations,
@@ -56,6 +105,7 @@ export default function JobFiltersSidebar({
 }: Props) {
   return (
     <aside className="nk-browse-filters">
+      <div className="nk-browse-filters-scroll">
       <div className="nk-browse-filters-head">
         <h3>All filters</h3>
         <button type="button" className="nk-filter-clear" onClick={onClear}>
@@ -68,10 +118,11 @@ export default function JobFiltersSidebar({
           {JOB_TYPES.map((t) => (
             <label key={t} className="nk-filter-check">
               <input
-                type="radio"
-                name="job-type"
-                checked={filters.type === t}
-                onChange={() => onChange({ type: filters.type === t ? "" : t })}
+                type="checkbox"
+                checked={filters.types.includes(t)}
+                onChange={() =>
+                  onChange({ types: toggleValue(filters.types, t) })
+                }
               />
               <span>{t}</span>
             </label>
@@ -84,56 +135,44 @@ export default function JobFiltersSidebar({
           {EXPERIENCE_OPTIONS.map((exp) => (
             <label key={exp} className="nk-filter-check">
               <input
-                type="radio"
-                name="experience"
-                checked={filters.experience === exp}
+                type="checkbox"
+                checked={filters.experience.includes(exp)}
                 onChange={() =>
-                  onChange({ experience: filters.experience === exp ? "" : exp })
+                  onChange({
+                    experience: toggleValue(filters.experience, exp),
+                  })
                 }
               />
-              <span>{exp === "0-1" ? "0-1 years" : exp === "5+" ? "5+ years" : exp}</span>
+              <span>
+                {exp === "0-1" ? "0-1 year" : exp === "5+" ? "5+ years" : exp}
+              </span>
             </label>
           ))}
         </div>
       </FilterGroup>
 
       <FilterGroup title="Location">
-        <input
-          className="nk-filter-search"
-          placeholder="Search location"
-          value={filters.location}
-          onChange={(e) => onChange({ location: e.target.value })}
+        <LocationChecks
+          locations={locations}
+          selected={filters.locations}
+          onToggle={(loc) =>
+            onChange({ locations: toggleValue(filters.locations, loc) })
+          }
         />
-        {locations.length > 0 && (
-          <div className="nk-filter-checks mt-2">
-            {locations.slice(0, 8).map((loc) => (
-              <label key={loc} className="nk-filter-check">
-                <input
-                  type="radio"
-                  name="location-pick"
-                  checked={filters.location === loc}
-                  onChange={() =>
-                    onChange({ location: filters.location === loc ? "" : loc })
-                  }
-                />
-                <span>{loc}</span>
-              </label>
-            ))}
-          </div>
-        )}
       </FilterGroup>
 
       {categories.length > 0 && (
         <FilterGroup title="Department">
-          <div className="nk-filter-checks">
-            {categories.slice(0, 10).map((cat) => (
+          <div className="nk-filter-checks nk-filter-checks-scroll">
+            {categories.map((cat) => (
               <label key={cat} className="nk-filter-check">
                 <input
-                  type="radio"
-                  name="category"
-                  checked={filters.category === cat}
+                  type="checkbox"
+                  checked={filters.categories.includes(cat)}
                   onChange={() =>
-                    onChange({ category: filters.category === cat ? "" : cat })
+                    onChange({
+                      categories: toggleValue(filters.categories, cat),
+                    })
                   }
                 />
                 <span>{cat}</span>
@@ -148,11 +187,12 @@ export default function JobFiltersSidebar({
           {PRIORITY_OPTIONS.map((p) => (
             <label key={p} className="nk-filter-check">
               <input
-                type="radio"
-                name="priority"
-                checked={filters.priority === p}
+                type="checkbox"
+                checked={filters.priorities.includes(p)}
                 onChange={() =>
-                  onChange({ priority: filters.priority === p ? "" : p })
+                  onChange({
+                    priorities: toggleValue(filters.priorities, p),
+                  })
                 }
               />
               <span>{p}</span>
@@ -160,6 +200,7 @@ export default function JobFiltersSidebar({
           ))}
         </div>
       </FilterGroup>
+      </div>
     </aside>
   );
 }

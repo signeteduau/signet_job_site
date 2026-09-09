@@ -18,7 +18,7 @@ import {
 import { db } from "@/lib/firebase";
 import { Job } from "@/types/firestore";
 import { enrichJobLogos, resolveLogoFromRecord } from "@/lib/services/company-logo";
-import { normalizeJobType, jobMatchesSearchTerm } from "@/lib/job-utils";
+import { jobMatchesSearchTerm, jobTypesMatch } from "@/lib/job-utils";
 
 function mapJob(id: string, data: DocumentData): Job {
   return {
@@ -135,44 +135,62 @@ export async function fetchCompanyJobs(companyId: string): Promise<Job[]> {
   return enrichJobLogos(snap.docs.map((d) => mapJob(d.id, d.data())));
 }
 
+function asFilterList(value?: string | string[]): string[] {
+  if (!value) return [];
+  return (Array.isArray(value) ? value : [value])
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function matchesAnyField(haystacks: string[], needles: string[]): boolean {
+  if (!needles.length) return true;
+  const fields = haystacks.map((item) => item.toLowerCase());
+  return needles.some((needle) => {
+    const n = needle.toLowerCase();
+    return fields.some((field) => field.includes(n));
+  });
+}
+
 export async function searchJobs(opts: {
   term?: string;
-  type?: string;
-  location?: string;
-  priority?: string;
-  category?: string;
-  experience?: string;
+  type?: string | string[];
+  location?: string | string[];
+  priority?: string | string[];
+  category?: string | string[];
+  experience?: string | string[];
   activeOnly?: boolean;
 }): Promise<Job[]> {
-  const jobs = await fetchJobs(100, { activeOnly: opts.activeOnly !== false });
+  const jobs = await fetchJobs(200, { activeOnly: opts.activeOnly !== false });
   const term = (opts.term || "").trim().toLowerCase();
-  const typeNorm = normalizeJobType(opts.type);
+  const types = asFilterList(opts.type);
+  const locations = asFilterList(opts.location);
+  const categories = asFilterList(opts.category);
+  const experiences = asFilterList(opts.experience);
+  const priorities = asFilterList(opts.priority);
   return jobs.filter((j) => {
-    if (typeNorm && normalizeJobType(j.type) !== typeNorm) return false;
+    if (types.length && !types.some((t) => jobTypesMatch(j.type, t))) {
+      return false;
+    }
     if (
-      opts.location &&
-      !j.location.toLowerCase().includes(opts.location.toLowerCase())
+      !matchesAnyField(
+        [j.location, j.city || "", j.state || ""],
+        locations
+      )
     ) {
       return false;
     }
     if (
-      opts.priority &&
-      (j.priority || "").toLowerCase() !== opts.priority.toLowerCase()
+      priorities.length &&
+      !priorities.some(
+        (p) => (j.priority || "").toLowerCase() === p.toLowerCase()
+      )
     ) {
       return false;
     }
-    if (
-      opts.category &&
-      !(j.category || "").toLowerCase().includes(opts.category.toLowerCase())
-    ) {
+    if (!matchesAnyField([j.category || ""], categories)) {
       return false;
     }
-    if (
-      opts.experience &&
-      !(j.experience || "")
-        .toLowerCase()
-        .includes(opts.experience.toLowerCase())
-    ) {
+    if (!matchesAnyField([j.experience || ""], experiences)) {
       return false;
     }
     if (!term) return true;

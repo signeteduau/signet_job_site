@@ -1,5 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Job, SavedJob } from "@/types/firestore";
@@ -13,6 +14,7 @@ import {
   salarySuffix,
   showJobEmployer,
 } from "@/lib/job-utils";
+import JobDescriptionBlocks from "@/app/components/signet/job-description-blocks";
 
 type Props = {
   job: Job | SavedJob;
@@ -42,6 +44,7 @@ function typeLabel(type?: string) {
   if (!normalized) return "Full time";
   if (normalized.includes("part")) return "Part time";
   if (normalized.includes("contract")) return "Contract";
+  if (normalized.includes("trainee")) return "Trainee";
   if (normalized.includes("intern")) return "Internship";
   if (normalized.includes("remote")) return "Remote";
   return type || "Full time";
@@ -75,9 +78,7 @@ export default function JobCard({
   const location = workLocationLabel(job.location, job.type);
   const rolesAndResponsibilities =
     "rolesAndResponsibilities" in job ? job.rolesAndResponsibilities : "";
-  const description = (job.description || rolesAndResponsibilities || "")
-    .replace(/\s+/g, " ")
-    .trim();
+  const description = (job.description || rolesAndResponsibilities || "").trim();
   const showDesc =
     showDescription &&
     description &&
@@ -154,7 +155,9 @@ export default function JobCard({
                   {isNew && <span className="signet-job-new">New</span>}
                 </div>
 
-                <h3 className="signet-job-title">{job.title}</h3>
+                <h3 className="signet-job-title">
+                  <Link href={link}>{job.title}</Link>
+                </h3>
 
                 <div className="signet-job-meta">
                   {showEmployer && (
@@ -289,7 +292,12 @@ export default function JobCard({
         {expandable && showDesc && (
           <div className={`signet-job-details ${expanded ? "open" : ""}`}>
             <div className="signet-job-details-wrap">
-              <p className="signet-job-details-text">{description}</p>
+              <JobDescriptionBlocks
+                text={description}
+                compact
+                moreHref={link}
+                onMoreClick={open}
+              />
               <div className="signet-job-details-meta">
                 {"experience" in job && job.experience && (
                   <span>{job.experience} experience</span>

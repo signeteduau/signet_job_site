@@ -8,7 +8,8 @@ import { PanelShimmer } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { applyUrl } from "@/lib/auth-flow";
 import { formatMissingList, getProfileCompletion } from "@/lib/profile-completion";
-import { isSignetJob, jobEmployerLabel, normalizeJobType, salarySuffix, showJobEmployer, splitJobTextToPoints } from "@/lib/job-utils";
+import { isSignetJob, jobEmployerLabel, normalizeJobType, parseJobDescriptionSections, salarySuffix, showJobEmployer } from "@/lib/job-utils";
+import JobDescriptionBlocks from "@/app/components/signet/job-description-blocks";
 import { hasApplied } from "@/lib/services/applications";
 import { fetchJobById, fetchRelatedJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
@@ -21,6 +22,7 @@ function relatedJobTypeLabel(type?: string) {
   if (!normalized) return "Full time";
   if (normalized.includes("part")) return "Part time";
   if (normalized.includes("contract")) return "Contract";
+  if (normalized.includes("trainee")) return "Trainee";
   if (normalized.includes("intern")) return "Internship";
   if (normalized.includes("remote")) return "Remote";
   return type || "Full time";
@@ -38,26 +40,6 @@ function relatedSalaryLabel(job: Job) {
   if (!job.salary) return "Salary TBD";
   const suffix = salarySuffix(job.salary);
   return suffix ? `${job.salary}${suffix}` : job.salary;
-}
-
-function JobDetailText({
-  text,
-  emptyLabel = "No description provided.",
-}: {
-  text?: string;
-  emptyLabel?: string;
-}) {
-  const points = splitJobTextToPoints(text);
-  if (!points.length) {
-    return <p className="signet-job-detail-text">{emptyLabel}</p>;
-  }
-  return (
-    <ul className="signet-job-detail-list">
-      {points.map((point, index) => (
-        <li key={index}>{point}</li>
-      ))}
-    </ul>
-  );
 }
 
 export default function PublicJobDetailPage() {
@@ -138,6 +120,14 @@ export default function PublicJobDetailPage() {
     const suffix = salarySuffix(job.salary);
     return suffix ? `${job.salary}${suffix}` : job.salary;
   }, [job]);
+  const descHasHeadings = useMemo(
+    () => parseJobDescriptionSections(job?.description).some((s) => s.heading),
+    [job?.description]
+  );
+  const showRolesBlock = Boolean(
+    job?.rolesAndResponsibilities?.trim() &&
+      job.rolesAndResponsibilities.trim() !== (job.description || "").trim()
+  );
 
   const handleApply = () => {
     if (
@@ -278,14 +268,18 @@ export default function PublicJobDetailPage() {
                   )}
                 </div>
 
-                <h3 className="signet-job-detail-section-title">Description</h3>
-                <JobDetailText text={job.description} />
-                {job.rolesAndResponsibilities && (
+                {!descHasHeadings && (
+                  <h3 className="signet-job-detail-section-title">Description</h3>
+                )}
+                <JobDescriptionBlocks text={job.description} />
+                {showRolesBlock && (
                   <>
-                    <h3 className="signet-job-detail-section-title">
-                      Roles &amp; responsibilities
-                    </h3>
-                    <JobDetailText text={job.rolesAndResponsibilities} />
+                    {!descHasHeadings && (
+                      <h3 className="signet-job-detail-section-title">
+                        Roles &amp; responsibilities
+                      </h3>
+                    )}
+                    <JobDescriptionBlocks text={job.rolesAndResponsibilities} />
                   </>
                 )}
                 {!!job.skills?.length && (

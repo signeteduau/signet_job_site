@@ -43,6 +43,7 @@ export default function CompanyFiltersSidebar({
 }: Props) {
   return (
     <aside className="nk-browse-filters">
+      <div className="nk-browse-filters-scroll">
       <div className="nk-browse-filters-head">
         <h3>All filters</h3>
         <button type="button" className="nk-filter-clear" onClick={onClear}>
@@ -114,6 +115,7 @@ export default function CompanyFiltersSidebar({
           </label>
         </div>
       </FilterGroup>
+      </div>
     </aside>
   );
 }
