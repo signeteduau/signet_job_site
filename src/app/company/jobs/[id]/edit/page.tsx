@@ -131,8 +131,16 @@ function Inner() {
           <input required value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="signet-field">
-          <label>Salary</label>
-          <input required value={salary} onChange={(e) => setSalary(e.target.value)} />
+          <label className="signet-field-label-row" htmlFor="job-salary">
+            <span>Salary</span>
+            <span className="signet-field-label-hint">Minimum wage</span>
+          </label>
+          <input
+            id="job-salary"
+            required
+            value={salary}
+            onChange={(e) => setSalary(e.target.value)}
+          />
         </div>
         <AddressFields required value={addressValue} onChange={setAddressValue} />
         <div className="row">
