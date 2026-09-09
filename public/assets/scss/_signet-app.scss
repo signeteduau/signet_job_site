@@ -829,22 +829,30 @@ $signet-page-pad: 16px;
 .signet-job-icon-actions {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .signet-job-icon-btn {
-  width: 24px;
-  height: 24px;
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: 1px solid #e8ebf3;
-  border-radius: 50px;
+  border-radius: 50%;
   background: #fff;
   color: #64748b;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
   cursor: pointer;
   transition: border-color 0.2s $s-ease, color 0.2s $s-ease, background 0.2s $s-ease;
-  i { font-size: 14px; }
+  i {
+    font-size: 12px;
+    line-height: 1;
+    display: block;
+  }
   &:hover {
     border-color: rgba(0, 76, 240, 0.22);
     color: $s-blue;
