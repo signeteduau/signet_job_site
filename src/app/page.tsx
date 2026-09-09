@@ -563,20 +563,6 @@ export default function Home() {
                   <i className="bi bi-instagram" />
                 </a>
                 <a
-                  href="https://x.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="X"
-                  className="is-x"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fill="currentColor"
-                      d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.59l-5.16-6.74L4.9 22H1.64l8.02-9.16L1.5 2h6.76l4.66 6.17L18.244 2Zm-1.16 18.08h1.83L7.01 3.83H5.05l12.03 16.25Z"
-                    />
-                  </svg>
-                </a>
-                <a
                   href="https://www.linkedin.com/in/signet-employment-hub/"
                   target="_blank"
                   rel="noopener noreferrer"
