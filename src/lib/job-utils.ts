@@ -6,6 +6,58 @@ export function normalizeSearchText(text: string): string {
     .trim();
 }
 
+export function isSignetJob(job?: {
+  isSignetJob?: boolean;
+  postedBy?: string;
+  hideCompany?: boolean;
+  companyId?: string;
+  companyName?: string;
+  category?: string;
+  anzsco?: string;
+  type?: string;
+  title?: string;
+}): boolean {
+  if (job?.isSignetJob || job?.postedBy === "admin" || job?.hideCompany) {
+    return true;
+  }
+
+  const noCompany =
+    !(job?.companyId || "").trim() && !(job?.companyName || "").trim();
+  if (!noCompany) return false;
+
+  if ((job?.anzsco || "").trim()) return true;
+  if (/\bANZSCO\b/i.test(job?.title || "")) return true;
+  if (/training/i.test(job?.category || "")) return true;
+  if ((job?.type || "").toLowerCase() === "traineeship") return true;
+
+  return false;
+}
+
+/** Public label when employer company is hidden (admin-posted training roles). */
+export function jobEmployerLabel(job?: {
+  companyName?: string;
+  isSignetJob?: boolean;
+  postedBy?: string;
+  hideCompany?: boolean;
+  category?: string;
+  anzsco?: string;
+  type?: string;
+  title?: string;
+  companyId?: string;
+}): string {
+  if (isSignetJob(job)) {
+    return job?.category?.trim() || "Signet training role";
+  }
+  const name = job?.companyName?.trim();
+  return name || "";
+}
+
+/** Whether to show an employer / company row in job UI. */
+export function showJobEmployer(job?: Parameters<typeof isSignetJob>[0]): boolean {
+  if (isSignetJob(job)) return false;
+  return !!(job?.companyName?.trim() || job?.companyId?.trim());
+}
+
 type JobSearchFields = {
   title?: string;
   category?: string;

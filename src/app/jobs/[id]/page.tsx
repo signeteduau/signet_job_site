@@ -8,7 +8,7 @@ import { PanelShimmer } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { applyUrl } from "@/lib/auth-flow";
 import { formatMissingList, getProfileCompletion } from "@/lib/profile-completion";
-import { normalizeJobType, salarySuffix, splitJobTextToPoints } from "@/lib/job-utils";
+import { isSignetJob, jobEmployerLabel, normalizeJobType, salarySuffix, showJobEmployer, splitJobTextToPoints } from "@/lib/job-utils";
 import { hasApplied } from "@/lib/services/applications";
 import { fetchJobById, fetchRelatedJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
@@ -130,6 +130,9 @@ export default function PublicJobDetailPage() {
   }, [user, job, isCandidateReady]);
 
   const applyMissing = getProfileCompletion(profile).applyMissing;
+  const signetRole = job ? isSignetJob(job) : false;
+  const employerLabel = job ? jobEmployerLabel(job) : "";
+  const showEmployer = job ? showJobEmployer(job) : false;
   const salaryLabel = useMemo(() => {
     if (!job?.salary) return "Salary TBD";
     const suffix = salarySuffix(job.salary);
@@ -233,10 +236,18 @@ export default function PublicJobDetailPage() {
                 <h1 className="signet-job-detail-title">{job.title}</h1>
 
                 <div className="signet-job-meta signet-job-detail-meta">
-                  <span className="signet-job-meta-item">
-                    <i className="bi bi-building" aria-hidden />
-                    <strong>{job.companyName || "Company"}</strong>
-                  </span>
+                  {showEmployer && (
+                    <span className="signet-job-meta-item">
+                      <i className="bi bi-building" aria-hidden />
+                      <strong>{employerLabel}</strong>
+                    </span>
+                  )}
+                  {signetRole && job.category && (
+                    <span className="signet-job-meta-item">
+                      <i className="bi bi-mortarboard" aria-hidden />
+                      <strong>{job.category}</strong>
+                    </span>
+                  )}
                   {job.location && (
                     <span className="signet-job-meta-item">
                       <i className="bi bi-geo-alt" aria-hidden />
@@ -307,9 +318,11 @@ export default function PublicJobDetailPage() {
                   <button type="button" className="signet-btn secondary" onClick={handleSave}>
                     {saved ? "Saved" : "Save job"}
                   </button>
-                  <button type="button" className="signet-btn secondary" onClick={handleMessage}>
-                    Message company
-                  </button>
+                  {!signetRole && (
+                    <button type="button" className="signet-btn secondary" onClick={handleMessage}>
+                      Message company
+                    </button>
+                  )}
                 </div>
                 {profile?.userType === "candidate" && applyMissing.length > 0 ? (
                   <p className="signet-job-detail-note">
@@ -343,7 +356,9 @@ export default function PublicJobDetailPage() {
                   <div className="signet-related-jobs-list">
                     {relatedJobs.map((related) => {
                       const logo = related.logoUrl || "";
-                      const initial = (related.companyName || "S")
+                      const relatedSignet = isSignetJob(related);
+                      const relatedEmployer = jobEmployerLabel(related);
+                      const initial = (relatedSignet ? "S" : related.companyName || "S")
                         .charAt(0)
                         .toUpperCase();
                       const typeLabel = relatedJobTypeLabel(related.type);
@@ -377,10 +392,18 @@ export default function PublicJobDetailPage() {
                             {related.title}
                           </strong>
                           <div className="signet-related-job-meta">
-                            <span>
-                              <i className="bi bi-building" aria-hidden />
-                              {related.companyName || "Company"}
-                            </span>
+                            {!relatedSignet && relatedEmployer && (
+                              <span>
+                                <i className="bi bi-building" aria-hidden />
+                                {relatedEmployer}
+                              </span>
+                            )}
+                            {relatedSignet && related.category && (
+                              <span>
+                                <i className="bi bi-mortarboard" aria-hidden />
+                                {related.category}
+                              </span>
+                            )}
                             <span>
                               <i className="bi bi-geo-alt" aria-hidden />
                               {relatedLocationLabel(related)}

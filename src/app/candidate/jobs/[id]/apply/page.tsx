@@ -13,6 +13,7 @@ import {
   formatFullPhone,
 } from "@/lib/phone-country-codes";
 import { applyBlockMessage } from "@/lib/profile-completion";
+import { jobEmployerLabel, isSignetJob } from "@/lib/job-utils";
 import { fetchJobById } from "@/lib/services/jobs";
 import { applyToJob, hasApplied } from "@/lib/services/applications";
 import { uploadResume, getStorageErrorMessage, validateResumeFile } from "@/lib/services/storage";
@@ -198,8 +199,27 @@ function ApplyInner() {
       ) : (
       <form className="signet-panel" onSubmit={onSubmit}>
         <p style={{ color: "#6B7280" }}>
-          Applying to{" "}
-          <strong style={{ color: "#12141A" }}>{job.companyName}</strong>
+          {isSignetJob(job) ? (
+            <>
+              Applying for{" "}
+              <strong style={{ color: "#12141A" }}>{job.title}</strong>
+              {job.category && (
+                <>
+                  {" "}
+                  <span style={{ color: "#6B7280" }}>({job.category})</span>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              Applying to{" "}
+              <strong style={{ color: "#12141A" }}>
+                {jobEmployerLabel(job) || "this employer"}
+              </strong>
+              {" — "}
+              <span style={{ color: "#12141A" }}>{job.title}</span>
+            </>
+          )}
         </p>
         <PhoneField
           countryCode={phoneCountryCode}

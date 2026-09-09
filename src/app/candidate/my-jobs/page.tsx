@@ -100,8 +100,8 @@ function MyJobsInner() {
                 companyId: app.companyId,
                 companyName: app.companyName,
                 title: app.title,
-                location: app.location || "",
                 type: app.type || "",
+                location: app.location || "",
                 salary: app.salary || "",
                 logoUrl: app.logoUrl,
               }}

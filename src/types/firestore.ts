@@ -68,8 +68,16 @@ export type CompanyConnection = {
 export type Job = {
   id: string;
   jobId?: string;
-  companyId: string;
-  companyName: string;
+  companyId?: string;
+  companyName?: string;
+  postedBy?: string;
+  isSignetJob?: boolean;
+  hideCompany?: boolean;
+  occupation?: string;
+  anzsco?: string;
+  positionType?: string;
+  industry?: string;
+  trainingArea?: string;
   logoUrl?: string;
   title: string;
   salary: string;
@@ -127,6 +135,11 @@ export type SavedJob = {
   companyId: string;
   title: string;
   companyName: string;
+  postedBy?: string;
+  isSignetJob?: boolean;
+  hideCompany?: boolean;
+  category?: string;
+  anzsco?: string;
   location: string;
   type: string;
   salary: string;

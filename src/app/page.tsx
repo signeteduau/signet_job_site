@@ -545,7 +545,7 @@ export default function Home() {
               <p className="nk-footer-connect">We&apos;re Social!</p>
               <div className="nk-footer-social">
                 <a
-                  href="https://www.facebook.com/"
+                  href="https://www.facebook.com/signetemployment"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -554,7 +554,7 @@ export default function Home() {
                   <i className="bi bi-facebook" />
                 </a>
                 <a
-                  href="https://www.instagram.com/"
+                  href="https://www.instagram.com/signetemploymenthub"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"

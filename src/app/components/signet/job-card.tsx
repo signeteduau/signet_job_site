@@ -7,8 +7,11 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 import {
   formatPostedAgo,
   isJobNew,
+  isSignetJob,
+  jobEmployerLabel,
   normalizeJobType,
   salarySuffix,
+  showJobEmployer,
 } from "@/lib/job-utils";
 
 type Props = {
@@ -65,7 +68,10 @@ export default function JobCard({
     job.logoUrl ||
     (job as Job & { profileImage?: string }).profileImage ||
     "";
-  const initial = (job.companyName || "S").charAt(0).toUpperCase();
+  const signetRole = isSignetJob(job);
+  const employerLabel = jobEmployerLabel(job);
+  const showEmployer = showJobEmployer(job);
+  const initial = (signetRole ? "S" : job.companyName || "S").charAt(0).toUpperCase();
   const location = workLocationLabel(job.location, job.type);
   const rolesAndResponsibilities =
     "rolesAndResponsibilities" in job ? job.rolesAndResponsibilities : "";
@@ -151,10 +157,12 @@ export default function JobCard({
                 <h3 className="signet-job-title">{job.title}</h3>
 
                 <div className="signet-job-meta">
-                  <span className="signet-job-meta-item">
-                    <i className="bi bi-building" aria-hidden />
-                    <strong>{job.companyName || "Company"}</strong>
-                  </span>
+                  {showEmployer && (
+                    <span className="signet-job-meta-item">
+                      <i className="bi bi-building" aria-hidden />
+                      <strong>{employerLabel}</strong>
+                    </span>
+                  )}
                   <span className="signet-job-meta-item">
                     <i className="bi bi-geo-alt" aria-hidden />
                     {location}
