@@ -13,6 +13,7 @@ import {
   formatFullPhone,
 } from "@/lib/phone-country-codes";
 import { applyBlockMessage } from "@/lib/profile-completion";
+import { logAnalyticsEvent } from "@/lib/analytics";
 import { jobEmployerLabel, isSignetJob } from "@/lib/job-utils";
 import { fetchJobById } from "@/lib/services/jobs";
 import { applyToJob, hasApplied } from "@/lib/services/applications";
@@ -144,6 +145,10 @@ function ApplyInner() {
         resumeUrl,
         resumeFile,
         phone: formatFullPhone(phoneCountryCode, phone),
+      });
+      logAnalyticsEvent("apply_job", {
+        item_id: job.id,
+        item_name: job.title || "",
       });
       toast.success("Application submitted!");
       router.push("/candidate/my-jobs");

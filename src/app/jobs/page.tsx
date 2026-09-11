@@ -14,6 +14,7 @@ import { useAuth } from "@/context/auth-context";
 import { fetchJobs, searchJobs } from "@/lib/services/jobs";
 import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
 import { applyBlockMessage } from "@/lib/profile-completion";
+import { logAnalyticsEvent } from "@/lib/analytics";
 import { Job } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
@@ -53,6 +54,9 @@ function PublicJobsInner() {
         priority: merged.priorities,
       });
       setJobs(list);
+      if (merged.term.trim()) {
+        logAnalyticsEvent("search", { search_term: merged.term.trim() });
+      }
       if (user && isCandidateReady) {
         const entries = await Promise.all(
           list.map(async (j) => [j.id, await isJobSaved(user.uid, j.id)] as const)

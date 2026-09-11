@@ -8,6 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { emptyAddress, formatAddress } from "@/lib/address";
 import { JOB_TYPES } from "@/lib/job-utils";
+import { logAnalyticsEvent } from "@/lib/analytics";
 import { createJob, updateJob } from "@/lib/services/jobs";
 import { uploadJobAttachment } from "@/lib/services/storage";
 import AddressFields from "@/app/components/signet/address-fields";
@@ -83,6 +84,11 @@ function NewJobInner() {
               setUploading(false);
             }
             toast.success("Job posted!");
+            logAnalyticsEvent("post_job", {
+              item_id: jobId,
+              item_name: title,
+              item_category: category || type,
+            });
             router.push("/company/jobs");
           } catch (err) {
             console.error(err);

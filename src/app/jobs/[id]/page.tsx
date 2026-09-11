@@ -7,6 +7,7 @@ import PublicSiteNav from "@/app/components/signet/public-site-nav";
 import { PanelShimmer } from "@/app/components/signet/shimmer";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { applyUrl } from "@/lib/auth-flow";
+import { logAnalyticsEvent } from "@/lib/analytics";
 import { formatMissingList, getProfileCompletion } from "@/lib/profile-completion";
 import { isSignetJob, jobEmployerLabel, normalizeJobType, parseJobDescriptionSections, salarySuffix, showJobEmployer } from "@/lib/job-utils";
 import JobDescriptionBlocks from "@/app/components/signet/job-description-blocks";
@@ -62,6 +63,13 @@ export default function PublicJobDetailPage() {
       try {
         const j = await fetchJobById(id);
         if (alive) setJob(j);
+        if (j) {
+          logAnalyticsEvent("view_item", {
+            item_id: j.id,
+            item_name: j.title || "",
+            item_category: j.category || j.type || "",
+          });
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -140,6 +148,10 @@ export default function PublicJobDetailPage() {
       return;
     }
     router.push(applyUrl(id));
+    logAnalyticsEvent("apply_start", {
+      item_id: id,
+      item_name: job?.title || "",
+    });
   };
 
   const handleSave = async () => {
@@ -160,6 +172,10 @@ export default function PublicJobDetailPage() {
       } else {
         await saveJob(user.uid, job);
         setSaved(true);
+        logAnalyticsEvent("add_to_wishlist", {
+          item_id: job.id,
+          item_name: job.title || "",
+        });
       }
     } catch {
       toast.error("Could not update saved job.");

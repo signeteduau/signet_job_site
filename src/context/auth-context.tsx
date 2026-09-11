@@ -25,6 +25,7 @@ import {
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { resolvePostLoginPath } from "@/lib/auth-flow";
+import { logAnalyticsEvent } from "@/lib/analytics";
 import { auth } from "@/lib/firebase";
 import {
   GOOGLE_AUTH_COMPANY_KEY,
@@ -225,6 +226,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         setUser(redirectResult.user);
         setProfile(p);
+        const createdNow =
+          redirectResult.user.metadata.creationTime ===
+          redirectResult.user.metadata.lastSignInTime;
+        logAnalyticsEvent(createdNow ? "sign_up" : "login", {
+          method: "google",
+          user_type: p?.userType || intent.userType || "unknown",
+        });
         if (typeof window !== "undefined") {
           window.location.replace(
             resolvePostLoginPath(p, redirectResult.user, intent.returnUrl)
@@ -267,6 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login: async (email, password) => {
         const cred = await signInWithEmailAndPassword(auth, email, password);
         await refreshProfile();
+        logAnalyticsEvent("login", { method: "email" });
         return cred.user;
       },
       register: async ({ name, email, password, userType, companyName, isStudent, usid }) => {
@@ -285,6 +294,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         await requestVerificationEmail();
         await refreshProfile();
+        logAnalyticsEvent("sign_up", { method: "email", user_type: userType });
         return cred.user;
       },
       loginWithGoogle: async ({ userType, companyName, isStudent, usid, returnUrl } = {}) => {
@@ -322,6 +332,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           usid
         );
         setProfile(p);
+        const createdNow =
+          cred.user.metadata.creationTime === cred.user.metadata.lastSignInTime;
+        logAnalyticsEvent(createdNow ? "sign_up" : "login", {
+          method: "google",
+          user_type: p?.userType || userType || "unknown",
+        });
         return cred.user;
       },
       logout: async () => {

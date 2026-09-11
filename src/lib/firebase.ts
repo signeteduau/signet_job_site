@@ -31,14 +31,4 @@ export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
 export const storage: FirebaseStorage = getStorage(app);
 
-/** Analytics only runs in the browser (not during SSR). */
-export async function getAnalyticsIfSupported() {
-  if (typeof window === "undefined") return null;
-  const { getAnalytics, isSupported } = await import("firebase/analytics");
-  if (await isSupported()) {
-    return getAnalytics(app);
-  }
-  return null;
-}
-
 export default app;
