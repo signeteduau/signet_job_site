@@ -6426,40 +6426,92 @@ body:has(.nk-site) {
 }
 
 .nk-footer-app {
-  padding: 16px;
-  border: 1px solid $nk-border;
-  border-radius: 12px;
-  background: #fff;
-  strong {
-    display: block;
-    font-size: 14px;
-    font-weight: 800;
-    color: $nk-ink;
-    margin-bottom: 4px;
-  }
   p {
-    margin: 0 0 12px;
-    font-size: 12px;
+    margin: 0 0 14px;
+    font-size: 13px;
     color: $nk-muted;
     font-weight: 500;
+    line-height: 1.45;
   }
 }
 
-.nk-footer-stores {
+.nk-app-tiles {
   display: flex;
+  flex-direction: column;
   gap: 8px;
+  max-width: 220px;
 }
 
-.nk-footer-coming-soon {
+.nk-app-tile {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
   margin: 0 !important;
   padding: 10px 12px;
-  border-radius: 8px;
-  background: #f3f6ff;
-  border: 1px dashed rgba(37, 80, 235, 0.28);
-  color: $nk-blue !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  line-height: 1.4;
+  border-radius: 14px;
+  background: #f6f8fd;
+  border: 1px solid #e7eaf3;
+  color: $nk-ink !important;
+  text-decoration: none !important;
+  transition: 0.2s ease;
+  .nk-app-tile-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(18, 18, 36, 0.06);
+    svg { width: 18px; height: 18px; display: block; }
+    &.is-ios { color: $nk-ink; }
+  }
+  .nk-app-tile-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+    small {
+      font-size: 10px;
+      font-weight: 650;
+      color: $nk-muted;
+      letter-spacing: 0.02em;
+    }
+    strong {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: $nk-ink;
+    }
+  }
+  > i {
+    font-size: 12px;
+    color: $nk-blue;
+  }
+  em {
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $nk-blue;
+    background: rgba(37, 80, 235, 0.08);
+    border-radius: 999px;
+    padding: 4px 7px;
+  }
+  &:hover {
+    color: $nk-ink !important;
+    border-color: rgba(37, 80, 235, 0.28);
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(37, 80, 235, 0.08);
+    transform: translateY(-1px);
+  }
+  &.is-soon {
+    opacity: 0.78;
+    pointer-events: none;
+  }
 }
 
 .signet-legal-shell {

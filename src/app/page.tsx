@@ -592,9 +592,45 @@ export default function Home() {
               <Link href="/terms">Terms &amp; conditions</Link>
             </div>
             <div className="nk-footer-app">
-              <strong>Download our App</strong>
-              <p>Get real-time job updates on our App</p>
-              <p className="nk-footer-coming-soon">We&apos;re working on it — Coming Soon</p>
+              <h4>Get the app</h4>
+              <p>Job alerts and applications, on your phone.</p>
+              <div className="nk-app-tiles">
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.peppyminds.jobportal&pcampaignid=web_share"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nk-app-tile"
+                >
+                  <span className="nk-app-tile-icon is-play" aria-hidden>
+                    <svg viewBox="0 0 24 24">
+                      <path fill="#34A853" d="M3.6 2.5 13.5 12 3.6 21.5c-.4-.3-.6-.8-.6-1.3V3.8c0-.5.2-1 .6-1.3Z" />
+                      <path fill="#FBBC04" d="M16.9 8.6 5.1 1.7 13.5 12z" />
+                      <path fill="#4285F4" d="m13.5 12 3.4 3.4 4.7-2.7c.8-.4.8-1.5 0-2l-4.7-2.7z" />
+                      <path fill="#EA4335" d="M5.1 22.3 16.9 15.4 13.5 12z" />
+                    </svg>
+                  </span>
+                  <span className="nk-app-tile-copy">
+                    <small>Android</small>
+                    <strong>Google Play</strong>
+                  </span>
+                  <i className="bi bi-arrow-up-right" aria-hidden />
+                </a>
+                <div className="nk-app-tile is-soon">
+                  <span className="nk-app-tile-icon is-ios" aria-hidden>
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        fill="currentColor"
+                        d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.9Zm-2.3-6.7c.6-.8 1.1-1.9.9-3-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.6-1.3Z"
+                      />
+                    </svg>
+                  </span>
+                  <span className="nk-app-tile-copy">
+                    <small>iOS</small>
+                    <strong>App Store</strong>
+                  </span>
+                  <em>Soon</em>
+                </div>
+              </div>
             </div>
           </div>
           <div className="nk-container nk-footer-bottom">
