@@ -13,7 +13,7 @@ export const privacyPolicy: LegalDocument = {
       "address": "64 Barnes Ave, Magill SA 5072, Australia",
       "website": "https://signetemploymenthub.com",
       "privacyEmail": "signeteduau@gmail.com",
-      "supportEmail": "signeteduau@gmail.com",
+      "supportEmail": "support@signetemploymenthub.com",
       "deleteAccountUrl": "https://signetemploymenthub.com/delete-account"
     },
     "notice": "Prepared for publication and app-store submission. Review this policy whenever the app, SDKs, permissions or data practices change."
@@ -58,7 +58,7 @@ export const privacyPolicy: LegalDocument = {
             ["Principal place of business", "64 Barnes Ave, Magill SA 5072, Australia"],
             ["Website", "https://signetemploymenthub.com"],
             ["Privacy email", "signeteduau@gmail.com"],
-            ["Support email", "signeteduau@gmail.com"]
+            ["Support email", "support@signetemploymenthub.com"]
           ]
         },
         {
@@ -1063,7 +1063,7 @@ export const privacyPolicy: LegalDocument = {
             ],
             [
               "Support email",
-              "signeteduau@gmail.com"
+              "support@signetemploymenthub.com"
             ]
           ]
         }

@@ -13,7 +13,7 @@ export const termsAndConditions: LegalDocument = {
       address: "64 Barnes Ave, Magill SA 5072, Australia",
       website: "https://signetemploymenthub.com",
       privacyEmail: "signeteduau@gmail.com",
-      supportEmail: "signeteduau@gmail.com",
+      supportEmail: "support@signetemploymenthub.com",
       deleteAccountUrl: "https://signetemploymenthub.com/delete-account",
     },
     notice:
@@ -264,7 +264,7 @@ export const termsAndConditions: LegalDocument = {
       blocks: [
         {
           type: "p",
-          text: "You may stop using the Services at any time and may request deletion of your account through account settings in the app or by contacting signeteduau@gmail.com.",
+          text: "You may stop using the Services at any time and may request deletion of your account through account settings in the app or by contacting support@signetemploymenthub.com.",
         },
         {
           type: "p",
@@ -360,7 +360,7 @@ export const termsAndConditions: LegalDocument = {
             ["Legal entity", "JLMG PTY LTD trading as Signet Employment Hub"],
             ["ABN", "94 684 960 521"],
             ["Address", "64 Barnes Ave, Magill SA 5072, Australia"],
-            ["Support email", "signeteduau@gmail.com"],
+            ["Support email", "support@signetemploymenthub.com"],
             ["Privacy email", "signeteduau@gmail.com"],
             ["Website", "https://signetemploymenthub.com"],
             ["Account deletion", "https://signetemploymenthub.com/delete-account"],
