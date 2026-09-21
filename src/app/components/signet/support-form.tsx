@@ -6,11 +6,9 @@ import { FileUploadField } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
 import { SIGNET_SUPPORT_EMAIL } from "@/lib/contact";
 
-const ISSUE_TYPES = [
+const TOPICS = [
   "Account or login",
-  "Job posting",
-  "Application",
-  "Messaging",
+  "Jobs and applications",
   "Profile or resume",
   "Something else",
 ];
@@ -23,9 +21,9 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function ReportIssueForm() {
+export default function SupportForm() {
   const { user } = useAuth();
-  const [type, setType] = useState(ISSUE_TYPES[0]);
+  const [topic, setTopic] = useState(TOPICS[0]);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -36,12 +34,12 @@ export default function ReportIssueForm() {
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    const subject = encodeURIComponent(`Signet issue: ${type}`);
+    const subject = encodeURIComponent(`Signet support: ${topic}`);
     const attachmentLine = file
       ? `\n\nAttachment: ${file.name} (${formatFileSize(file.size)}). Please attach this file before sending.`
       : "";
     const body = encodeURIComponent(
-      `Account email: ${email.trim()}\nIssue type: ${type}\n\n${message.trim()}${attachmentLine}`
+      `Account email: ${email.trim()}\nTopic: ${topic}\n\n${message.trim()}${attachmentLine}`
     );
     if (file) {
       toast.info("Your email app will open. Attach the selected file before sending.");
@@ -52,13 +50,13 @@ export default function ReportIssueForm() {
   return (
     <form className="nk-help-form" onSubmit={submit}>
       <div className="signet-field">
-        <label htmlFor="report-type">Issue type</label>
+        <label htmlFor="support-topic">Topic</label>
         <select
-          id="report-type"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
+          id="support-topic"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
         >
-          {ISSUE_TYPES.map((item) => (
+          {TOPICS.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
@@ -66,9 +64,9 @@ export default function ReportIssueForm() {
         </select>
       </div>
       <div className="signet-field">
-        <label htmlFor="report-email">Your email</label>
+        <label htmlFor="support-email">Your email</label>
         <input
-          id="report-email"
+          id="support-email"
           type="email"
           required
           autoComplete="email"
@@ -78,12 +76,12 @@ export default function ReportIssueForm() {
         />
       </div>
       <div className="signet-field">
-        <label htmlFor="report-message">What happened</label>
+        <label htmlFor="support-message">How can we help</label>
         <textarea
-          id="report-message"
+          id="support-message"
           required
           rows={6}
-          placeholder="Tell us the page you were on and what went wrong."
+          placeholder="Tell us what you need help with. Include the page you were on if you can."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
@@ -108,7 +106,7 @@ export default function ReportIssueForm() {
         }}
       />
       <button type="submit" className="nk-btn nk-btn-register">
-        Send report
+        Email support
       </button>
       <p className="nk-help-form-note">
         This opens your email app addressed to {SIGNET_SUPPORT_EMAIL}.

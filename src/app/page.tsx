@@ -615,7 +615,12 @@ export default function Home() {
                   </span>
                   <i className="bi bi-arrow-up-right" aria-hidden />
                 </a>
-                <div className="nk-app-tile is-soon">
+                <a
+                  href="https://apps.apple.com/us/app/signet-employment-hub-seh/id6785533461"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nk-app-tile"
+                >
                   <span className="nk-app-tile-icon is-ios" aria-hidden>
                     <svg viewBox="0 0 24 24">
                       <path
@@ -628,8 +633,8 @@ export default function Home() {
                     <small>iOS</small>
                     <strong>App Store</strong>
                   </span>
-                  <em>Soon</em>
-                </div>
+                  <i className="bi bi-arrow-up-right" aria-hidden />
+                </a>
               </div>
             </div>
           </div>

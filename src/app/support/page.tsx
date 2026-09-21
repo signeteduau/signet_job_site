@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Wrapper from "@/layouts/wrapper";
 import PublicSiteNav from "@/app/components/signet/public-site-nav";
+import SupportForm from "@/app/components/signet/support-form";
 import { SIGNET_SUPPORT_EMAIL } from "@/lib/contact";
 
 export const metadata = {
@@ -79,30 +80,35 @@ export default function SupportPage() {
                 ))}
               </div>
 
-              <div className="nk-help-contact">
-                <div>
+              <div className="nk-help-split">
+                <div className="nk-help-panel">
                   <p className="nk-faq-kicker">Contact</p>
                   <h2>Email the Signet team</h2>
                   <p>
-                    Include your account email and a short description of what you
-                    need. We usually reply to{" "}
+                    Include your account email and, if it helps, attach a
+                    screenshot or document.
+                  </p>
+                  <SupportForm />
+                </div>
+                <aside className="nk-help-aside">
+                  <strong>What to include</strong>
+                  <ul>
+                    <li>Your Signet account email</li>
+                    <li>The page or job you were using</li>
+                    <li>A screenshot of any error</li>
+                    <li>A resume or file, if it is relevant</li>
+                  </ul>
+                  <p>
+                    We usually reply to{" "}
                     <a href={`mailto:${SIGNET_SUPPORT_EMAIL}`}>
                       {SIGNET_SUPPORT_EMAIL}
                     </a>
                     .
                   </p>
-                </div>
-                <div className="nk-faq-help-actions">
-                  <a
-                    href={`mailto:${SIGNET_SUPPORT_EMAIL}`}
-                    className="nk-btn nk-btn-register"
-                  >
-                    Email support
-                  </a>
                   <Link href="/report" className="nk-btn nk-btn-ghost">
                     Report an issue
                   </Link>
-                </div>
+                </aside>
               </div>
             </div>
           </section>

@@ -42,8 +42,8 @@ export default function ReportPage() {
               <div className="nk-help-panel">
                 <h2>Send a report</h2>
                 <p>
-                  Include your account email and enough detail for us to reproduce
-                  the problem.
+                  Include your account email, enough detail for us to reproduce
+                  the problem, and a screenshot if you have one.
                 </p>
                 <ReportIssueForm />
               </div>
@@ -53,6 +53,7 @@ export default function ReportPage() {
                   <li>The page or job you were using</li>
                   <li>What you expected to happen</li>
                   <li>What happened instead</li>
+                  <li>A screenshot of any error</li>
                   <li>Your Signet account email</li>
                 </ul>
                 <p>

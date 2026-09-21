@@ -6490,27 +6490,12 @@ body:has(.nk-site) {
     font-size: 12px;
     color: $nk-blue;
   }
-  em {
-    font-style: normal;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: $nk-blue;
-    background: rgba(37, 80, 235, 0.08);
-    border-radius: 999px;
-    padding: 4px 7px;
-  }
   &:hover {
     color: $nk-ink !important;
     border-color: rgba(37, 80, 235, 0.28);
     background: #fff;
     box-shadow: 0 8px 20px rgba(37, 80, 235, 0.08);
     transform: translateY(-1px);
-  }
-  &.is-soon {
-    opacity: 0.78;
-    pointer-events: none;
   }
 }
 
@@ -8763,6 +8748,10 @@ body:has(.nk-site) {
   a {
     color: $nk-blue !important;
     font-weight: 700;
+  }
+  .nk-btn {
+    display: inline-flex;
+    margin-top: 4px;
   }
 }
 
