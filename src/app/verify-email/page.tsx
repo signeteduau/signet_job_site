@@ -6,20 +6,21 @@ import { reload } from "firebase/auth";
 import AuthShell from "@/app/components/signet/auth-shell";
 import { PageLoader } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
-import { resolvePostLoginPath } from "@/lib/auth-flow";
+import { buildRegisterUrl, resolvePostLoginPath } from "@/lib/auth-flow";
 import { getUserProfile } from "@/lib/services/users";
 import Wrapper from "@/layouts/wrapper";
 
 function VerifyEmailInner() {
-  const { user, sendVerification, logout } = useAuth();
+  const { user, sendVerification, abandonUnverifiedSignup } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
   const returnUrl = search?.get("returnUrl");
   const [sending, setSending] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     if (!user) {
-      router.replace("/login");
+      if (!switching) router.replace("/login");
       return;
     }
     const id = setInterval(async () => {
@@ -34,7 +35,7 @@ function VerifyEmailInner() {
       }
     }, 4000);
     return () => clearInterval(id);
-  }, [user, router, returnUrl]);
+  }, [user, router, returnUrl, switching]);
 
   return (
     <Wrapper>
@@ -68,13 +69,24 @@ function VerifyEmailInner() {
         </button>
         <button
           className="signet-btn secondary w-100 mt-2"
+          disabled={switching}
           onClick={async () => {
-            await logout();
-            router.push("/login");
+            setSwitching(true);
+            try {
+              await abandonUnverifiedSignup();
+              router.replace(buildRegisterUrl(returnUrl));
+            } catch {
+              toast.error("Could not switch methods. Try again.");
+              setSwitching(false);
+            }
           }}
         >
-          Use a different account
+          {switching ? "Going back…" : "Use a different method"}
         </button>
+        <p className="signet-auth-switch">
+          Your account is not created until this email is verified. Choosing
+          another method removes this email.
+        </p>
       </AuthShell>
     </Wrapper>
   );

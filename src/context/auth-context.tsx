@@ -18,6 +18,7 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  deleteUser,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
@@ -37,6 +38,7 @@ import {
 } from "@/lib/google-auth";
 import {
   createUserProfile,
+  deleteUserProfile,
   getUserProfile,
   completeProfileSetup,
   updateUserProfile,
@@ -66,6 +68,7 @@ type AuthContextType = {
     returnUrl?: string | null;
   }) => Promise<User>;
   logout: () => Promise<void>;
+  abandonUnverifiedSignup: () => Promise<void>;
   sendVerification: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
@@ -342,6 +345,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       logout: async () => {
         await fbSignOut(auth);
+        setProfile(null);
+      },
+      abandonUnverifiedSignup: async () => {
+        const u = auth.currentUser;
+        if (!u) {
+          setProfile(null);
+          return;
+        }
+        if (u.emailVerified) {
+          await fbSignOut(auth);
+          setProfile(null);
+          return;
+        }
+        try {
+          await deleteUserProfile(u.uid);
+        } catch {
+          /* best effort — Auth delete still frees the email */
+        }
+        try {
+          await deleteUser(u);
+        } catch {
+          await fbSignOut(auth);
+        }
         setProfile(null);
       },
       sendVerification: async () => {

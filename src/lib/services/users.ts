@@ -1,4 +1,5 @@
 import {
+  deleteDoc,
   doc,
   getDoc,
   setDoc,
@@ -63,4 +64,8 @@ export async function updateUserProfile(
     ...data,
     updatedAt: serverTimestamp(),
   });
+}
+
+export async function deleteUserProfile(uid: string): Promise<void> {
+  await deleteDoc(doc(db, "users", uid));
 }
