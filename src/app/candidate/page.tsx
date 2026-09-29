@@ -15,6 +15,7 @@ import { isJobSaved, saveJob, unsaveJob } from "@/lib/services/saved-jobs";
 import { Job } from "@/types/firestore";
 import { Article } from "@/types/chat";
 import Wrapper from "@/layouts/wrapper";
+import { useUnreadChatCount } from "@/lib/hooks/use-unread-chat-count";
 
 type CompanyPreview = {
   uid: string;
@@ -72,6 +73,7 @@ const QUICK_ACTIONS = [
 
 function CandidateHomeInner() {
   const { user, profile } = useAuth();
+  const chatCount = useUnreadChatCount(user?.uid, false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [companies, setCompanies] = useState<CompanyPreview[]>([]);
@@ -162,6 +164,11 @@ function CandidateHomeInner() {
           >
             <span className="signet-dash-action-icon">
               <i className={`bi ${action.icon}`} aria-hidden />
+              {action.href.includes("/chat") && chatCount > 0 && (
+                <span className="signet-badge sm">
+                  {chatCount > 9 ? "9+" : chatCount}
+                </span>
+              )}
             </span>
             <span className="signet-dash-action-body">
               <strong>{action.label}</strong>
@@ -190,14 +197,16 @@ function CandidateHomeInner() {
             <p>When companies post roles, they&apos;ll show up here.</p>
           </div>
         )}
-        {jobs.map((job) => (
-          <JobCard
-            key={job.id}
-            job={job}
-            saved={!!savedMap[job.id]}
-            onSaveToggle={() => toggleSave(job)}
-          />
-        ))}
+        <div className="signet-home-jobs">
+          {jobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
+              saved={!!savedMap[job.id]}
+              onSaveToggle={() => toggleSave(job)}
+            />
+          ))}
+        </div>
       </section>
 
       {companies.length > 0 && (

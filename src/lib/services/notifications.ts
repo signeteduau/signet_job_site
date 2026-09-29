@@ -13,6 +13,11 @@ import {
 import { db } from "@/lib/firebase";
 import { AppNotification } from "@/types/chat";
 
+function isNotificationRead(data: DocumentData): boolean {
+  const value = data.read ?? data.isRead ?? data.is_read ?? data.seen;
+  return value === true || value === 1 || value === "1" || value === "true";
+}
+
 function mapNotif(id: string, data: DocumentData): AppNotification {
   return {
     id,
@@ -21,7 +26,7 @@ function mapNotif(id: string, data: DocumentData): AppNotification {
     type: data.type || "",
     data: data.data || {},
     logoUrl: data.logoUrl || "",
-    read: !!data.read,
+    read: isNotificationRead(data),
     createdAt: data.createdAt,
   };
 }
@@ -63,7 +68,10 @@ export async function markNotificationRead(
   uid: string,
   id: string
 ): Promise<void> {
-  await updateDoc(doc(db, "users", uid, "notifications", id), { read: true });
+  await updateDoc(doc(db, "users", uid, "notifications", id), {
+    read: true,
+    isRead: true,
+  });
 }
 
 export async function markAllNotificationsRead(uid: string): Promise<void> {

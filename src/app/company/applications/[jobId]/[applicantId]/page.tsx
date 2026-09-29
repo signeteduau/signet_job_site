@@ -71,7 +71,7 @@ function Inner() {
 
   return (
     <AppShell role="company" title={applicant?.fullName || "Applicant"}>
-      <Link href={`/company/applications?jobId=${jobId}`} className="signet-btn secondary mb-3">
+      <Link href={`/company/applications?jobId=${jobId}`} className="signet-btn secondary mb-3 d-none d-lg-inline-flex">
         ← Back to applications
       </Link>
 

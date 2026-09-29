@@ -25,7 +25,7 @@ import {
   getRedirectResult,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { resolvePostLoginPath } from "@/lib/auth-flow";
+import { resolveHomePath, resolvePostLoginPath } from "@/lib/auth-flow";
 import { logAnalyticsEvent } from "@/lib/analytics";
 import { auth } from "@/lib/firebase";
 import {
@@ -79,14 +79,6 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-function resolveHomePath(profile: AppUser | null, user: User | null): string {
-  if (!user) return "/login";
-  if (!user.emailVerified) return "/verify-email";
-  if (!profile) return "/role-select";
-  if (!profile.profileCompleted) return "/profile-setup";
-  return profile.userType === "company" ? "/company" : "/candidate";
-}
 
 async function ensureGoogleUserProfile(
   firebaseUser: User,

@@ -1,4 +1,5 @@
 import { User } from "firebase/auth";
+import { isManagementEmail } from "@/lib/management";
 import { AppUser } from "@/types/firestore";
 
 /** Allow only same-origin relative paths (no open redirects). */
@@ -56,6 +57,18 @@ export function resolvePostLoginPath(
     return withReturnUrl("/profile-setup", safe);
   }
   if (safe) return safe;
+  return resolveHomePath(profile, user);
+}
+
+export function resolveHomePath(
+  profile: AppUser | null,
+  user: User | null
+): string {
+  if (!user) return "/login";
+  if (!user.emailVerified) return "/verify-email";
+  if (!profile) return "/role-select";
+  if (!profile.profileCompleted) return "/profile-setup";
+  if (isManagementEmail(user.email || profile.email)) return "/management";
   return profile.userType === "company" ? "/company" : "/candidate";
 }
 

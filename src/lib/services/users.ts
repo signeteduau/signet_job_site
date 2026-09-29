@@ -1,10 +1,17 @@
 import {
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  limit,
+  query,
   setDoc,
+  startAfter,
   updateDoc,
+  where,
   serverTimestamp,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { AppUser, UserType } from "@/types/firestore";
@@ -68,4 +75,41 @@ export async function updateUserProfile(
 
 export async function deleteUserProfile(uid: string): Promise<void> {
   await deleteDoc(doc(db, "users", uid));
+}
+
+export async function fetchUsersByType(
+  userType: UserType,
+  max = 2000
+): Promise<AppUser[]> {
+  const pageSize = 250;
+  const results: AppUser[] = [];
+  let last: QueryDocumentSnapshot | undefined;
+
+  while (results.length < max) {
+    const take = Math.min(pageSize, max - results.length);
+    const q = last
+      ? query(
+          collection(db, "users"),
+          where("userType", "==", userType),
+          startAfter(last),
+          limit(take)
+        )
+      : query(
+          collection(db, "users"),
+          where("userType", "==", userType),
+          limit(take)
+        );
+    const snap = await getDocs(q);
+    if (snap.empty) break;
+    results.push(
+      ...snap.docs.map((d) => ({
+        uid: d.id,
+        ...(d.data() as Omit<AppUser, "uid">),
+      }))
+    );
+    last = snap.docs[snap.docs.length - 1];
+    if (snap.size < take) break;
+  }
+
+  return results;
 }

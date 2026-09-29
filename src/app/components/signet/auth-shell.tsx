@@ -31,7 +31,7 @@ export default function AuthShell({
       <div className="signet-auth-layout">
         <Link href="/" className="signet-auth-back">
           <i className="bi bi-arrow-left" aria-hidden />
-          <span>Back to site</span>
+          <span className="signet-auth-back-label">Back to site</span>
         </Link>
 
         <div className="signet-auth-stage">

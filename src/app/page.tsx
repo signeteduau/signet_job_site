@@ -9,6 +9,7 @@ import { NkScrollRail } from "@/app/components/signet/nk-scroll-rail";
 import SearchSuggestions from "@/app/components/signet/search-suggestions";
 import { useAuth } from "@/context/auth-context";
 import { jobMatchesSearchTerm } from "@/lib/job-utils";
+import JobCard from "@/app/components/signet/job-card";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
 import { Job } from "@/types/firestore";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
@@ -335,6 +336,33 @@ export default function Home() {
               </NkScrollRail>
             </div>
           </section>
+
+          {!loading && jobs.length > 0 && (
+            <section className="nk-section nk-section-tight nk-home-openings">
+              <div className="nk-container">
+                <div className="signet-section-head">
+                  <div>
+                    <h2 className="nk-section-title">Latest openings</h2>
+                    <p className="nk-section-sub">Fresh roles from employers on Signet</p>
+                  </div>
+                  <Link href="/jobs" className="signet-section-link">
+                    See all
+                  </Link>
+                </div>
+                <div className="signet-home-jobs">
+                  {jobs.slice(0, 5).map((job) => (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      href={`/jobs/${job.id}`}
+                      showDescription={false}
+                      expandable={false}
+                    />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
           <section className="nk-section nk-section-soft">
             <div className="nk-container">

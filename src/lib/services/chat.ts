@@ -8,6 +8,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  increment,
   setDoc,
   updateDoc,
   where,
@@ -36,6 +37,8 @@ function mapChat(id: string, data: DocumentData): ChatThread {
     typingByCandidate: !!data.typingByCandidate,
     unreadByCompany: !!data.unreadByCompany,
     unreadByCandidate: !!data.unreadByCandidate,
+    unreadCountCompany: Number(data.unreadCountCompany) || 0,
+    unreadCountCandidate: Number(data.unreadCountCandidate) || 0,
     archivedByCompany: !!data.archivedByCompany,
     archivedByCandidate: !!data.archivedByCandidate,
     deletedByCompany: !!data.deletedByCompany,
@@ -206,6 +209,8 @@ export async function sendMessage(opts: {
       lastMessageTime: serverTimestamp(),
       unreadByCompany: !opts.senderIsCompany,
       unreadByCandidate: opts.senderIsCompany,
+      unreadCountCompany: opts.senderIsCompany ? 0 : increment(1),
+      unreadCountCandidate: opts.senderIsCompany ? increment(1) : 0,
       typingByCompany: false,
       typingByCandidate: false,
     },
@@ -219,7 +224,9 @@ export async function markChatRead(opts: {
 }): Promise<void> {
   await setDoc(
     doc(db, "chats", opts.chatId),
-    opts.isCompany ? { unreadByCompany: false } : { unreadByCandidate: false },
+    opts.isCompany
+      ? { unreadByCompany: false, unreadCountCompany: 0 }
+      : { unreadByCandidate: false, unreadCountCandidate: 0 },
     { merge: true }
   );
 }
@@ -253,4 +260,21 @@ export async function archiveChat(
       ? { archivedByCompany: true }
       : { archivedByCandidate: true }),
   });
+}
+
+export function unreadMessageCount(
+  chat: ChatThread,
+  isCompany: boolean
+): number {
+  const stored = isCompany ? chat.unreadCountCompany : chat.unreadCountCandidate;
+  if (typeof stored === "number" && stored > 0) return stored;
+  const flagged = isCompany ? chat.unreadByCompany : chat.unreadByCandidate;
+  return flagged ? 1 : 0;
+}
+
+export function totalUnreadMessages(
+  chats: ChatThread[],
+  isCompany: boolean
+): number {
+  return chats.reduce((sum, chat) => sum + unreadMessageCount(chat, isCompany), 0);
 }

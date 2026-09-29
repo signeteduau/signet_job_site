@@ -11,6 +11,7 @@ import { JobListShimmer, PanelShimmer } from "@/app/components/signet/shimmer";
 import { useAuth } from "@/context/auth-context";
 import { withActingParam } from "@/lib/acting-company";
 import { useActingCompany } from "@/lib/hooks/use-acting-company";
+import { useUnreadChatCount } from "@/lib/hooks/use-unread-chat-count";
 import { getProfileCompletion } from "@/lib/profile-completion";
 import {
   subCompanyId,
@@ -66,6 +67,7 @@ function statusClass(status?: string) {
 function CompanyHomeInner() {
   const { user, profile } = useAuth();
   const { acting, setActing, children, companyId, isActing } = useActingCompany();
+  const chatCount = useUnreadChatCount(companyId, true);
   const [stats, setStats] = useState<CompanyDashboardStats | null>(null);
   const [applicantNames, setApplicantNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -165,6 +167,11 @@ function CompanyHomeInner() {
           >
             <span className="signet-dash-action-icon">
               <i className={`bi ${action.icon}`} aria-hidden />
+              {action.href.includes("/chat") && chatCount > 0 && (
+                <span className="signet-badge sm">
+                  {chatCount > 9 ? "9+" : chatCount}
+                </span>
+              )}
             </span>
             <span className="signet-dash-action-body">
               <strong>{action.label}</strong>

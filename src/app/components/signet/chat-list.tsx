@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChatListShimmer } from "@/app/components/signet/shimmer";
-import { subscribeToChats } from "@/lib/services/chat";
+import { subscribeToChats, unreadMessageCount } from "@/lib/services/chat";
 import { formatChatListTime } from "@/lib/date-utils";
 import { ChatThread } from "@/types/chat";
 
@@ -53,8 +53,8 @@ export default function ChatList({
             role === "company" ? chat.candidateName : chat.companyName;
           const image =
             role === "company" ? chat.candidateImage : chat.companyImage;
-          const unread =
-            role === "company" ? chat.unreadByCompany : chat.unreadByCandidate;
+          const unreadCount = unreadMessageCount(chat, role === "company");
+          const unread = unreadCount > 0;
           const typing =
             role === "company" ? chat.typingByCandidate : chat.typingByCompany;
           return (
@@ -72,7 +72,11 @@ export default function ChatList({
                     <span>{(title || "S").charAt(0)}</span>
                   )}
                 </span>
-                {unread && <span className="signet-chat-unread-dot" aria-hidden />}
+                {unreadCount > 0 ? (
+                  <span className="signet-chat-unread-count">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                ) : null}
               </span>
               <span className="signet-chat-row-body">
                 <span className="signet-chat-row-top">

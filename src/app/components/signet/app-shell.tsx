@@ -9,17 +9,24 @@ import { useAuth } from "@/context/auth-context";
 import { withActingParam } from "@/lib/acting-company";
 import { useActingCompany } from "@/lib/hooks/use-acting-company";
 import { getProfileCompletion } from "@/lib/profile-completion";
-import { subscribeToChats } from "@/lib/services/chat";
+import { subscribeToChats, totalUnreadMessages } from "@/lib/services/chat";
 import {
   incomingPendingCount,
   subscribeCompanyConnections,
 } from "@/lib/services/company-connections";
 import { subscribeToNotifications } from "@/lib/services/notifications";
+import MobileBackButton, {
+  resolveMobileBackFallback,
+} from "@/app/components/signet/mobile-back-button";
+import { useIsManagement } from "@/lib/hooks/use-is-management";
 
 type NavItem = { href: string; label: string; icon: string; badge?: number };
 
 function isAppNavActive(pathname: string, href: string, role: "candidate" | "company") {
   if (href === `/${role}` || href === "/jobs") return pathname === href;
+  if (href === "/management") {
+    return pathname === "/management" || pathname.startsWith("/management/");
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -68,10 +75,7 @@ export default function AppShell({
       setNotifCount(items.filter((n) => !n.read).length);
     });
     const unsubC = subscribeToChats(inboxId, (chats) => {
-      const unread = chats.filter((c) =>
-        role === "company" ? c.unreadByCompany : c.unreadByCandidate
-      ).length;
-      setChatCount(unread);
+      setChatCount(totalUnreadMessages(chats, role === "company"));
     });
     const unsubNet =
       role === "company"
@@ -86,16 +90,28 @@ export default function AppShell({
     };
   }, [user, role, inboxId]);
 
-  const nav: NavItem[] = (role === "company" ? companyNavBase : candidateNavBase).map(
-    (item) => {
-      if (item.href.endsWith("/chat")) return { ...item, badge: chatCount };
-      if (item.href === "/company/network") return { ...item, badge: networkCount };
-      return { ...item };
-    }
+  const { allowed: showPeopleTab } = useIsManagement(
+    user?.email || profile?.email
   );
+  const navBase = role === "company" ? companyNavBase : candidateNavBase;
+  const navItems = showPeopleTab
+    ? [
+        navBase[0],
+        { href: "/management", label: "People", icon: "bi-person-lines-fill" },
+        ...navBase.slice(1),
+      ]
+    : navBase;
+  const nav: NavItem[] = navItems.map((item) => {
+    if (item.href.endsWith("/chat")) return { ...item, badge: chatCount };
+    if (item.href === "/company/network") return { ...item, badge: networkCount };
+    return { ...item };
+  });
   const completion = getProfileCompletion(profile);
   const completeTone =
     completion.percent >= 100 ? "done" : completion.percent >= 70 ? "mid" : "low";
+  const isRoleHome = pathname === `/${role}`;
+  const isChatDetail = /^\/(candidate|company)\/chat\/[^/]+$/.test(pathname || "");
+  const showMobileBack = !isRoleHome && !isChatDetail;
 
   return (
     <div className="signet-app">
@@ -103,6 +119,12 @@ export default function AppShell({
       <header className="signet-topbar">
         <div className="signet-app-layout">
           <div className="signet-topbar-main d-flex align-items-center justify-content-between">
+          <div className="signet-topbar-left">
+          {showMobileBack && (
+            <MobileBackButton
+              fallback={resolveMobileBackFallback(pathname, role)}
+            />
+          )}
           <Link
             href={role === "company" ? "/company" : "/candidate"}
             className="signet-brand-link"
@@ -123,6 +145,7 @@ export default function AppShell({
               <span className="signet-sub">Employment Hub</span>
             </span>
           </Link>
+          </div>
           <div className="d-flex align-items-center gap-2 gap-sm-3">
             <Link
               href={
@@ -174,13 +197,17 @@ export default function AppShell({
               </span>
             </Link>
             <button
-              className="signet-ghost-btn"
+              type="button"
+              className="signet-ghost-btn signet-logout-btn"
+              title="Logout"
+              aria-label="Logout"
               onClick={async () => {
                 await logout();
                 router.push("/login");
               }}
             >
-              Logout
+              <i className="bi bi-box-arrow-right d-lg-none" aria-hidden />
+              <span className="d-none d-lg-inline">Logout</span>
             </button>
           </div>
           </div>
@@ -234,7 +261,8 @@ export default function AppShell({
             acting &&
             pathname !== "/company/profile" &&
             pathname !== "/company/network" &&
-            pathname !== "/company/settings" && (
+            pathname !== "/company/settings" &&
+            !pathname.startsWith("/management") && (
             <div className="signet-acting-banner">
               <span>
                 Managing <strong>{acting.name}</strong>
@@ -248,7 +276,11 @@ export default function AppShell({
         </main>
       </div>
 
-      <nav className={`signet-bottom-nav d-lg-none${nav.length > 6 ? " is-dense" : ""}`}>
+      <nav
+        className={`signet-bottom-nav d-lg-none${
+          nav.length > 7 ? " is-packed" : nav.length > 6 ? " is-dense" : ""
+        }`}
+      >
         {nav.map((item) => {
           const active = isAppNavActive(pathname, item.href, role);
           return (

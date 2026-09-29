@@ -14,6 +14,8 @@ export type ChatThread = {
   typingByCandidate?: boolean;
   unreadByCompany?: boolean;
   unreadByCandidate?: boolean;
+  unreadCountCompany?: number;
+  unreadCountCandidate?: number;
   archivedByCompany?: boolean;
   archivedByCandidate?: boolean;
   deletedByCompany?: boolean;

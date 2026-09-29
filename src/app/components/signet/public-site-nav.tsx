@@ -7,6 +7,9 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { buildRegisterUrl } from "@/lib/auth-flow";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
+import MobileBackButton, {
+  resolveMobileBackFallback,
+} from "@/app/components/signet/mobile-back-button";
 
 type Props = {
   rightExtra?: React.ReactNode;
@@ -23,11 +26,15 @@ export default function PublicSiteNav({
   const pathname = usePathname();
   const loggedIn = !loading && !!user;
   const isCompany = profile?.userType === "company";
+  const showMobileBack = pathname !== "/";
 
   return (
     <header className={`nk-nav ${variant === "browse" ? "nk-nav-browse" : ""}`}>
       <div className="nk-container nk-nav-inner">
         <div className="nk-nav-left">
+          {showMobileBack && (
+            <MobileBackButton fallback={resolveMobileBackFallback(pathname)} />
+          )}
           <Link href="/" className="nk-brand">
             <span className="nk-brand-mark">
               <Image
@@ -73,10 +80,13 @@ export default function PublicSiteNav({
               </Link>
               <button
                 type="button"
-                className="nk-btn nk-btn-register"
+                className="nk-btn nk-btn-register nk-logout-btn"
+                title="Logout"
+                aria-label="Logout"
                 onClick={() => logout()}
               >
-                Logout
+                <i className="bi bi-box-arrow-right d-lg-none" aria-hidden />
+                <span className="d-none d-lg-inline">Logout</span>
               </button>
             </>
           ) : (

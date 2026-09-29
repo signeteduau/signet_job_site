@@ -17,6 +17,7 @@ import { deleteAllUserData } from "@/lib/services/account-deletion";
 import { getUserProfile } from "@/lib/services/users";
 import { SIGNET_SUPPORT_EMAIL } from "@/lib/contact";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import MobileBackButton from "@/app/components/signet/mobile-back-button";
 
 type Props = {
   embed?: boolean;
@@ -115,6 +116,7 @@ export default function DeleteAccountPanel({ embed = false }: Props) {
 
   return (
     <div className="signet-auth-card signet-delete-account" style={{ maxWidth: 720 }}>
+      <MobileBackButton fallback="/support" />
       <p className="signet-eyebrow">Privacy</p>
       <h2>Delete your Signet account</h2>
       <p className="signet-auth-lead">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import Wrapper from "@/layouts/wrapper";
+import MobileBackButton from "@/app/components/signet/mobile-back-button";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
 import type {
   LegalBlock,
@@ -144,7 +145,9 @@ export default function LegalDocumentPage({ document }: Props) {
     <article className={`signet-legal-doc ${embed ? "is-embed" : ""}`}>
       <header className="signet-legal-header">
         {!embed && (
-          <div className="signet-legal-brand">
+          <>
+            <MobileBackButton fallback="/" />
+            <div className="signet-legal-brand">
             <Image
               src={signetLogo}
               alt={SIGNET_LOGO_ALT}
@@ -155,7 +158,8 @@ export default function LegalDocumentPage({ document }: Props) {
               <p className="signet-legal-brand-name">Signet Employment Hub</p>
               <p className="signet-legal-brand-entity">{document.meta.entity.legalName}</p>
             </div>
-          </div>
+            </div>
+          </>
         )}
         <p className="signet-legal-kicker">{document.meta.product}</p>
         <h1>{document.meta.title}</h1>
