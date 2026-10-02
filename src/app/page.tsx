@@ -13,6 +13,7 @@ import JobCard from "@/app/components/signet/job-card";
 import { fetchCompanies, fetchJobs } from "@/lib/services/jobs";
 import { Job } from "@/types/firestore";
 import { SIGNET_LOGO as signetLogo, SIGNET_LOGO_ALT } from "@/lib/brand";
+import LandingReviews from "@/app/components/signet/landing-reviews";
 
 type CompanyRow = {
   uid: string;
@@ -509,6 +510,8 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          <LandingReviews />
 
           <section className="nk-section" id="open-roles">
             <div className="nk-container">
