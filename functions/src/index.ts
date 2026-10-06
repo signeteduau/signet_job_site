@@ -4,6 +4,7 @@ import {
   onDocumentUpdated,
 } from "firebase-functions/v2/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { APP_URL, SMTP_PASS } from "./config";
 import { getUserEmail, sendEmail } from "./email";
 import {
@@ -14,6 +15,7 @@ import {
   interviewScheduledEmail,
   jobCancelledEmail,
   jobClosedCompanyEmail,
+  profileReminderEmail,
   verificationEmail,
   welcomeEmail,
   type EmailContent,
@@ -266,6 +268,149 @@ export const sendJobClosedEmails = onDocumentUpdated(
         });
       })
     );
+  }
+);
+
+const PROFILE_REMINDER_TYPES = new Set(["candidate", "company"]);
+const ADMIN_REMINDER_COOLDOWN_MS = 60 * 60 * 1000;
+const SCHEDULED_REMINDER_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+const MIN_ACCOUNT_AGE_MS = 24 * 60 * 60 * 1000;
+
+function timestampMs(value: unknown): number {
+  if (value && typeof value === "object" && "toDate" in value) {
+    const date = (value as { toDate: () => Date }).toDate();
+    return date instanceof Date ? date.getTime() : 0;
+  }
+  return 0;
+}
+
+async function markReminder(
+  reminderId: string | undefined,
+  status: string,
+  extra: Record<string, unknown> = {}
+) {
+  if (!reminderId) return;
+  await admin
+    .firestore()
+    .doc(`profileReminders/${reminderId}`)
+    .update({
+      status,
+      processedAt: admin.firestore.FieldValue.serverTimestamp(),
+      ...extra,
+    });
+}
+
+async function sendProfileCompletionReminder(opts: {
+  userId: string;
+  source: "admin" | "schedule";
+  reminderId?: string;
+}) {
+  const userRef = admin.firestore().doc(`users/${opts.userId}`);
+  const snap = await userRef.get();
+  if (!snap.exists) {
+    await markReminder(opts.reminderId, "failed", { error: "User not found" });
+    return { ok: false, reason: "missing_user" };
+  }
+
+  const data = snap.data() || {};
+  const userType = asString(data.userType);
+  if (!PROFILE_REMINDER_TYPES.has(userType)) {
+    await markReminder(opts.reminderId, "skipped", { error: "Not a candidate or company" });
+    return { ok: false, reason: "wrong_type" };
+  }
+  if (data.profileCompleted) {
+    await markReminder(opts.reminderId, "skipped", { error: "Profile already complete" });
+    return { ok: false, reason: "already_complete" };
+  }
+
+  const email = asString(data.email);
+  if (!email) {
+    await markReminder(opts.reminderId, "failed", { error: "No email on profile" });
+    return { ok: false, reason: "missing_email" };
+  }
+
+  const lastMs = timestampMs(data.lastProfileReminderAt);
+  const cooldown =
+    opts.source === "admin" ? ADMIN_REMINDER_COOLDOWN_MS : SCHEDULED_REMINDER_COOLDOWN_MS;
+  if (lastMs && Date.now() - lastMs < cooldown) {
+    await markReminder(opts.reminderId, "skipped", { error: "Recently reminded" });
+    return { ok: false, reason: "cooldown" };
+  }
+
+  const name = asString(data.fullName || data.companyName, "there");
+  const tpl = profileReminderEmail({
+    name,
+    userType,
+    appUrl: APP_URL.value(),
+  });
+
+  await dispatchEmail(email, tpl, SMTP_PASS.value(), {
+    type: "profile_completion_reminder",
+    userId: opts.userId,
+    userType,
+    source: opts.source,
+  });
+
+  await userRef.update({
+    lastProfileReminderAt: admin.firestore.FieldValue.serverTimestamp(),
+    lastProfileReminderSource: opts.source,
+  });
+  await markReminder(opts.reminderId, "sent", { email });
+  return { ok: true };
+}
+
+/** Admin-queued reminder when a profileReminders doc is created. */
+export const sendRequestedProfileReminder = onDocumentCreated(
+  {
+    document: "profileReminders/{reminderId}",
+    secrets: [SMTP_PASS],
+  },
+  async (event) => {
+    const data = event.data?.data();
+    if (!data) return;
+
+    const userId = asString(data.userId);
+    if (!userId) {
+      await markReminder(event.params.reminderId, "failed", { error: "Missing userId" });
+      return;
+    }
+
+    await sendProfileCompletionReminder({
+      userId,
+      source: asString(data.source, "admin") === "schedule" ? "schedule" : "admin",
+      reminderId: event.params.reminderId,
+    });
+  }
+);
+
+/** Daily reminder for incomplete candidate and company profiles. */
+export const sendScheduledProfileReminders = onSchedule(
+  {
+    schedule: "0 9 * * *",
+    timeZone: "Australia/Sydney",
+    secrets: [SMTP_PASS],
+  },
+  async () => {
+    const snap = await admin
+      .firestore()
+      .collection("users")
+      .where("profileCompleted", "==", false)
+      .get();
+
+    const now = Date.now();
+    for (const userDoc of snap.docs) {
+      const data = userDoc.data();
+      if (!PROFILE_REMINDER_TYPES.has(asString(data.userType))) continue;
+      if (!asString(data.email)) continue;
+
+      const createdMs = timestampMs(data.createdAt);
+      if (createdMs && now - createdMs < MIN_ACCOUNT_AGE_MS) continue;
+
+      await sendProfileCompletionReminder({
+        userId: userDoc.id,
+        source: "schedule",
+      });
+    }
   }
 );
 

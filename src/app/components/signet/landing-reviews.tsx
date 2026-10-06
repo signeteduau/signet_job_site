@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { fetchPublishedReviews } from "@/lib/services/reviews";
 
 type Review = {
+  id?: string;
   quote: string;
   name: string;
   title: string;
@@ -12,7 +14,7 @@ type Review = {
   rating: number;
 };
 
-const REVIEWS: Review[] = [
+const FALLBACK_REVIEWS: Review[] = [
   {
     quote:
       "I applied to three roles on a Sunday night and had an interview booked by Tuesday. Signet made the whole process feel simple — profile, apply, chat, done.",
@@ -65,9 +67,12 @@ const REVIEWS: Review[] = [
   },
 ];
 
-const AVERAGE_RATING = Number(
-  (REVIEWS.reduce((sum, item) => sum + item.rating, 0) / REVIEWS.length).toFixed(1)
-);
+function averageRating(reviews: Review[]) {
+  if (!reviews.length) return 0;
+  return Number(
+    (reviews.reduce((sum, item) => sum + item.rating, 0) / reviews.length).toFixed(1)
+  );
+}
 
 const ROTATE_MS = 7000;
 
@@ -109,11 +114,25 @@ function Stars({ value = 5 }: { value?: number }) {
 }
 
 export default function LandingReviews() {
+  const [reviews, setReviews] = useState<Review[]>(FALLBACK_REVIEWS);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const touchStartX = useRef<number | null>(null);
-  const review = REVIEWS[index];
+  const review = reviews[index] || reviews[0];
+  const AVERAGE_RATING = averageRating(reviews);
+
+  useEffect(() => {
+    let alive = true;
+    fetchPublishedReviews().then((items) => {
+      if (!alive || !items.length) return;
+      setReviews(items);
+      setIndex(0);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -124,15 +143,16 @@ export default function LandingReviews() {
   }, []);
 
   useEffect(() => {
-    if (paused || reduceMotion) return;
+    if (paused || reduceMotion || reviews.length < 2) return;
     const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % REVIEWS.length);
+      setIndex((current) => (current + 1) % reviews.length);
     }, ROTATE_MS);
     return () => window.clearInterval(timer);
-  }, [paused, reduceMotion, index]);
+  }, [paused, reduceMotion, index, reviews.length]);
 
   const goTo = (next: number) => {
-    const length = REVIEWS.length;
+    const length = reviews.length;
+    if (!length) return;
     setIndex(((next % length) + length) % length);
   };
 
@@ -149,6 +169,8 @@ export default function LandingReviews() {
     if (Math.abs(delta) < 48) return;
     goTo(index + (delta > 0 ? 1 : -1));
   };
+
+  if (!review) return null;
 
   return (
     <section className="nk-reviews" aria-labelledby="nk-reviews-title">
@@ -224,7 +246,7 @@ export default function LandingReviews() {
               <span className="nk-review-count">
                 {String(index + 1).padStart(2, "0")}
                 <em>/</em>
-                {String(REVIEWS.length).padStart(2, "0")}
+                {String(reviews.length).padStart(2, "0")}
               </span>
               <button
                 type="button"
@@ -238,7 +260,7 @@ export default function LandingReviews() {
           </article>
 
           <div className="nk-review-stepper" role="tablist" aria-label="Choose a review">
-            {REVIEWS.map((item, itemIndex) => {
+            {reviews.map((item, itemIndex) => {
               const active = itemIndex === index;
               return (
                 <button

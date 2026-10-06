@@ -21,9 +21,6 @@ export function resolveMobileBackFallback(
     return "/company/jobs";
   }
   if (path.startsWith("/company/applications/")) return "/company/applications";
-  if (path.startsWith("/management/") && path !== "/management") {
-    return "/management";
-  }
   if (/\/jobs\/[^/]+\/apply$/.test(path)) {
     const id = path.split("/")[3];
     return id ? `/jobs/${id}` : "/jobs";

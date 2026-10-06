@@ -18,15 +18,11 @@ import { subscribeToNotifications } from "@/lib/services/notifications";
 import MobileBackButton, {
   resolveMobileBackFallback,
 } from "@/app/components/signet/mobile-back-button";
-import { useIsManagement } from "@/lib/hooks/use-is-management";
 
 type NavItem = { href: string; label: string; icon: string; badge?: number };
 
 function isAppNavActive(pathname: string, href: string, role: "candidate" | "company") {
   if (href === `/${role}` || href === "/jobs") return pathname === href;
-  if (href === "/management") {
-    return pathname === "/management" || pathname.startsWith("/management/");
-  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -90,18 +86,8 @@ export default function AppShell({
     };
   }, [user, role, inboxId]);
 
-  const { allowed: showPeopleTab } = useIsManagement(
-    user?.email || profile?.email
-  );
   const navBase = role === "company" ? companyNavBase : candidateNavBase;
-  const navItems = showPeopleTab
-    ? [
-        navBase[0],
-        { href: "/management", label: "People", icon: "bi-person-lines-fill" },
-        ...navBase.slice(1),
-      ]
-    : navBase;
-  const nav: NavItem[] = navItems.map((item) => {
+  const nav: NavItem[] = navBase.map((item) => {
     if (item.href.endsWith("/chat")) return { ...item, badge: chatCount };
     if (item.href === "/company/network") return { ...item, badge: networkCount };
     return { ...item };
@@ -261,8 +247,7 @@ export default function AppShell({
             acting &&
             pathname !== "/company/profile" &&
             pathname !== "/company/network" &&
-            pathname !== "/company/settings" &&
-            !pathname.startsWith("/management") && (
+            pathname !== "/company/settings" && (
             <div className="signet-acting-banner">
               <span>
                 Managing <strong>{acting.name}</strong>

@@ -207,6 +207,52 @@ export function jobCancelledEmail(opts: {
   });
 }
 
+export function profileReminderEmail(opts: {
+  name: string;
+  userType?: string;
+  appUrl: string;
+}): EmailContent {
+  const safeName = escapeHtml(opts.name);
+  const isCompany = opts.userType === "company";
+  const setupUrl = `${opts.appUrl}/profile-setup`;
+
+  if (isCompany) {
+    return build("Complete your Signet employer profile", {
+      preheader: "Finish your company profile so candidates can find you",
+      badge: "Profile reminder",
+      title: "Your employer profile is incomplete",
+      appUrl: opts.appUrl,
+      body: `<p>Hi ${safeName},</p>
+        <p>Your Signet Employment Hub employer account is still missing profile details.</p>
+        <p>Complete your company profile so you can post jobs, review applicants, and appear on the employer network.</p>
+        ${bulletList([
+          "Add your company name, location, and industry",
+          "Upload a logo and short company description",
+          "Start posting roles once your profile is complete",
+        ])}`,
+      ctaLabel: "Complete company profile",
+      ctaUrl: setupUrl,
+    });
+  }
+
+  return build("Complete your Signet profile to apply for jobs", {
+    preheader: "Finish your profile so employers can consider you",
+    badge: "Profile reminder",
+    title: "Your candidate profile is incomplete",
+    appUrl: opts.appUrl,
+    body: `<p>Hi ${safeName},</p>
+      <p>You created a Signet Employment Hub account, but your profile is not complete yet.</p>
+      <p>Employers review complete profiles first. Add your occupation, skills, and resume so you can apply and get noticed.</p>
+      ${bulletList([
+        "Add your occupation and experience",
+        "Upload your resume",
+        "List the skills employers search for",
+      ])}`,
+    ctaLabel: "Complete my profile",
+    ctaUrl: setupUrl,
+  });
+}
+
 export function jobClosedCompanyEmail(opts: {
   companyName: string;
   jobTitle: string;
