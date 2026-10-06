@@ -11,6 +11,7 @@ import { useAuth } from "@/context/auth-context";
 import { resolvePostLoginPath, withReturnUrl } from "@/lib/auth-flow";
 import { auth } from "@/lib/firebase";
 import { getUserProfile } from "@/lib/services/users";
+import { WebLoginBlockedError } from "@/lib/web-login-blocklist";
 import { UserType } from "@/types/firestore";
 import Wrapper from "@/layouts/wrapper";
 
@@ -57,7 +58,9 @@ function RegisterInner() {
       router.push(withReturnUrl("/verify-email", returnUrl));
     } catch (err) {
       let message = "Could not create account.";
-      if (err instanceof FirebaseError) {
+      if (err instanceof WebLoginBlockedError) {
+        message = err.message;
+      } else if (err instanceof FirebaseError) {
         if (err.code === "auth/email-already-in-use") {
           message = "An account with this email already exists.";
         } else if (err.code === "auth/weak-password") {

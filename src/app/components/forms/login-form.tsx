@@ -9,6 +9,7 @@ import icon from "@/assets/images/icon/icon_60.svg";
 import { resolveHomePath, useAuth } from "@/context/auth-context";
 import { auth } from "@/lib/firebase";
 import { getUserProfile } from "@/lib/services/users";
+import { WebLoginBlockedError } from "@/lib/web-login-blocklist";
 
 const LoginForm = () => {
   const [showPass, setShowPass] = useState(false);
@@ -35,7 +36,9 @@ const LoginForm = () => {
       router.push(resolveHomePath(p, u));
     } catch (err) {
       const message =
-        err instanceof FirebaseError
+        err instanceof WebLoginBlockedError
+          ? err.message
+          : err instanceof FirebaseError
           ? "Invalid email or password."
           : "Something went wrong.";
       setError(message);

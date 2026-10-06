@@ -44,6 +44,11 @@ import {
   updateUserProfile,
 } from "@/lib/services/users";
 import { requestVerificationEmail } from "@/lib/services/verification-email";
+import {
+  assertWebLoginAllowed,
+  isWebLoginBlocked,
+  WebLoginBlockedError,
+} from "@/lib/web-login-blocklist";
 import { AppUser, UserType } from "@/types/firestore";
 
 type AuthContextType = {
@@ -211,6 +216,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const redirectResult = await getRedirectResult(auth);
         if (!redirectResult?.user || !mounted) return;
+        if (isWebLoginBlocked(redirectResult.user.email)) {
+          await fbSignOut(auth);
+          const { toast } = await import("react-toastify");
+          toast.error(new WebLoginBlockedError().message);
+          return;
+        }
         const intent = readGoogleAuthIntent();
         const p = await ensureGoogleUserProfile(
           redirectResult.user,
@@ -240,6 +251,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (!mounted) return;
+      if (u && isWebLoginBlocked(u.email)) {
+        await fbSignOut(auth);
+        if (!mounted) return;
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
       setUser(u);
       if (u) {
         try {
@@ -268,12 +287,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       homePath: resolveHomePath(profile, user),
       refreshProfile,
       login: async (email, password) => {
+        assertWebLoginAllowed(email);
         const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (isWebLoginBlocked(cred.user.email)) {
+          await fbSignOut(auth);
+          throw new WebLoginBlockedError();
+        }
         await refreshProfile();
         logAnalyticsEvent("login", { method: "email" });
         return cred.user;
       },
       register: async ({ name, email, password, userType, companyName, isStudent, usid }) => {
+        assertWebLoginAllowed(email);
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         if (name) {
           await updateProfile(cred.user, { displayName: name });
@@ -318,6 +343,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.removeItem(GOOGLE_AUTH_RETURN_URL_KEY);
         sessionStorage.removeItem(GOOGLE_AUTH_IS_STUDENT_KEY);
         sessionStorage.removeItem(GOOGLE_AUTH_USID_KEY);
+
+        if (isWebLoginBlocked(cred.user.email)) {
+          await fbSignOut(auth);
+          throw new WebLoginBlockedError();
+        }
 
         const p = await ensureGoogleUserProfile(
           cred.user,
@@ -366,6 +396,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await requestVerificationEmail();
       },
       resetPassword: async (email) => {
+        assertWebLoginAllowed(email);
         await sendPasswordResetEmail(auth, email);
       },
       changePassword: async (currentPassword, newPassword) => {

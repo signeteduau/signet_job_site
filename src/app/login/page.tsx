@@ -11,6 +11,7 @@ import { useAuth } from "@/context/auth-context";
 import { resolvePostLoginPath } from "@/lib/auth-flow";
 import { auth } from "@/lib/firebase";
 import { getUserProfile } from "@/lib/services/users";
+import { WebLoginBlockedError } from "@/lib/web-login-blocklist";
 import Wrapper from "@/layouts/wrapper";
 
 function LoginInner() {
@@ -40,7 +41,9 @@ function LoginInner() {
       await goNext();
     } catch (err) {
       toast.error(
-        err instanceof FirebaseError
+        err instanceof WebLoginBlockedError
+          ? err.message
+          : err instanceof FirebaseError
           ? "Invalid email or password."
           : "Something went wrong."
       );
@@ -102,8 +105,12 @@ function LoginInner() {
                   try {
                     await resetPassword(email.trim());
                     toast.success("Password reset email sent.");
-                  } catch {
-                    toast.error("Could not send reset email.");
+                  } catch (err) {
+                    toast.error(
+                      err instanceof WebLoginBlockedError
+                        ? err.message
+                        : "Could not send reset email."
+                    );
                   } finally {
                     setResetting(false);
                   }

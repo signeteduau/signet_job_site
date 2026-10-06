@@ -1,4 +1,5 @@
 import { FirebaseError } from "firebase/app";
+import { WebLoginBlockedError } from "@/lib/web-login-blocklist";
 
 /** Thrown after signInWithRedirect — page is navigating away; do not show an error toast. */
 export class GoogleRedirectInProgress extends Error {
@@ -13,6 +14,9 @@ export function isGoogleRedirectInProgress(err: unknown): boolean {
 }
 
 export function getGoogleAuthErrorMessage(err: unknown): string {
+  if (err instanceof WebLoginBlockedError) {
+    return err.message;
+  }
   const code = err instanceof FirebaseError ? err.code : "";
   switch (code) {
     case "auth/unauthorized-domain":
